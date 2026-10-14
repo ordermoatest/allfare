@@ -1,8 +1,18 @@
+에러 로그의 **Commit ID: 211bc57**을 보면 이전 커밋과 동일한 구문 에러가 그대로 발생하고 있습니다. 이는 GitHub에서 복사/붙여넣기 시 일부 코드가 중간에서 누락되었거나 백틱/괄호 문자가 제대로 닫히지 않았을 때 발생하는 전형적인 문제점입니다.
+
+구문 에러 요소를 완전히 배제하고 주석 및 특수기호를 깔끔하게 정리한 **최종 통합 코드**입니다.
+
+GitHub의 `src/app/page.tsx` 파일 전체 내용을 삭제하신 후, 아래 코드를 **처음부터 끝까지 전체 선택하여 덮어씌워 커밋**해 주세요!
+
+---
+
+### 🛠️ `src/app/page.tsx` (오류 수정 최종 코드)
+
+```tsx
 'use client';
 
 import React, { useState } from 'react';
 
-// 복지 지원금 mock 데이터
 interface WelfareItem {
   id: string;
   category: string;
@@ -13,7 +23,6 @@ interface WelfareItem {
   applyUrl: string;
 }
 
-// 문화누리카드 가맹점 mock 데이터
 interface CultureStore {
   id: string;
   name: string;
@@ -163,7 +172,6 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // 혜택 지원금 필터링 (대소문자 및 공백 제거 검색)
   const filteredWelfare = WELFARE_DATA.filter((item) => {
     const query = searchQuery.trim().toLowerCase();
     const matchesCategory = selectedCategory === '전체' || item.category === selectedCategory;
@@ -175,7 +183,6 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  // 문화누리카드 사용처 필터링 (대소문자 및 공백 제거 검색)
   const filteredCultureStores = CULTURE_STORES.filter((store) => {
     const query = searchQuery.trim().toLowerCase();
     return (
@@ -190,10 +197,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-6 font-sans">
-      {/* 상단 모바일/웹 컨테이너 */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 min-h-[840px] flex flex-col">
-        
-        {/* LF몰 스타일 미니멀 AF 헤더 */}
         <header className="bg-blue-600 text-white p-6 rounded-b-3xl shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold tracking-widest bg-white/20 px-2.5 py-1 rounded-full uppercase">
@@ -203,7 +207,6 @@ export default function HomePage() {
           <h1 className="text-2xl font-extrabold tracking-tight">올페어 (Allfare)</h1>
           <p className="text-xs text-blue-100 mt-1">대한민국 모든 복지 혜택과 문화누리카드를 한눈에</p>
 
-          {/* 메인 탭 선택 버튼 */}
           <div className="flex bg-blue-700/50 p-1 rounded-xl mt-4">
             <button
               onClick={() => { setActiveTab('benefits'); setSearchQuery(''); setSelectedCategory('전체'); }}
@@ -224,12 +227,149 @@ export default function HomePage() {
           </div>
         </header>
 
-        {/* 메인 콘텐츠 영역 */}
         <div className="p-5 flex-1 flex flex-col">
-
-          {/* 1. 혜택 지원금 한눈에 조회 탭 */}
           {activeTab === 'benefits' && (
             <div className="flex-1 flex flex-col">
-              {/* 카테고리 필터 태그 */}
               <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3 scrollbar-none">
-                {['전체', '주거·중립', '보육·육아', '교통·혜택', '문화·체육'].map((cat) =>
+                {['전체', '주거·중립', '보육·육아', '교통·혜택', '문화·체육'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
+                      selectedCategory === cat
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="지원의 명칭이나 카테고리 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 bg-gray-50 text-gray-800"
+                />
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[520px] overflow-y-auto pr-1">
+                {filteredWelfare.length > 0 ? (
+                  filteredWelfare.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedItem(item)}
+                      className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
+                    >
+                      <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        {item.category}
+                      </span>
+                      <h3 className="font-bold text-gray-800 text-sm mt-1">{item.title}</h3>
+                      <p className="text-xs font-medium text-blue-600 mt-1">{item.amount}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-xs text-gray-400">조회된 지원금 혜택이 없습니다.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'culture' && (
+            <div className="flex-1 flex flex-col">
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="가맹점명(영화/CGV/교보문고), 지역, 업종 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 bg-gray-50 text-gray-800"
+                />
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[580px] overflow-y-auto pr-1">
+                {filteredCultureStores.length > 0 ? (
+                  filteredCultureStores.map((store) => (
+                    <div
+                      key={store.id}
+                      className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
+                            {store.category}
+                          </span>
+                          <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md">
+                            {store.type}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-gray-800 text-sm mt-1.5">{store.name}</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">{store.address}</p>
+                      </div>
+                      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg whitespace-nowrap">
+                        {store.region}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-xs text-gray-400">검색 조건에 일치하는 가맹점이 없습니다.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-bottom duration-200">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                {selectedItem.category}
+              </span>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-900">{selectedItem.title}</h2>
+            <p className="text-sm font-bold text-blue-600 mt-1 mb-4">{selectedItem.amount}</p>
+
+            <div className="space-y-3 mb-6">
+              <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                <h4 className="text-xs font-bold text-blue-800 mb-1">지원 자격 요건</h4>
+                <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                  {selectedItem.eligibility.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                <h4 className="text-xs font-bold text-emerald-800 mb-1">소득 및 선정 기준</h4>
+                <p className="text-xs text-gray-600">{selectedItem.selectionCriteria}</p>
+              </div>
+            </div>
+
+            <a
+              href={selectedItem.applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center bg-blue-600 text-white font-bold py-3 text-sm rounded-xl hover:bg-blue-700 transition-colors shadow-md active:scale-[0.99]"
+            >
+              공식 사이트에서 신청하기 🚀
+            </a>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+
+```
