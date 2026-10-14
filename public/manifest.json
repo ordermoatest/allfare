@@ -1,0 +1,22 @@
+{
+  "theme_color": "#2563EB",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "올페어(Allfare) - 모든 복지와 지원금",
+  "short_name": "올페어",
+  "description": "대한민국 모든 혜택을 탭하다, 올페어",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
