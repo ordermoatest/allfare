@@ -188,11 +188,224 @@ export default function HomePage() {
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-6 font-sans">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 min-h-[840px] flex flex-col relative pb-16">
         
-        {/* 상단 헤더 */}
         <header className="bg-blue-600 text-white p-6 rounded-b-3xl shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold tracking-widest bg-white/20 px-2.5 py-1 rounded-full uppercase">
               AF Motif · Allfare
             </span>
           </div>
-          <h1 className="text-2xl font-
+          <h1 className="text-2xl font-extrabold tracking-tight">올페어 (Allfare)</h1>
+          <p className="text-xs text-blue-100 mt-1">대한민국 모든 복지 혜택과 문화누리카드를 한눈에</p>
+        </header>
+
+        <div className="p-5 flex-1 flex flex-col">
+          {activeNav === 'benefits' && (
+            <div className="flex-1 flex flex-col">
+              <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3 scrollbar-none">
+                {['전체', '주거·중립', '보육·육아', '교통·혜택', '문화·체육'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
+                      selectedCategory === cat
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="지원의 명칭이나 카테고리 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 bg-gray-50 text-gray-800"
+                />
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[500px] overflow-y-auto pr-1">
+                {filteredWelfare.length > 0 ? (
+                  filteredWelfare.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedItem(item)}
+                      className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
+                    >
+                      <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        {item.category}
+                      </span>
+                      <h3 className="font-bold text-gray-800 text-sm mt-1">{item.title}</h3>
+                      <p className="text-xs font-medium text-blue-600 mt-1">{item.amount}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-xs text-gray-400">조회된 지원금 혜택이 없습니다.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeNav === 'culture' && (
+            <div className="flex-1 flex flex-col">
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="가맹점명(영화/CGV/교보문고), 지역, 업종 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 bg-gray-50 text-gray-800"
+                />
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[550px] overflow-y-auto pr-1">
+                {filteredCultureStores.length > 0 ? (
+                  filteredCultureStores.map((store) => (
+                    <div
+                      key={store.id}
+                      className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
+                            {store.category}
+                          </span>
+                          <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md">
+                            {store.type}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-gray-800 text-sm mt-1.5">{store.name}</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">{store.address}</p>
+                      </div>
+                      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg whitespace-nowrap">
+                        {store.region}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-xs text-gray-400">검색 조건에 일치하는 가맹점이 없습니다.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeNav === 'my' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold mb-3">
+                👤
+              </div>
+              <h3 className="font-bold text-gray-800 text-base mb-1">맞춤 혜택 설정</h3>
+              <p className="text-xs text-gray-500 mb-6 max-w-[240px]">
+                연령 및 소득 수준을 설정하면 나에게 꼭 맞는 복지 혜택을 우선 추천해 드립니다.
+              </p>
+              <div className="w-full space-y-3 text-left">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">연령대 선택</label>
+                  <select className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:outline-none text-gray-800">
+                    <option>청년 (만 19세 ~ 34세)</option>
+                    <option>영유아/아동 보호자</option>
+                    <option>중장년층</option>
+                    <option>어르신 (만 65세 이상)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">가구 소득 수준</label>
+                  <select className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:outline-none text-gray-800">
+                    <option>중위소득 60% 이하</option>
+                    <option>중위소득 100% 이하</option>
+                    <option>기초생활수급자 / 차상위계층</option>
+                    <option>상관없음 (전체 보기)</option>
+                  </select>
+                </div>
+                <button className="w-full bg-blue-600 text-white font-bold py-3 text-xs rounded-xl shadow-md mt-2">
+                  맞춤 혜택 적용하기
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <nav className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around py-2.5 z-40 rounded-b-3xl">
+          <button
+            onClick={() => { setActiveNav('benefits'); setSearchQuery(''); setSelectedCategory('전체'); }}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeNav === 'benefits' ? 'text-blue-600 font-bold' : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <span className="text-base">🎁</span>
+            <span className="text-[10px]">혜택조회</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveNav('culture'); setSearchQuery(''); }}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeNav === 'culture' ? 'text-blue-600 font-bold' : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <span className="text-base">💳</span>
+            <span className="text-[10px]">문화누리</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveNav('my'); setSearchQuery(''); }}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeNav === 'my' ? 'text-blue-600 font-bold' : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <span className="text-base">👤</span>
+            <span className="text-[10px]">내 맞춤혜택</span>
+          </button>
+        </nav>
+      </div>
+
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-bottom duration-200">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                {selectedItem.category}
+              </span>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-900">{selectedItem.title}</h2>
+            <p className="text-sm font-bold text-blue-600 mt-1 mb-4">{selectedItem.amount}</p>
+
+            <div className="space-y-3 mb-6">
+              <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                <h4 className="text-xs font-bold text-blue-800 mb-1">지원 자격 요건</h4>
+                <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                  {selectedItem.eligibility.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                <h4 className="text-xs font-bold text-emerald-800 mb-1">소득 및 선정 기준</h4>
+                <p className="text-xs text-gray-600">{selectedItem.selectionCriteria}</p>
+              </div>
+            </div>
+
+            <a
+              href={selectedItem.applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center bg-blue-600 text-white font-bold py-3 text-sm rounded-xl hover:bg-blue-700 transition-colors shadow-md active:scale-[0.99]"
+            >
+              공식 사이트에서 신청하기 🚀
+            </a>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
