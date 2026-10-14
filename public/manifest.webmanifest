@@ -1,0 +1,10 @@
+{
+  "name": "올페어 - 내 복지 혜택 찾기",
+  "short_name": "올페어",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F7F4",
+  "theme_color": "#0F8A68",
+  "lang": "ko",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
