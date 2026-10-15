@@ -8,7 +8,8 @@ import BenefitSheet from './BenefitSheet';
 import StoreSheet from './StoreSheet';
 import { IcBook, IcGift, IcPin, IcSliders } from './icons';
 import Brand from './Brand';
-import { IcShare } from './icons';
+import { IcBack, IcShare } from './icons';
+import { useBackClose } from '@/lib/useBackClose';
 import { shareLink, track } from '@/lib/client';
 import { BItem, Store } from '@/lib/types';
 import { EMPTY_PROFILE, Profile, clearProfile, loadNum, loadProfile, loadSet, saveNum, saveProfile, saveSet } from '@/lib/profile';
@@ -31,6 +32,12 @@ export default function App() {
   const scrollPos = useRef<Record<Tab, number>>({ home: 0, culture: 0, explore: 0, my: 0 });
   const [mini, setMini] = useState(false);
   const [sharePrompt, setSharePrompt] = useState(false);
+  // 탭 이동 기록 (폰 뒤로가기 = 이전 탭)
+  const tabRef = useRef<Tab>('home');
+  tabRef.current = tab;
+  const depthRef = useRef(0);
+  const [depth, setDepth] = useState(0);
+  const [fabDim, setFabDim] = useState(false);
 
   const [list, setList] = useState<{ key: string; items: BItem[] | null; error: string | null; region: string }>({ key: '', items: null, error: null, region: '' });
 
@@ -42,7 +49,12 @@ export default function App() {
     const b = qs.get('b');
     if (b) setBenefit(b);
     const t = qs.get('tab'); // 가이드 글에서 탭 바로 열기 (?tab=my / ?tab=culture)
-    if (t === 'my' || t === 'culture' || t === 'explore') { setTab(t); setOpened((o) => ({ ...o, [t]: true })); }
+    let first: Tab = 'home';
+    if (t === 'my' || t === 'culture' || t === 'explore') { first = t; setTab(t); setOpened((o) => ({ ...o, [t]: true })); }
+    // 탭 이동 기록 시작점 (새로고침이면 기존 기록 이어가기)
+    const hs = history.state || {};
+    if (hs.afTab) { first = hs.afTab; setTab(first); setOpened((o) => ({ ...o, [first]: true })); depthRef.current = hs.afD || 0; setDepth(depthRef.current); }
+    else history.replaceState({ ...hs, afTab: first, afD: 0 }, '');
     setReady(true);
   }, []);
 
@@ -80,13 +92,38 @@ export default function App() {
   }, []);
   useEffect(() => { if (ready && list.key !== regionKey) loadList(regionKey); }, [ready, regionKey, list.key, loadList]);
 
-  const go = (t: Tab) => {
-    if (t === tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    scrollPos.current[tab] = window.scrollY;
+  const switchTab = (t: Tab) => {
+    scrollPos.current[tabRef.current] = window.scrollY;
     setTab(t);
     setOpened((o) => ({ ...o, [t]: true }));
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, scrollPos.current[t] || 0)));
   };
+  const go = (t: Tab) => {
+    if (t === tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    switchTab(t);
+    depthRef.current += 1; setDepth(depthRef.current);
+    history.pushState({ ...(history.state || {}), afTab: t, afD: depthRef.current, afSheet: false }, '');
+  };
+  // 폰 뒤로가기·앞으로가기
+  useEffect(() => {
+    const on = (e: PopStateEvent) => {
+      const s = e.state || {};
+      if (typeof s.afD === 'number') { depthRef.current = s.afD; setDepth(s.afD); }
+      if (s.afTab && s.afTab !== tabRef.current) switchTab(s.afTab);
+    };
+    window.addEventListener('popstate', on);
+    return () => window.removeEventListener('popstate', on);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // 상세 창은 뒤로가기로 닫기
+  useBackClose(!!benefit, () => setBenefit(null));
+  useBackClose(!!store, () => setStore(null));
+  // 스크롤 중엔 뒤로가기 버튼 더 옅게
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const on = () => { setFabDim(true); clearTimeout(t); t = setTimeout(() => setFabDim(false), 500); };
+    window.addEventListener('scroll', on, { passive: true });
+    return () => { window.removeEventListener('scroll', on); clearTimeout(t); };
+  }, []);
   const toTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // 사이트 공유
@@ -149,6 +186,9 @@ export default function App() {
         <button className={tab === 'my' ? 'on' : ''} aria-current={tab === 'my' ? 'page' : undefined} onClick={() => go('my')}><span className="ic"><IcSliders size={24} /></span>내 조건</button>
       </nav>
 
+      {depth > 0 && !benefit && !store && (
+        <button className={`backfab ${fabDim ? 'dim' : ''}`} onClick={() => history.back()} aria-label="이전 화면으로"><IcBack /></button>
+      )}
       {benefit && <BenefitSheet id={benefit} profile={profile} liked={!!liked[benefit]} onLiked={onLiked} onClose={() => setBenefit(null)} toast={toast} />}
       {store && <StoreSheet store={store} onClose={() => setStore(null)} toast={toast} />}
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}

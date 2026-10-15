@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { SITE } from '@/lib/site';
+import GlobalUi from '@/components/GlobalUi';
 
 const GA = process.env.NEXT_PUBLIC_GA_ID;
 const GSC = process.env.NEXT_PUBLIC_GSC_VERIFY; // 구글 서치콘솔 소유확인 값 (선택)
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
+        <GlobalUi />
         {GA && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA}`} strategy="afterInteractive" />

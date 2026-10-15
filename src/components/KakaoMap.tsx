@@ -6,14 +6,17 @@ import { Store } from '@/lib/types';
 
 const LEVEL: Record<number, number> = { 500: 4, 1000: 5, 3000: 7 };
 const GRID = 56; // 이 픽셀 안에 모인 핀은 숫자 원으로 묶음
+const LIST_MAX = 10; // 숫자 원이 이 개수 이하면 눌렀을 때 목록으로 보여줌
 
 /**
  * 카카오 지도
  * - 기본은 '고정': 지도 위를 쓸어도 페이지가 스크롤됨. 핀·숫자 원 누르기는 됨
  * - '지도 움직이기'를 켜면 끌기·확대 가능
  */
-export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, children }: {
-  lat: number; lng: number; radius: number; stores: Store[]; visible: boolean; onPick: (s: Store) => void; children?: ReactNode;
+export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, onCluster, children }: {
+  lat: number; lng: number; radius: number; stores: Store[]; visible: boolean; onPick: (s: Store) => void;
+  /** 숫자 원을 눌렀을 때 그 안의 가게 목록 (10곳 이하이거나 더 확대할 수 없을 때) */
+  onCluster?: (list: Store[]) => void; children?: ReactNode;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const st = useRef<{ kakao?: any; map?: any; circle?: any; me?: any; overlays: any[] }>({ overlays: [] });
@@ -24,6 +27,8 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, ch
   const hintT = useRef<ReturnType<typeof setTimeout>>();
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
+  const clRef = useRef(onCluster);
+  clRef.current = onCluster;
   const storesRef = useRef(stores);
   storesRef.current = stores;
 
@@ -98,8 +103,12 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, ch
         const pos = proj.coordsFromContainerPoint(new kakao.maps.Point(g.x / n, g.y / n));
         btn.className = `mk cl ${n >= 50 ? 'xl' : n >= 10 ? 'l' : ''}`;
         btn.textContent = String(n);
-        btn.setAttribute('aria-label', `가맹점 ${n}곳, 눌러서 확대`);
-        btn.onclick = () => map.setLevel(Math.max(1, map.getLevel() - 2), { anchor: pos, animate: true });
+        const asList = !!clRef.current && (n <= LIST_MAX || map.getLevel() <= 2);
+        btn.setAttribute('aria-label', asList ? `가맹점 ${n}곳, 눌러서 목록 보기` : `가맹점 ${n}곳, 눌러서 확대`);
+        btn.onclick = () => {
+          if (asList) clRef.current?.(g.list.slice().sort((a, b) => a.distance - b.distance));
+          else map.setLevel(Math.max(1, map.getLevel() - 2), { anchor: pos, animate: true });
+        };
         out.push(new kakao.maps.CustomOverlay({ map, position: pos, content: btn, yAnchor: 0.5, xAnchor: 0.5, zIndex: 2 }));
       }
     });
