@@ -50,3 +50,4 @@ supabase/          DB 스키마 SQL
 2. 깃허브에 v3 파일 덮어쓰고 푸시 → Vercel 자동 배포
 3. `/admin` → [혜택 동기화] 한 번 실행 (자녀 나이·세대주 힌트 채우기, 인천 서해구 반영)
 4. v4: SQL 변경 없음. 배포 후 `/admin`에서 [혜택 동기화] 한 번 더 (신혼부부·임신 가구 힌트)
+5. v5: SQL 변경 없음. Vercel 환경변수 NEXT_PUBLIC_SITE_URL=https://allfare.kr 추가 후 재배포

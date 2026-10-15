@@ -171,11 +171,6 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
               <button className="linkbtn" onClick={goMy}>내 조건 다시 확인하기</button>
             </div>
           )}
-          <CatBar
-            title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
-            right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
-            label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
-          />
           {profile.set ? (
             <>
               <div className="tgrid" role="tablist" aria-label="혜택 분류">
@@ -185,15 +180,27 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
                   </button>
                 ))}
               </div>
+              <CatBar
+                title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
+                right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
+                label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
+              />
               <div className="thead"><strong>{sec.title} {sorted.length.toLocaleString()}개</strong>{cat !== '전체' && <span className="cap">{cat}</span>}</div>
             </>
           ) : (
+            <>
+              <CatBar
+                title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
+                right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
+                label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
+              />
             <div className="cap" style={{ padding: '0 4px' }}>조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.</div>
+            </>
           )}
           {list}
         </>
       )}
-      <Footer />
+      <Footer notes={['꼭 맞음·확인 필요 표시는 공개된 조건만 비교한 참고 정보예요.', '정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />
     </>
   );
 }

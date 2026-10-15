@@ -55,7 +55,11 @@ export function explain(b: Cond, p: Profile): Check[] {
       const y = +p.birth.slice(0, 4);
       out.push({ label: '나이', status: 'no', detail: `${range} 대상${src} · 현재 만 ${age}세`, tip: `${y + lo}년 ${+p.birth.slice(4, 6)}월 ${+p.birth.slice(6, 8)}일(만 ${lo}세)부터 신청할 수 있어요` });
     } else if (hi && age > hi) out.push({ label: '나이', status: 'no', detail: `${range} 대상${src} · 현재 만 ${age}세`, tip: '나이 조건은 바꿀 수 없어요. 비슷한 분야의 다른 혜택을 찾아보세요' });
-    else out.push({ label: '나이', status: 'ok', detail: `${range} 대상${src} · 현재 만 ${age}세`, specific: true, short: range });
+    else {
+      // 성인이면 거의 다 되는 나이 조건(만 18·19세 이상, 19~64세 같은 넓은 범위)은 '콕 집은' 조건으로 안 봄
+      const broad = (!hi && lo <= 20) || (lo <= 20 && hi >= 64);
+      out.push({ label: '나이', status: 'ok', detail: `${range} 대상${src} · 현재 만 ${age}세`, specific: !broad, short: range });
+    }
   }
 
   // 소득

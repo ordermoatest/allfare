@@ -2,24 +2,32 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getBenefit } from '@/lib/server/benefit';
 import { deadlineLabel } from '@/lib/deadline';
-import { conditionSummary } from '@/lib/match';
+import { Cond, conditionSummary } from '@/lib/match';
 import Brand from '@/components/Brand';
+import Footer from '@/components/Footer';
 
 export const revalidate = 3600;
 
 // 카카오톡 등으로 공유된 링크가 열리는 혜택 소개 페이지
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const b = await getBenefit(params.id).catch(() => null);
-  if (!b) return { title: '올페어' };
-  const desc = (b.summary || b.content || '').slice(0, 120);
-  return { title: `${b.name} - 올페어`, description: desc, openGraph: { title: b.name, description: desc, images: [{ url: '/og.png', width: 1200, height: 630 }] } };
+  if (!b) return { title: '올페어', robots: { index: false } };
+  const clip = (t: string | null, n: number) => (t || '').replace(/\s+/g, ' ').trim().slice(0, n);
+  const title = `${b.name} - 대상·지원 내용·신청 방법 | 올페어`;
+  const desc = [b.org, clip(b.summary || b.content, 70), b.target ? `대상: ${clip(b.target, 50)}` : ''].filter(Boolean).join(' · ');
+  return {
+    title, description: desc,
+    alternates: { canonical: `/benefit/${encodeURIComponent(b.id)}` },
+    robots: b.active ? undefined : { index: false },
+    openGraph: { title: b.name, description: desc, type: 'article', locale: 'ko_KR', siteName: '올페어', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+  };
 }
 
 export default async function BenefitPage({ params }: { params: { id: string } }) {
   const b = await getBenefit(params.id).catch(() => null);
   if (!b) notFound();
   const dl = deadlineLabel(b.deadlineKind, b.deadlineEnd);
-  const conds = conditionSummary({ lo: b.lo, hi: b.hi, codes: b.codes });
+  const conds = conditionSummary({ lo: b.lo, hi: b.hi, codes: b.codes, hint: b.hint as Cond['hint'] });
   return (
     <div className="app" style={{ height: 'auto', minHeight: '100dvh' }}>
       <main className="scroll" style={{ paddingBottom: 32 }}>
@@ -41,7 +49,7 @@ export default async function BenefitPage({ params }: { params: { id: string } }
           <a className="go" href={b.url || 'https://www.gov.kr'} target="_blank" rel="noopener noreferrer">신청하러 가기</a>
         </div>
         <a className="cta" href={`/?b=${encodeURIComponent(b.id)}`} style={{ display: 'grid', placeItems: 'center', textDecoration: 'none', background: 'var(--card)', color: 'var(--mint)' }}>내가 받을 수 있는 혜택 더 찾기</a>
-        <p className="note">올페어는 정부 기관이 아니며, 공공데이터포털 자료를 바탕으로 안내합니다. 정확한 내용은 신청처에서 확인하세요.</p>
+        <Footer notes={['정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />
       </main>
     </div>
   );
