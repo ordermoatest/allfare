@@ -1,6 +1,7 @@
 // 혜택 설명 문구(서비스명·지원대상·선정기준)에서 조건 코드에 없는 조건을 읽어냄
-// ca: 자녀 나이 범위, pa: 본인 나이 범위(조건 코드에 나이가 없을 때만), preg: 임신, head: 세대주
-export type Hint = { ca?: [number, number]; pa?: [number, number]; preg?: 1; head?: 1 };
+// ca: 자녀 나이 범위, pa: 본인 나이 범위(조건 코드에 나이가 없을 때만), preg: 임신, pf: 임신 가구·배우자도 대상,
+// head: 세대주, nw: 신혼부부(혼인 N년 이내), pre: 예비 신혼부부(결혼 예정)도 대상
+export type Hint = { ca?: [number, number]; pa?: [number, number]; preg?: 1; pf?: 1; head?: 1; nw?: number; pre?: 1 };
 
 const NOT_KID = /아동복지|아동학대|아동보호|아동센터|지역아동|아동양육시설|청소년\S*시설|자녀\s*없는/g;
 const KID = /자녀|아동|영유아|영아|유아|초등학생|중학생|고등학생|아이|출생아|신생아|미취학|어린이/;
@@ -26,7 +27,16 @@ export function parseHint(...parts: (string | null | undefined)[]): Hint | null 
   if (/세대주/.test(t) && !/세대원|가구원/.test(t)) h.head = 1;
 
   // 임신
-  if (/임산부|임신부|임신\s*중|임신한|출산\s*예정/.test(t)) h.preg = 1;
+  if (/임산부|임신부|임신\s*중|임신한|출산\s*예정/.test(t)) {
+    h.preg = 1;
+    if (/예비\s*부모|임산부\s*(?:가구|가정|가족)|임신\S*\s*(?:가구|가정)|배우자|부부/.test(t)) h.pf = 1;
+  }
+
+  // 신혼부부 (혼인 N년 이내) · 예비 신혼부부
+  const nw = t.match(/혼인\s*(?:기간|신고일?\s*(?:로부터|부터)?)?\s*(\d{1,2})\s*년\s*(?:이내|이하|미만)/);
+  if (nw && +nw[1] >= 1 && +nw[1] <= 10) h.nw = +nw[1];
+  else if (/신혼\s*부부|신혼\s*가구/.test(t)) h.nw = 7;
+  if (/예비\s*신혼|결혼\s*예정|혼인\s*예정/.test(t)) { h.pre = 1; if (!h.nw) h.nw = 7; }
 
   // 자녀 나이: 숫자로 적힌 범위가 있으면 그걸 우선
   let ca: [number, number] | null = null;

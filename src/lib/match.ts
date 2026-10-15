@@ -1,6 +1,6 @@
 // 내 조건과 혜택 조건 비교
 // 정부24 지원조건 코드(JA) + 설명 문구에서 읽은 조건(hint: 자녀 나이·세대주·임신·본인 나이)
-import { INC, Profile, TAGS, incomePercent, kidAges, manAge, medianOf, myCodes } from './profile';
+import { INC, Profile, TAGS, incomePercent, kidAges, manAge, medianOf, myCodes, yearsSince } from './profile';
 import type { Hint } from './hints';
 
 export type Match = 'ok' | 'check' | 'no';
@@ -31,7 +31,8 @@ export type Check = { label: string; status: 'ok' | 'no' | 'unknown'; detail: st
 function knownFalse(code: string, p: Profile, saidNone: boolean): boolean {
   const kidCodes = ['JA0411', 'JA0303', 'JA0317', 'JA0318', 'JA0319'];
   if (kidCodes.includes(code)) return p.hasKids === 'N' || (p.hasKids === 'Y' && p.kids.length > 0);
-  if (code === 'JA0302') return p.pregnant === 'N';
+  if (code === 'JA0302' || code === 'JA0301') return p.pregnant === 'N';
+  if (code === 'JA0404') return p.hh > 1; // 가구원 수로 1인 가구 여부를 앎
   return saidNone;
 }
 
@@ -49,10 +50,10 @@ export function explain(b: Cond, p: Profile): Check[] {
   if (lo > 0 || hi > 0) {
     const range = hi ? `만 ${lo}~${hi}세` : `만 ${lo}세 이상`;
     const src = fromText ? ' (설명 기준)' : '';
-    if (age === null) out.push({ label: '나이', status: 'unknown', detail: `${range} 대상${src}`, tip: '내 조건에 주민등록번호 앞 6자리를 넣으면 확인할 수 있어요' });
+    if (age === null) out.push({ label: '나이', status: 'unknown', detail: `${range} 대상${src}`, tip: '내 조건에 생년월일을 넣으면 확인할 수 있어요' });
     else if (lo && age < lo) {
-      const yy = +p.birth.slice(0, 2), y = (yy > new Date().getFullYear() % 100 ? 1900 : 2000) + yy;
-      out.push({ label: '나이', status: 'no', detail: `${range} 대상${src} · 현재 만 ${age}세`, tip: `${y + lo}년 ${+p.birth.slice(2, 4)}월 ${+p.birth.slice(4, 6)}일(만 ${lo}세)부터 신청할 수 있어요` });
+      const y = +p.birth.slice(0, 4);
+      out.push({ label: '나이', status: 'no', detail: `${range} 대상${src} · 현재 만 ${age}세`, tip: `${y + lo}년 ${+p.birth.slice(4, 6)}월 ${+p.birth.slice(6, 8)}일(만 ${lo}세)부터 신청할 수 있어요` });
     } else if (hi && age > hi) out.push({ label: '나이', status: 'no', detail: `${range} 대상${src} · 현재 만 ${age}세`, tip: '나이 조건은 바꿀 수 없어요. 비슷한 분야의 다른 혜택을 찾아보세요' });
     else out.push({ label: '나이', status: 'ok', detail: `${range} 대상${src} · 현재 만 ${age}세`, specific: true, short: range });
   }
@@ -88,12 +89,18 @@ export function explain(b: Cond, p: Profile): Check[] {
     const need = group.filter((c) => on.has(c));
     if (!need.length || on.has(none)) continue;
     const text = need.map((c) => CODE_LABEL[c]).join(' 또는 ');
-    const hit = need.filter((c) => mine.has(c));
+    // 남성이 '가족 중 임신'으로 임산부 코드만 맞는 경우: 임산부 본인 신청일 수 있어 확인 필요
+    const male = p.gender === 'M';
+    const hit = need.filter((c) => mine.has(c) && !(male && c === 'JA0302'));
+    if (!hit.length && male && need.includes('JA0302') && p.pregnant === 'Y') {
+      out.push({ label: name, status: 'unknown', detail: `${text} 대상`, tip: '임산부 본인이 신청하는 혜택일 수 있어요. 배우자가 신청할 수 있는지 신청처에서 확인하세요' });
+      continue;
+    }
     if (hit.length) { out.push({ label: name, status: 'ok', detail: `${text} 대상`, specific: true, short: hit.map((c) => CODE_LABEL[c]).join('·') }); continue; }
     const selectable = TAGS.filter((t) => t.codes.some((c) => need.includes(c))).map((t) => `'${t.label}'`);
     const tip = selectable.length ? `해당되면 내 조건에서 ${selectable.join(', ')}을(를) 선택해 주세요`
-      : need.some((c) => ['JA0411', 'JA0303', 'JA0317', 'JA0318', 'JA0319'].includes(c)) ? '내 조건에 자녀 출생연월을 넣으면 확인할 수 있어요'
-      : need.includes('JA0302') ? "임신 중이면 내 조건에서 '임신 중'을 선택해 주세요" : '해당 여부는 신청처에서 확인하세요';
+      : need.some((c) => ['JA0411', 'JA0303', 'JA0317', 'JA0318', 'JA0319'].includes(c)) ? '내 조건에 자녀 생년월일을 넣으면 확인할 수 있어요'
+      : need.includes('JA0302') || need.includes('JA0301') ? "가족 중 임신 중인 사람이 있으면 내 조건에서 '가족 중 임신'을 '예'로 골라주세요" : '해당 여부는 신청처에서 확인하세요';
     const sure = need.every((c) => knownFalse(c, p, saidNone));
     out.push({ label: name, status: sure ? 'no' : 'unknown', detail: `${text} 대상`, tip });
   }
@@ -106,13 +113,29 @@ export function explain(b: Cond, p: Profile): Check[] {
     const hitAge = ages.find((x) => x >= a && x <= z);
     const pregOk = h.preg && p.pregnant === 'Y';
     if (hitAge !== undefined) out.push({ label: '자녀', status: 'ok', detail: `${range} 자녀 대상 · 만 ${hitAge}세 자녀 해당`, specific: true, short: `만 ${hitAge}세 자녀` });
-    else if (pregOk) out.push({ label: '자녀', status: 'ok', detail: `${range} 자녀 또는 임산부 대상 · 임신 중`, specific: true, short: '임신 중' });
-    else if (p.hasKids === '') out.push({ label: '자녀', status: 'unknown', detail: `${range} 자녀 대상 (설명 기준)`, tip: '내 조건에 자녀 출생연월을 넣으면 확인할 수 있어요' });
+    else if (pregOk) out.push({ label: '자녀', status: 'ok', detail: `${range} 자녀 또는 임산부 대상 · 가족 중 임신`, specific: true, short: '가족 중 임신' });
+    else if (p.hasKids === '') out.push({ label: '자녀', status: 'unknown', detail: `${range} 자녀 대상 (설명 기준)`, tip: '내 조건에 자녀 생년월일을 넣으면 확인할 수 있어요' });
     else out.push({ label: '자녀', status: 'no', detail: `${range} 자녀 대상 (설명 기준)`, tip: p.hasKids === 'N' ? '자녀가 있는 가정이 받는 혜택이에요' : `자녀 나이가 ${range}일 때 받을 수 있어요` });
   } else if (h.preg && !on.has('JA0302')) {
-    if (p.pregnant === 'Y') out.push({ label: '임신', status: 'ok', detail: '임산부 대상 (설명 기준)', specific: true, short: '임신 중' });
-    else if (p.pregnant === 'N') out.push({ label: '임신', status: 'no', detail: '임산부 대상 (설명 기준)' });
-    else out.push({ label: '임신', status: 'unknown', detail: '임산부 대상 (설명 기준)', tip: "임신 중이면 내 조건에서 '임신 중'을 선택해 주세요" });
+    const who = h.pf ? '임산부·임신 가구 대상 (설명 기준)' : '임산부 대상 (설명 기준)';
+    if (p.pregnant === 'Y' && p.gender === 'M' && !h.pf) out.push({ label: '임신', status: 'unknown', detail: who, tip: '임산부 본인이 신청하는 혜택일 수 있어요. 배우자가 신청할 수 있는지 신청처에서 확인하세요' });
+    else if (p.pregnant === 'Y') out.push({ label: '임신', status: 'ok', detail: who, specific: true, short: '가족 중 임신' });
+    else if (p.pregnant === 'N') out.push({ label: '임신', status: 'no', detail: who });
+    else out.push({ label: '임신', status: 'unknown', detail: who, tip: "가족 중 임신 중인 사람이 있으면 내 조건에서 '가족 중 임신'을 '예'로 골라주세요" });
+  }
+
+  // 신혼부부 (설명 문구)
+  if (h.nw) {
+    const want = `혼인 ${h.nw}년 이내${h.pre ? '·결혼 예정' : ''} 신혼부부 대상 (설명 기준)`;
+    const yrs = yearsSince(p.marryDate);
+    if (!p.marry) out.push({ label: '혼인', status: 'unknown', detail: want, tip: '내 조건에서 혼인 여부를 고르면 확인할 수 있어요' });
+    else if (p.marry === 'S') out.push({ label: '혼인', status: 'no', detail: want, tip: h.pre ? '결혼 예정이면 신청할 수 있어요' : '혼인신고 후 신청할 수 있어요' });
+    else if (p.marry === 'P') out.push(h.pre
+      ? { label: '혼인', status: 'ok', detail: want + ' · 결혼 예정', specific: true, short: '결혼 예정' }
+      : { label: '혼인', status: 'unknown', detail: want, tip: '혼인신고 후 신청할 수 있는 혜택일 수 있어요. 예비 신혼부부도 되는지 신청처에서 확인하세요' });
+    else if (yrs === null) out.push({ label: '혼인', status: 'unknown', detail: want, tip: '내 조건에 혼인신고일을 넣으면 확인할 수 있어요' });
+    else if (yrs < h.nw) out.push({ label: '혼인', status: 'ok', detail: `${want} · 혼인 ${yrs + 1}년차`, specific: true, short: `신혼 ${yrs + 1}년차` });
+    else out.push({ label: '혼인', status: 'no', detail: `${want} · 혼인 ${yrs + 1}년차`, tip: `혼인신고일로부터 ${h.nw}년이 지나 신청 기간이 끝났어요` });
   }
 
   // 세대주 (설명 문구)
@@ -167,6 +190,8 @@ export function conditionSummary(b: Cond): string[] {
   const h = b.hint;
   if (h?.ca) out.push(`${h.ca[0] === 0 ? `만 ${h.ca[1]}세 이하` : `만 ${h.ca[0]}~${h.ca[1]}세`} 자녀 (설명 기준)`);
   if (h?.head) out.push('세대주 (설명 기준)');
+  if (h?.nw) out.push(`혼인 ${h.nw}년 이내 신혼부부${h.pre ? '·결혼 예정' : ''} (설명 기준)`);
+  if (h?.preg && !h?.ca) out.push(h.pf ? '임산부·임신 가구 (설명 기준)' : '임산부 (설명 기준)');
   return out;
 }
 

@@ -15,11 +15,11 @@ const SORTS = { dl: '마감 임박순', new: '최신순', like: '좋아요순', 
 type SortKey = keyof typeof SORTS;
 const PAGE = 20;
 
-const SECTIONS: { tier: Tier; title: string; desc: string; badge: [string, string] }[] = [
-  { tier: 'fit', title: '나에게 꼭 맞는 혜택', desc: '내 나이·소득·자녀·상황을 콕 집은 혜택이에요', badge: ['ok', '꼭 맞음'] },
-  { tier: 'maybe', title: '받을 수도 있는 혜택', desc: '정보가 부족해 신청처 확인이 필요한 혜택이에요', badge: ['check', '확인 필요'] },
-  { tier: 'all', title: '누구나 받는 혜택', desc: '나이·소득 조건이 거의 없는 혜택이에요', badge: ['all', '누구나'] },
-  { tier: 'no', title: '조건이 안 맞는 혜택', desc: '어떤 조건이 다른지 카드와 상세에서 볼 수 있어요', badge: ['no', '안 맞음'] },
+const SECTIONS: { tier: Tier; title: string; name: string; desc: string; badge: [string, string] }[] = [
+  { tier: 'fit', title: '나에게 꼭 맞는 혜택', name: '꼭 맞음', desc: '내 조건을 콕 집은 혜택', badge: ['ok', '꼭 맞음'] },
+  { tier: 'maybe', title: '받을 수도 있는 혜택', name: '확인 필요', desc: '신청처에 확인이 필요해요', badge: ['check', '확인 필요'] },
+  { tier: 'all', title: '누구나 받는 혜택', name: '누구나', desc: '조건이 거의 없어요', badge: ['all', '누구나'] },
+  { tier: 'no', title: '조건이 안 맞는 혜택', name: '안 맞음', desc: '왜 안 맞는지 보여드려요', badge: ['no', '안 맞음'] },
 ];
 
 /** 기관 배지: 지역 기관은 시·도 이름을 떼서 짧게 */
@@ -40,9 +40,8 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
   const [cat, setCat] = useState('전체');
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<SortKey>('dl');
-  const [showNo, setShowNo] = useState(false);
-  const [open, setOpen] = useState<Record<Tier, boolean>>({ fit: true, maybe: false, all: false, no: true });
-  const [limits, setLimits] = useState<Record<Tier, number>>({ fit: PAGE, maybe: PAGE, all: PAGE, no: PAGE });
+  const [picked, setPicked] = useState<Tier | null>(null);
+  const [limit, setLimit] = useState(PAGE);
 
   const likesOf = (b: BItem) => likeCounts[b.id] ?? b.l;
 
@@ -51,17 +50,26 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
 
   const query = q.trim().replace(/\s+/g, '');
   const visible = useMemo(() => {
-    let base = judged;
-    if (profile.set && !showNo) base = base.filter((x) => x.t !== 'no');
-    if (query) base = base.filter(({ b }) => (b.n + b.s + (b.o || '') + b.c).replace(/\s+/g, '').includes(query));
-    return base;
-  }, [judged, query, showNo, profile.set]);
+    if (!query) return judged;
+    return judged.filter(({ b }) => (b.n + b.s + (b.o || '') + b.c).replace(/\s+/g, '').includes(query));
+  }, [judged, query]);
+
+  // 분야를 고른 상태의 4칸 숫자
+  const inCat = useMemo(() => visible.filter(({ b }) => cat === '전체' || b.c === cat), [visible, cat]);
+  const total = useMemo(() => {
+    const c: Record<Tier, number> = { fit: 0, maybe: 0, all: 0, no: 0 };
+    inCat.forEach((x) => c[x.t]++);
+    return c;
+  }, [inCat]);
+  // 고른 칸이 없으면: 꼭 맞음 → 확인 필요 → 누구나 → 안 맞음 중 처음으로 혜택이 있는 칸
+  const pick: Tier = !profile.set ? 'maybe' : picked ?? (['fit', 'maybe', 'all', 'no'] as Tier[]).find((t) => total[t] > 0) ?? 'fit';
+  const inTier = useMemo(() => visible.filter((x) => x.t === pick), [visible, pick]);
 
   const counts = useMemo(() => {
     const m = new Map<string, number>();
-    visible.forEach(({ b }) => m.set(b.c, (m.get(b.c) || 0) + 1));
-    return CATEGORY_ORDER.filter((c) => c === '전체' || m.get(c)).map((c) => ({ key: c, count: c === '전체' ? visible.length : m.get(c)! }));
-  }, [visible]);
+    inTier.forEach(({ b }) => m.set(b.c, (m.get(b.c) || 0) + 1));
+    return CATEGORY_ORDER.filter((c) => c === '전체' || c === cat || m.get(c)).map((c) => ({ key: c, count: c === '전체' ? inTier.length : m.get(c) || 0 }));
+  }, [inTier, cat]);
 
   const sorted = useMemo(() => {
     const cmp: Record<SortKey, (a: BItem, b: BItem) => number> = {
@@ -70,17 +78,11 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
       like: (a, b) => likesOf(b) - likesOf(a) || b.v - a.v,
       view: (a, b) => b.v - a.v,
     };
-    return visible.filter(({ b }) => cat === '전체' || b.c === cat).sort((x, y) => cmp[sort](x.b, y.b));
+    return inTier.filter(({ b }) => cat === '전체' || b.c === cat).sort((x, y) => cmp[sort](x.b, y.b));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, cat, sort, likeCounts]);
+  }, [inTier, cat, sort, likeCounts]);
 
-  const byTier = useMemo(() => {
-    const g: Record<Tier, typeof sorted> = { fit: [], maybe: [], all: [], no: [] };
-    sorted.forEach((x) => g[x.t].push(x));
-    return g;
-  }, [sorted]);
-
-  const total = useMemo(() => {
+  const all = useMemo(() => {
     const c: Record<Tier, number> = { fit: 0, maybe: 0, all: 0, no: 0 };
     judged.forEach((x) => c[x.t]++);
     return c;
@@ -88,7 +90,8 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
 
   const age = manAge(profile.birth);
   const kids = kidAges(profile);
-  const nothing = profile.set && total.fit + total.maybe + total.all === 0;
+  const nothing = profile.set && all.fit + all.maybe + all.all === 0;
+  const choose = (t: Tier) => { setPicked(t); setLimit(PAGE); track('pick_tier', { tier: t }); };
 
   const card = (b: BItem, t: Tier) => {
     const d = deadlineLabel(b.dk, b.de);
@@ -113,17 +116,14 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
     );
   };
 
-  const listOf = (t: Tier) => {
-    const arr = byTier[t];
-    const lim = limits[t];
-    return (
-      <div className="list">
-        {arr.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
-        {arr.slice(0, lim).map(({ b }) => card(b, t))}
-        {arr.length > lim && <button className="morebtn" onClick={() => setLimits((l) => ({ ...l, [t]: l[t] + PAGE }))}>더 보기 ({(arr.length - lim).toLocaleString()}개 남음)</button>}
-      </div>
-    );
-  };
+  const sec = SECTIONS.find((x) => x.tier === pick)!;
+  const list = (
+    <div className="list">
+      {sorted.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
+      {sorted.slice(0, limit).map(({ b }) => card(b, pick))}
+      {sorted.length > limit && <button className="morebtn" onClick={() => setLimit((l) => l + PAGE)}>더 보기 ({(sorted.length - limit).toLocaleString()}개 남음)</button>}
+    </div>
+  );
 
   return (
     <>
@@ -147,10 +147,11 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
             {profile.inc && <span className="pill">중위 {profile.inc}</span>}
             {kids.length > 0 && <span className="pill">자녀 {kids.length}명</span>}
             {profile.head === 'Y' && <span className="pill">세대주</span>}
+            {profile.marry === 'M' && <span className="pill">기혼</span>}
+            {profile.marry === 'P' && <span className="pill">결혼 예정</span>}
             {profile.tags.filter((t) => t !== '해당 없음').slice(0, 2).map((t) => <span key={t} className="pill">{t}</span>)}
           </div>
-          <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : nothing ? <>지금 조건에 맞는 혜택이<br />없어요</> : <>나에게 꼭 맞는 혜택<br />{total.fit.toLocaleString()}개를 찾았어요</>}</b>
-          {items && items.length > 0 && !nothing && <span style={{ fontSize: 13 }}>받을 수도 있는 혜택 {total.maybe.toLocaleString()}개 · 누구나 받는 혜택 {total.all.toLocaleString()}개</span>}
+          <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : nothing ? <>지금 조건에 맞는 혜택이<br />없어요</> : <>나에게 꼭 맞는 혜택<br />{all.fit.toLocaleString()}개를 찾았어요</>}</b>
           <button onClick={goMy}>조건 바꾸기</button>
         </section>
       )}
@@ -163,40 +164,33 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
         <div className="notice"><b>혜택 정보를 준비하고 있어요</b><span>정부24 혜택 목록을 받아오는 중이에요. 잠시 후 다시 열어주세요.</span><button className="linkbtn" onClick={onRetry}>다시 불러오기</button></div>
       ) : (
         <>
-          {profile.set && (
-            <label className="switchrow">
-              <span><b>조건이 안 맞는 혜택도 보기</b><small>{total.no.toLocaleString()}개 · 왜 안 맞는지 이유가 함께 나와요</small></span>
-              <input type="checkbox" role="switch" checked={showNo} onChange={(e) => setShowNo(e.target.checked)} />
-            </label>
-          )}
-          {nothing && !showNo ? (
+          {nothing && (
             <div className="notice">
               <b>입력한 조건에 맞는 혜택이 없어요</b>
-              <span>위의 &lsquo;조건이 안 맞는 혜택도 보기&rsquo;를 켜면 혜택마다 어떤 조건이 다른지, 어떻게 되면 받을 수 있는지 볼 수 있어요.</span>
+              <span>아래 &lsquo;안 맞음&rsquo; 칸을 누르면 혜택마다 어떤 조건이 다른지, 어떻게 되면 받을 수 있는지 볼 수 있어요.</span>
               <button className="linkbtn" onClick={goMy}>내 조건 다시 확인하기</button>
             </div>
-          ) : (
-            <>
-              <CatBar
-                title={<>분야별 보기 <span className="cap light">{sorted.length.toLocaleString()}개</span></>}
-                right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
-                label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); track('pick_category', { cat: k }); }}
-              />
-              <div className="cap" style={{ padding: '0 4px' }}>{profile.set ? `${region} 기준` : '조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.'}</div>
-              {!profile.set ? listOf('maybe') : SECTIONS.filter((s) => s.tier !== 'no' || showNo).map((s) => (
-                <section key={s.tier} className="tier">
-                  <button className="tierhead" aria-expanded={open[s.tier]} onClick={() => setOpen((o) => ({ ...o, [s.tier]: !o[s.tier] }))}>
-                    <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                      <b>{s.title} <span className={`tcount ${s.badge[0]}`}>{byTier[s.tier].length.toLocaleString()}</span></b>
-                      <small>{s.desc}</small>
-                    </span>
-                    <span className="chev" aria-hidden>{open[s.tier] ? '▴' : '▾'}</span>
-                  </button>
-                  {open[s.tier] && listOf(s.tier)}
-                </section>
-              ))}
-            </>
           )}
+          <CatBar
+            title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
+            right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
+            label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
+          />
+          {profile.set ? (
+            <>
+              <div className="tgrid" role="tablist" aria-label="혜택 분류">
+                {SECTIONS.map((x) => (
+                  <button key={x.tier} role="tab" aria-selected={pick === x.tier} className={`tcell ${x.tier} ${pick === x.tier ? 'on' : ''}`} onClick={() => choose(x.tier)}>
+                    <em>{x.name}</em><b>{total[x.tier].toLocaleString()}</b><small>{x.desc}</small>
+                  </button>
+                ))}
+              </div>
+              <div className="thead"><strong>{sec.title} {sorted.length.toLocaleString()}개</strong>{cat !== '전체' && <span className="cap">{cat}</span>}</div>
+            </>
+          ) : (
+            <div className="cap" style={{ padding: '0 4px' }}>조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.</div>
+          )}
+          {list}
         </>
       )}
       <Footer />
