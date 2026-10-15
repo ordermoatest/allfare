@@ -200,6 +200,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
           {list}
         </>
       )}
+      <a className="gbanner" href="/guide"><span aria-hidden>📘</span><span><b>복지 가이드</b><small>기준중위소득 계산기 · 문화누리카드 · 신혼부부·청년 기준</small></span><span aria-hidden>›</span></a>
       <Footer notes={['꼭 맞음·확인 필요 표시는 공개된 조건만 비교한 참고 정보예요.', '정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />
     </>
   );

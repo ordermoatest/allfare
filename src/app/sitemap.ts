@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { db } from '@/lib/server/supabase';
 import { SITE } from '@/lib/site';
+import { GUIDES } from '@/lib/guides';
 
 export const revalidate = 86400; // 하루 한 번 새로 만듦
 
@@ -10,6 +11,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     { url: `${SITE}/`, lastModified: now, changeFrequency: 'daily', priority: 1 },
     { url: `${SITE}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE}/guide`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    ...GUIDES.map((g) => ({ url: `${SITE}/guide/${g.slug}`, lastModified: new Date(g.updated), changeFrequency: 'monthly' as const, priority: 0.8 })),
     { url: `${SITE}/privacy`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE}/terms`, changeFrequency: 'yearly', priority: 0.2 },
   ];

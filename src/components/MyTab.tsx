@@ -171,7 +171,8 @@ export default function MyTab({ profile, fs, setFs, onSave, onReset, onHome }: {
             ? <>가구 합계 세전 기준 · 중위소득 약 <b>{pct}%</b> → <b>{bracketOf(pct)}</b></>
             : d.inc && !d.mi ? <>소득 구간 <b>{d.inc}</b></>
             : <>{d.hh}인 가구 중위소득은 월 {Math.round(medianOf(d.hh) / 10000).toLocaleString()}만원이에요</>}
-          <button className="plink" aria-expanded={pickInc} onClick={() => setPickInc(!pickInc)}>{pickInc ? '접기' : '직접 고르기'}</button>
+          <a className="plink" href="/guide/median-income">중위소득이 뭔가요?</a>
+          <button className="plink" style={{ marginLeft: 0 }} aria-expanded={pickInc} onClick={() => setPickInc(!pickInc)}>{pickInc ? '접기' : '직접 고르기'}</button>
         </div>
         {pickInc && (
           <div className="grid3" style={{ paddingBottom: 6 }}>
@@ -207,7 +208,7 @@ export default function MyTab({ profile, fs, setFs, onSave, onReset, onHome }: {
       <Sec n={4} title="그 밖에 해당하는 것" sub="중복 선택 가능">
         <div className="wrap" style={{ padding: '6px 0 4px' }}>
           {TAGS.map((t) => (
-            <button key={t.label} className={`tg ${d.tags.includes(t.label) ? 'on' : ''}`} style={t.label === '해당 없음' ? { marginLeft: 'auto' } : undefined}
+            <button key={t.label} className={`tg ${d.tags.includes(t.label) ? 'on' : ''}`}
               aria-pressed={d.tags.includes(t.label)} onClick={() => toggleTag(t.label)}>{t.label}</button>
           ))}
         </div>

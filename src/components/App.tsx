@@ -31,8 +31,11 @@ export default function App() {
     setProfile(loadProfile());
     setFsState(Math.min(FS.length - 1, Math.max(0, loadNum('af-fs', 0))));
     setLiked(loadSet('af-liked'));
-    const b = new URLSearchParams(location.search).get('b');
+    const qs = new URLSearchParams(location.search);
+    const b = qs.get('b');
     if (b) setBenefit(b);
+    const t = qs.get('tab'); // 가이드 글에서 탭 바로 열기 (?tab=my / ?tab=culture)
+    if (t === 'my' || t === 'culture') { setTab(t); setOpened((o) => ({ ...o, [t]: true })); }
     setReady(true);
   }, []);
 

@@ -7,7 +7,7 @@ export default function Footer({ notes }: { notes?: string[] }) {
   return (
     <section className="foot">
       <ul className="footnotes">{lines.map((t) => <li key={t}><b aria-hidden>ⓘ</b><span>{t}</span></li>)}</ul>
-      <p><a href="/about">올페어 소개</a> · <a href="/privacy">개인정보처리방침</a> · <a href="/terms">이용약관</a>{mail ? <> · 문의 <span className="sel">{mail}</span></> : null}</p>
+      <p><a href="/guide">복지 가이드</a> · <a href="/about">올페어 소개</a> · <a href="/privacy">개인정보처리방침</a> · <a href="/terms">이용약관</a>{mail ? <> · 문의 <span className="sel">{mail}</span></> : null}</p>
     </section>
   );
 }

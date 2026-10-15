@@ -33,7 +33,7 @@ export default function About() {
       <p>올페어는 정부 기관이 아니며 혜택 신청을 대행하지 않아요. 실제 선정 여부는 신청처에서 꼭 확인하세요.</p>
 
       <h2>운영</h2>
-      <p>운영: ARININE{mail ? <><br />문의: <span className="sel">{mail}</span></> : null}</p>
+      <p>운영: AllFare{mail ? <><br />문의: <span className="sel">{mail}</span></> : null}</p>
       <p><a href="/">← 올페어에서 내 혜택 찾아보기</a></p>
     </main>
   );

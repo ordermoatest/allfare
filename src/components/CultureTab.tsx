@@ -181,6 +181,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
           </div>
         </>
       )}
+      <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden>🎫</span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>
       <Footer notes={['가맹점 목록은 한국문화예술위원회 공개 자료 기준이에요.', '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
 
       {sheet && (
