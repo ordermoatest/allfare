@@ -527,3 +527,28 @@ input, textarea, select { font-size: 16px !important; }
 /* 팝업 위 닫기 줄 고정 */
 .sheethead { position: sticky; top: -10px; z-index: 3; background: var(--bg); margin: -10px -2px 0; padding: 10px 2px 8px; display: flex; flex-direction: column; gap: 4px; }
 .sheethead .grab { margin-bottom: 2px; }
+/* 고정 머리글 바로 밑에 분야 칩 줄이 틈 없이 붙도록 */
+.catbar { top: calc(var(--hdr, 0px) - 1px); }
+
+/* ===== 로고 줄 높이 고정값 (아이폰에서도 틈 없이) ===== */
+:root { --hdrh: 68px; }
+html.hmini { --hdrh: 48px; }
+.apphead { box-sizing: border-box; height: calc(var(--hdrh) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); padding-bottom: 0; overflow: hidden; transition: height .2s, box-shadow .2s; }
+.apphead.mini { padding-top: env(safe-area-inset-top, 0px); padding-bottom: 0; }
+.catbar { top: calc(var(--hdrh) + env(safe-area-inset-top, 0px) - 1px); transition: top .2s; }
+
+/* 알아보기 탭 (v9.1) */
+nav.tabs button { min-width: 72px; font-size: 12.5px; }
+nav.tabs .ic { width: 54px; }
+.minereg { display: flex; align-items: center; justify-content: space-between; background: var(--mint); color: var(--on-mint); border-radius: 16px; padding: 12px 16px; text-decoration: none; font-weight: 800; font-size: 15px; }
+.minereg small { display: block; font-size: 11.5px; font-weight: 600; opacity: .85; }
+.minereg > span:last-child { font-size: 20px; }
+.regres { display: flex; flex-direction: column; gap: 6px; }
+.regres a { display: flex; justify-content: space-between; align-items: center; background: var(--bg); border-radius: 14px; padding: 11px 14px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 14.5px; }
+.regres a span { color: var(--mint); }
+.rchip.soft { background: var(--chip); }
+.calccard { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 22px; padding: 16px; text-decoration: none; color: var(--ink); }
+.calccard .cic { width: 46px; height: 46px; border-radius: 14px; background: var(--soft); display: grid; place-items: center; font-size: 24px; flex: none; }
+.calccard b { display: block; font-size: 15.5px; } .calccard small { font-size: 12.5px; color: var(--sub); }
+.calccard .cgo { margin-left: auto; color: var(--mint); font-size: 22px; font-weight: 800; }
+.gitem.soft { background: var(--bg); }

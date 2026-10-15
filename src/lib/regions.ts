@@ -97,3 +97,11 @@ export function scopeOf(orgType?: string | null, org?: string | null): { scope: 
   if (!sido) return { scope: 'unknown', sido: null, sgg: null };
   return { scope: 'local', sido, sgg };
 }
+
+// 지역 페이지 주소용 짧은 시·도 이름
+export const SIDO_SHORT: Record<string, string> = {
+  '서울특별시': '서울', '부산광역시': '부산', '대구광역시': '대구', '인천광역시': '인천', '대전광역시': '대전', '울산광역시': '울산',
+  '세종특별자치시': '세종', '경기도': '경기', '강원특별자치도': '강원', '충청북도': '충북', '충청남도': '충남', '전북특별자치도': '전북',
+  '전남광주통합특별시': '전남광주', '경상북도': '경북', '경상남도': '경남', '제주특별자치도': '제주',
+};
+export const SIDO_BY_SHORT: Record<string, string> = Object.fromEntries(Object.entries(SIDO_SHORT).map(([f, s]) => [s, f]));
