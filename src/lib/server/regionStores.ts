@@ -24,7 +24,7 @@ const OLD_SGG: Record<string, Record<string, string[]>> = {
 // 광주광역시 자치구는 전남 군과 이름이 겹치지 않게 광주로만 찾기
 const GWANGJU_GU = ['광산구', '남구', '동구', '북구', '서구'];
 
-export type RegionStore = { id: string; name: string; category: string | null; address: string | null; phone: string | null; lat: number | null; lng: number | null };
+export type RegionStore = { id: string; name: string; category: string | null; address: string | null; phone: string | null; lat: number | null; lng: number | null; reviews?: number };
 
 export function validRegion(sido: string, sgg?: string) {
   if (!SGG[sido]) return false;
@@ -50,5 +50,15 @@ export async function storesOf(sido: string, sgg?: string): Promise<RegionStore[
     out.push(...(data as RegionStore[]));
     if (data.length < 1000) break;
   }
-  return out;
+  // 후기 수 붙이기 (숨김 제외)
+  const cnt = new Map<string, number>();
+  for (let i = 0; i < out.length; i += 300) {
+    const ids = out.slice(i, i + 300).map((x) => x.id);
+    const { data } = await db().from('store_reviews').select('store_id').eq('hidden', false).in('store_id', ids);
+    (data || []).forEach((r) => cnt.set(r.store_id, (cnt.get(r.store_id) || 0) + 1));
+  }
+  out.forEach((x) => { x.reviews = cnt.get(x.id) || 0; });
+  // 정렬: 후기 많은 곳 → 전화번호 있는 곳 → 이름 가나다 ((재)·(주)·주식회사 빼고)
+  const key = (n: string) => n.replace(/\(.*?\)|㈜|주식회사|재단법인|사단법인|\s/g, '');
+  return out.sort((a, b) => (b.reviews || 0) - (a.reviews || 0) || Number(!!b.phone) - Number(!!a.phone) || key(a.name).localeCompare(key(b.name), 'ko'));
 }

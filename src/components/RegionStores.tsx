@@ -50,7 +50,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
           <ul className="rlist">
             {l.slice(0, PER_CAT).map((s) => (
               <li key={s.id}>
-                <b>{s.name}</b>
+                <b>{s.name}{s.reviews ? <em className="rrv"> 후기 {s.reviews}</em> : null}</b>
                 <span>{s.address}</span>
                 {s.phone && <a href={`tel:${s.phone.replace(/[^0-9]/g, '')}`}>{s.phone}</a>}
               </li>
