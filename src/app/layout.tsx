@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   title: '올페어 - 내 복지 혜택 · 문화누리카드 사용처 찾기',
   description: '나이·지역·소득만 입력하면 받을 수 있는 정부·지자체 혜택을 골라주고, 내 주변 문화누리카드 가맹점을 지도로 보여드려요.',
   manifest: '/manifest.webmanifest',
-  icons: { icon: '/icon.svg', apple: '/icon.svg' },
-  openGraph: { title: '올페어', description: '내 복지 혜택과 문화누리카드 사용처를 한 번에', type: 'website', locale: 'ko_KR' },
+  icons: { icon: [{ url: '/icon.svg', type: 'image/svg+xml' }, { url: '/icon-192.png', sizes: '192x192', type: 'image/png' }], apple: '/apple-touch-icon.png' },
+  openGraph: { title: '올페어 All welFare', description: '내 혜택, 내 주변 사용처 한 번에', type: 'website', locale: 'ko_KR', images: [{ url: '/og.png', width: 1200, height: 630 }] },
 };
 
 export const viewport: Viewport = {

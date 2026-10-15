@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getBenefit } from '@/lib/server/benefit';
 import { deadlineLabel } from '@/lib/deadline';
 import { conditionSummary } from '@/lib/match';
+import Brand from '@/components/Brand';
 
 export const revalidate = 3600;
 
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const b = await getBenefit(params.id).catch(() => null);
   if (!b) return { title: '올페어' };
   const desc = (b.summary || b.content || '').slice(0, 120);
-  return { title: `${b.name} - 올페어`, description: desc, openGraph: { title: b.name, description: desc } };
+  return { title: `${b.name} - 올페어`, description: desc, openGraph: { title: b.name, description: desc, images: [{ url: '/og.png', width: 1200, height: 630 }] } };
 }
 
 export default async function BenefitPage({ params }: { params: { id: string } }) {
@@ -22,7 +23,7 @@ export default async function BenefitPage({ params }: { params: { id: string } }
   return (
     <div className="app" style={{ height: 'auto', minHeight: '100dvh' }}>
       <main className="scroll" style={{ paddingBottom: 32 }}>
-        <a href="/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}><div className="logo">AF</div><div><h1>올페어</h1><div className="cap">내 혜택, 내 주변 사용처 한 번에</div></div></a>
+        <Brand href="/" />
         <section className="panel">
           <div className="row"><span className="tag">{b.category}</span><span className={`due ${dl.hot ? 'hot' : ''}`}>{dl.text}</span></div>
           <h1 style={{ fontSize: 22, lineHeight: 1.35 }}>{b.name}</h1>

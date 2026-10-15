@@ -13,5 +13,11 @@ export async function GET(req: NextRequest) {
   }
   const { data, error } = await db().rpc('nearby_stores', { p_lat: lat, p_lng: lng, p_radius: r, p_limit: 400 });
   if (error) return NextResponse.json({ error: '가맹점을 불러오지 못했어요' }, { status: 500 });
-  return NextResponse.json({ items: data || [] }, { headers: { 'Cache-Control': 'public, s-maxage=600' } });
+  // 근처에 없을 때: 아직 데이터 준비 중인지, 정말 없는지 구분
+  let ready = true;
+  if (!data?.length) {
+    const { count } = await db().from('culture_stores').select('id', { count: 'exact', head: true }).eq('geo_status', 'ok');
+    ready = (count ?? 0) > 1000;
+  }
+  return NextResponse.json({ items: data || [], ready }, { headers: { 'Cache-Control': ready ? 'public, s-maxage=600' : 'no-store' } });
 }

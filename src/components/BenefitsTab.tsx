@@ -5,7 +5,8 @@ import Footer from './Footer';
 import { IcHeartFill, IcSearch } from './icons';
 import { BItem } from '@/lib/types';
 import { Profile, manAge, regionLabel } from '@/lib/profile';
-import { evaluate, Match } from '@/lib/match';
+import { evaluate, firstReason, Match } from '@/lib/match';
+import Brand from './Brand';
 import { CATEGORY_ORDER } from '@/lib/categories';
 import { deadlineLabel } from '@/lib/deadline';
 import { track } from '@/lib/client';
@@ -63,7 +64,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
 
   return (
     <>
-      <div className="head"><div className="brand"><div className="logo">AF</div><div><h1>올페어</h1><div className="cap">내 혜택, 내 주변 사용처 한 번에</div></div></div></div>
+      <div className="head"><Brand /></div>
       <label className="search"><span style={{ color: 'var(--mute)' }}><IcSearch /></span>
         <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(PAGE); }} onBlur={() => query && track('search_benefit', { q: query })} placeholder="월세, 육아, 교통비로 찾아보세요" aria-label="혜택 검색" enterKeyHint="search" />
       </label>
@@ -83,7 +84,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
             {profile.inc && <span className="pill">중위 {profile.inc}</span>}
             {profile.tags.slice(0, 2).map((t) => <span key={t} className="pill">{t}</span>)}
           </div>
-          <b>내 조건에 맞는 혜택<br />{items ? `${fit.length.toLocaleString()}개를 찾았어요` : '찾는 중이에요'}</b>
+          <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : fit.length ? <>내 조건에 맞는 혜택<br />{fit.length.toLocaleString()}개를 찾았어요</> : <>지금 조건에 맞는 혜택이<br />없어요</>}</b>
           <button onClick={goMy}>조건 바꾸기</button>
         </section>
       )}
@@ -92,17 +93,27 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
         <div className="empty">{error}<br /><button className="linkbtn" onClick={onRetry}>다시 불러오기</button></div>
       ) : !items ? (
         <div className="list" aria-busy="true"><div className="skel" /><div className="skel" /><div className="skel" /></div>
+      ) : items.length === 0 ? (
+        <div className="notice"><b>혜택 정보를 준비하고 있어요</b><span>정부24 혜택 목록을 받아오는 중이에요. 잠시 후 다시 열어주세요.</span><button className="linkbtn" onClick={onRetry}>다시 불러오기</button></div>
       ) : (
         <>
-          <CatBar
+          {!(profile.set && fit.length === 0 && !showNo) && <CatBar
             title={<>분야별 보기 <span className="cap light">{list.length.toLocaleString()}개</span></>}
             right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
             label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
-          />
+          />}
           {!profile.set && <div className="cap" style={{ padding: '0 4px' }}>조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.</div>}
           {profile.set && <div className="cap" style={{ padding: '0 4px' }}>{region} 기준 · 조건 맞음 → 확인 필요 순으로 보여드려요</div>}
+          {profile.set && fit.length === 0 && !showNo && (
+            <div className="notice">
+              <b>입력한 조건에 맞는 혜택이 없어요</b>
+              <span>나이·소득·상황 조건이 하나라도 다르면 여기서 빠져요. 아래 버튼으로 빠진 혜택을 열어보면 혜택마다 어떤 조건이 안 맞는지, 어떻게 되면 받을 수 있는지 볼 수 있어요.</span>
+              <button className="morebtn" onClick={() => setShowNo(true)}>조건이 안 맞는 혜택 {hiddenNo.toLocaleString()}개 보기</button>
+              <button className="linkbtn" onClick={goMy}>내 조건 다시 확인하기</button>
+            </div>
+          )}
           <div className="list">
-            {list.length === 0 && <div className="empty">찾는 혜택이 없어요. 다른 단어로 검색해 보세요.</div>}
+            {list.length === 0 && (fit.length > 0 || showNo || !profile.set) && <div className="empty">{query ? '찾는 혜택이 없어요. 다른 단어로 검색해 보세요.' : '이 분야에는 보여드릴 혜택이 없어요.'}</div>}
             {list.slice(0, limit).map(({ b, m }) => {
               const d = deadlineLabel(b.dk, b.de);
               const on = !!liked[b.id];
@@ -114,6 +125,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
                   </div>
                   <strong>{b.n}</strong>
                   {b.s && <span className="sum">{b.s}</span>}
+                  {m === 'no' && profile.set && <span className="why">{firstReason({ lo: b.lo, hi: b.hi, codes: b.k }, profile)}</span>}
                   <div className="row"><span className="cap">{b.o}</span><span className={`lk ${on ? 'on' : ''}`}><IcHeartFill />{likesOf(b).toLocaleString()}</span></div>
                 </button>
               );

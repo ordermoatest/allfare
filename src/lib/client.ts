@@ -39,10 +39,15 @@ export async function shareLink(title: string, text: string, url: string): Promi
       if (K && !K.isInitialized()) K.init(key);
       if (K?.Share) {
         K.Share.sendDefault({
-          objectType: 'text',
-          text: `${title}\n${text}`.slice(0, 200),
-          link: { mobileWebUrl: url, webUrl: url },
-          buttonTitle: '자세히 보기',
+          objectType: 'feed',
+          content: {
+            title: title.slice(0, 80),
+            description: text.slice(0, 100),
+            imageUrl: `${location.origin}/og.png`,
+            imageWidth: 1200, imageHeight: 630,
+            link: { mobileWebUrl: url, webUrl: url },
+          },
+          buttons: [{ title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } }],
         });
         return 'kakao';
       }

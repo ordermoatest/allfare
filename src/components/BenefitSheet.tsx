@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { IcHeart, IcOut, IcShare } from './icons';
 import { Profile, deviceId } from '@/lib/profile';
-import { conditionSummary, evaluate, Match } from '@/lib/match';
+import { conditionSummary, evaluate, explain, Match } from '@/lib/match';
 import { deadlineLabel } from '@/lib/deadline';
 import { shareLink, track } from '@/lib/client';
 
@@ -63,6 +63,7 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
 
   const m = d ? evaluate({ lo: d.lo, hi: d.hi, codes: d.codes }, profile) : 'check';
   const conds = d ? conditionSummary({ lo: d.lo, hi: d.hi, codes: d.codes }) : [];
+  const checks = d && profile.set ? explain({ lo: d.lo, hi: d.hi, codes: d.codes }, profile) : [];
   const dl = d ? deadlineLabel(d.deadlineKind, d.deadlineEnd) : null;
   const applyUrl = d?.url || 'https://www.gov.kr';
 
@@ -81,9 +82,21 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
             {(d.content || d.supportType) && (
               <div className="amount"><span className="cap" style={{ color: 'inherit' }}>지원 내용{d.supportType ? ` · ${d.supportType}` : ''}</span><b>{d.content || d.summary}</b></div>
             )}
+            {checks.length > 0 && (
+              <section className="panel" aria-label="내 조건과 비교" style={{ gap: 12 }}>
+                <strong style={{ fontSize: 15 }}>내 조건과 비교</strong>
+                {checks.map((c, i) => (
+                  <div key={i} className="chk">
+                    <span className={`chk-ic ${c.status}`} aria-hidden>{c.status === 'ok' ? '✓' : c.status === 'no' ? '✕' : '?'}</span>
+                    <div><b>{c.label}</b> <span>{c.detail}</span>{c.tip && <p className={c.status}>{c.tip}</p>}</div>
+                  </div>
+                ))}
+                <span className="cap">공공데이터에 적힌 조건만 비교했어요. 재산·거주기간 등은 아래 선정 기준을 확인하세요.</span>
+              </section>
+            )}
             <section className="panel">
               {d.target && <div className="kv"><em>누가 받을 수 있나요</em><p>{d.target}</p></div>}
-              {conds.length > 0 && <><hr /><div className="kv"><em>지원 조건 요약</em><p>{conds.join('\n')}</p></div></>}
+              {!profile.set && conds.length > 0 && <><hr /><div className="kv"><em>지원 조건 요약</em><p>{conds.join('\n')}</p></div></>}
               {d.criteria && <><hr /><div className="kv"><em>선정 기준</em><p>{d.criteria}</p></div></>}
               {d.how && <><hr /><div className="kv"><em>어떻게 신청하나요</em><p>{d.how}</p></div></>}
               <hr />

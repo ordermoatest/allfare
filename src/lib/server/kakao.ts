@@ -33,15 +33,18 @@ export async function searchPlace(query: string, near?: { lat: number; lng: numb
   }));
 }
 
-/** 동네·역·주소 검색 → 좌표 (문화누리 탭 검색창) */
-export async function searchLocation(q: string): Promise<{ lat: number; lng: number; label: string } | null> {
-  const a = await kakao<Res>('/search/address.json', { query: q, size: 1 });
-  const d = a?.documents?.[0];
-  if (d) return { lat: +d.y, lng: +d.x, label: d.address_name || q };
-  const k = await kakao<Res>('/search/keyword.json', { query: q, size: 1 });
-  const p = k?.documents?.[0];
-  if (p) return { lat: +p.y, lng: +p.x, label: p.place_name || q };
-  return null;
+/** 동네·역·주소 검색 → 후보 목록 (문화누리 탭 '기준 위치 바꾸기') */
+export async function searchLocations(q: string): Promise<{ lat: number; lng: number; label: string; sub: string }[]> {
+  const [a, k] = await Promise.all([
+    kakao<Res>('/search/address.json', { query: q, size: 3 }),
+    kakao<Res>('/search/keyword.json', { query: q, size: 6 }),
+  ]);
+  const out = [
+    ...(a?.documents || []).map((d) => ({ lat: +d.y, lng: +d.x, label: d.address_name || q, sub: '주소' })),
+    ...(k?.documents || []).map((d) => ({ lat: +d.y, lng: +d.x, label: d.place_name || q, sub: d.road_address_name || d.address_name || '' })),
+  ];
+  const seen = new Set<string>();
+  return out.filter((x) => { const key = x.label + x.sub; if (seen.has(key)) return false; seen.add(key); return true; }).slice(0, 7);
 }
 
 /** 좌표 → 동네 이름 */

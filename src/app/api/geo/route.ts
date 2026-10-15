@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { regionName, searchLocation } from '@/lib/server/kakao';
+import { regionName, searchLocations } from '@/lib/server/kakao';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,9 +8,9 @@ export async function GET(req: NextRequest) {
   const q = (req.nextUrl.searchParams.get('q') || '').trim().slice(0, 50);
   try {
     if (q) {
-      const r = await searchLocation(q);
-      if (!r) return NextResponse.json({ error: '찾는 지역이 없어요. 동 이름이나 역 이름으로 다시 검색해 보세요' }, { status: 404 });
-      return NextResponse.json(r, { headers: { 'Cache-Control': 'public, s-maxage=86400' } });
+      const items = await searchLocations(q);
+      if (!items.length) return NextResponse.json({ error: '찾는 지역이 없어요. 동 이름이나 역 이름으로 다시 검색해 보세요' }, { status: 404 });
+      return NextResponse.json({ items, ...items[0] }, { headers: { 'Cache-Control': 'public, s-maxage=86400' } });
     }
     const lat = Number(req.nextUrl.searchParams.get('lat'));
     const lng = Number(req.nextUrl.searchParams.get('lng'));

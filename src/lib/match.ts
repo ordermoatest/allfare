@@ -1,6 +1,6 @@
 // 정부24 지원조건(JA 코드)으로 내 조건 판정
 // ok = 코드화된 조건을 모두 만족 / check = 정보 부족·조건 정보 없음 / no = 확실히 안 맞음
-import { INC, Profile, TAGS, incomePercent, manAge } from './profile';
+import { INC, Profile, TAGS, incomePercent, manAge, medianOf } from './profile';
 
 export type Match = 'ok' | 'check' | 'no';
 
@@ -64,6 +64,69 @@ export function evaluate(b: Cond, p: Profile): Match {
   if (missing) return 'check';
   if (on.size === 0 && b.lo === 0 && b.hi === 0) return 'check'; // 조건 정보 자체가 없음
   return 'ok';
+}
+
+export type Check = { label: string; status: 'ok' | 'no' | 'unknown'; detail: string; tip?: string };
+
+const INC_LIMIT = [50, 75, 100, 200, Infinity];
+
+/** 내 조건과 하나씩 비교: 왜 안 맞는지, 어떻게 되면 받을 수 있는지 */
+export function explain(b: Cond, p: Profile): Check[] {
+  const on = new Set(b.codes || []);
+  const out: Check[] = [];
+
+  // 나이
+  if (b.lo > 0 || b.hi > 0) {
+    const range = b.hi ? `만 ${b.lo}~${b.hi}세` : `만 ${b.lo}세 이상`;
+    const age = manAge(p.birth);
+    if (age === null) out.push({ label: '나이', status: 'unknown', detail: `${range} 대상`, tip: '내 조건에 주민등록번호 앞 6자리를 넣으면 확인할 수 있어요' });
+    else if (b.lo && age < b.lo) {
+      const yy = +p.birth.slice(0, 2), y = (yy > new Date().getFullYear() % 100 ? 1900 : 2000) + yy;
+      out.push({ label: '나이', status: 'no', detail: `${range} 대상 · 현재 만 ${age}세`, tip: `${y + b.lo}년 ${+p.birth.slice(2, 4)}월 ${+p.birth.slice(4, 6)}일(만 ${b.lo}세)부터 신청할 수 있어요` });
+    } else if (b.hi && age > b.hi) out.push({ label: '나이', status: 'no', detail: `${range} 대상 · 현재 만 ${age}세`, tip: '나이 조건은 바꿀 수 없어요. 비슷한 분야의 다른 혜택을 찾아보세요' });
+    else out.push({ label: '나이', status: 'ok', detail: `${range} 대상 · 현재 만 ${age}세` });
+  }
+
+  // 소득
+  const inc = INCOME.filter((c) => on.has(c));
+  if (inc.length > 0 && inc.length < INCOME.length) {
+    const allowed = INCOME.map((c, i) => (on.has(c) ? i : -1)).filter((i) => i >= 0);
+    const maxPct = INC_LIMIT[Math.max(...allowed)];
+    const minIdx = Math.min(...allowed);
+    const label = maxPct === Infinity ? `중위소득 ${[0, 50, 75, 100, 200][minIdx]}% 초과` : minIdx === 0 ? `중위소득 ${maxPct}% 이하` : inc.map((c) => CODE_LABEL[c].replace('중위소득 ', '')).join(', ');
+    const pct = incomePercent(p);
+    let idx = INC.indexOf(p.inc as (typeof INC)[number]);
+    if (pct !== null) idx = pct <= 50 ? 0 : pct <= 75 ? 1 : pct <= 100 ? 2 : pct <= 200 ? 3 : 4;
+    const cur = pct !== null ? `현재 약 ${pct}%` : idx >= 0 && idx < 5 ? `현재 ${INC[idx]}` : '';
+    const limitWon = maxPct !== Infinity ? Math.floor((medianOf(p.hh) * maxPct) / 100 / 10000) : null;
+    if (idx < 0 || idx > 4) out.push({ label: '소득', status: 'unknown', detail: `${label} 대상`, tip: limitWon ? `${p.hh}인 가구는 월 소득 약 ${limitWon.toLocaleString()}만원 이하면 해당돼요` : '내 조건에 가구 소득을 넣으면 확인할 수 있어요' });
+    else if (!on.has(INCOME[idx])) out.push({ label: '소득', status: 'no', detail: `${label} 대상 · ${cur}`, tip: limitWon ? `${p.hh}인 가구 기준 월 소득이 약 ${limitWon.toLocaleString()}만원 이하면 받을 수 있어요. 실제 심사는 재산을 포함한 '소득인정액'으로 해요` : undefined });
+    else out.push({ label: '소득', status: 'ok', detail: `${label} 대상 · ${cur}` });
+  }
+
+  // 성별
+  const g = GENDER.filter((c) => on.has(c));
+  if (g.length === 1) out.push({ label: '성별', status: 'unknown', detail: `${CODE_LABEL[g[0]]}만 대상`, tip: '성별 조건은 신청처에서 확인하세요' });
+
+  // 상황
+  const myCodes = new Set(TAGS.filter((t) => t.code && p.tags.includes(t.label)).map((t) => t.code!));
+  const saidNone = p.tags.includes('해당 없음');
+  for (const [group, none, name] of [[LIFE, LIFE_NONE, '대상'], [HOUSE, HOUSE_NONE, '가구']] as [string[], string, string][]) {
+    const need = group.filter((c) => on.has(c));
+    if (!need.length || on.has(none)) continue;
+    const text = need.map((c) => CODE_LABEL[c]).join(' 또는 ');
+    const selectable = TAGS.filter((t) => t.code && need.includes(t.code)).map((t) => `'${t.label}'`);
+    const tip = selectable.length ? `해당되면 내 조건에서 ${selectable.join(', ')}을(를) 선택해 주세요` : '해당 여부는 신청처에서 확인하세요';
+    if (need.some((c) => myCodes.has(c))) out.push({ label: name, status: 'ok', detail: `${text} 대상` });
+    else out.push({ label: name, status: saidNone ? 'no' : 'unknown', detail: `${text} 대상`, tip });
+  }
+  return out;
+}
+
+/** 목록 카드용: 안 맞는 첫 번째 이유 */
+export function firstReason(b: Cond, p: Profile): string | null {
+  const x = explain(b, p).find((c) => c.status === 'no');
+  return x ? `${x.label}: ${x.detail}` : null;
 }
 
 /** 상세 화면용 조건 요약 */

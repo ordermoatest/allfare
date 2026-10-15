@@ -73,7 +73,11 @@ function safeDel(k: string) { try { localStorage.removeItem(k); } catch { /* */ 
 export function loadProfile(): Profile {
   const raw = safeGet(KEY);
   if (!raw) return { ...EMPTY_PROFILE };
-  try { return { ...EMPTY_PROFILE, ...JSON.parse(raw) }; } catch { return { ...EMPTY_PROFILE }; }
+  try {
+    const p: Profile = { ...EMPTY_PROFILE, ...JSON.parse(raw) };
+    if (p.sido === '인천광역시' && p.sgg === '서구') p.sgg = '서해구'; // 2026.7 이름 변경
+    return p;
+  } catch { return { ...EMPTY_PROFILE }; }
 }
 export function saveProfile(p: Profile) { safeSet(KEY, JSON.stringify(p)); }
 export function clearProfile() { safeDel(KEY); }

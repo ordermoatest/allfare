@@ -78,7 +78,7 @@ export default function App() {
       </main>
       {opened.culture && (
         <main className="scroll" ref={scrollRef('culture')} hidden={tab !== 'culture'}>
-          <CultureTab visible={tab === 'culture'} profile={profile} onPick={setStore} toast={toast} />
+          <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} />
         </main>
       )}
       {opened.my && (
