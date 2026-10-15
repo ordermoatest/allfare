@@ -207,8 +207,8 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
       {sheet && (
         <div className="sheet" onClick={(e) => { if (e.target === e.currentTarget) setSheet(false); }}>
           <div className="box" role="dialog" aria-modal="true" aria-label="기준 위치 바꾸기">
-            <div className="grab" />
-            <div className="row"><strong style={{ fontSize: 17 }}>기준 위치 바꾸기</strong><button className="ghost" onClick={() => setSheet(false)}>닫기</button></div>
+            <div className="sheethead"><div className="grab" />
+            <div className="row"><strong style={{ fontSize: 17 }}>기준 위치 바꾸기</strong><button className="ghost" onClick={() => setSheet(false)}>닫기</button></div></div>
             <form className="search" style={{ paddingRight: 5 }} onSubmit={searchLoc}>
               <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
               <input autoFocus value={locQ} onChange={(e) => setLocQ(e.target.value)} enterKeyHint="search" placeholder="역·동네·주소 (예: 광화문역)" aria-label="역, 동네, 주소 검색" />

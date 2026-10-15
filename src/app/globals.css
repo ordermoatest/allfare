@@ -511,3 +511,19 @@ input, textarea, select { font-size: 16px !important; }
 .sheet { z-index: 20; }
 .toast { z-index: 30; }
 .sortsel select { font-size: 14px !important; height: 36px; }
+
+/* 공유 (v9) */
+.apphead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.headshare { flex: none; border: 0; height: 38px; padding: 0 13px; border-radius: 999px; background: var(--card); color: var(--mint); font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.apphead.mini .headshare { height: 32px; padding: 0 11px; font-size: 12.5px; }
+.sharebtn { flex: none; height: 56px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--card); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; }
+.sprompt { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 20px; padding: 12px 12px 12px 14px; box-shadow: inset 0 0 0 2px var(--soft); }
+.sprompt > span { font-size: 24px; flex: none; }
+.sprompt p { margin: 0; flex: 1; min-width: 0; line-height: 1.4; }
+.sprompt b { display: block; font-size: 14px; }
+.sprompt small { font-size: 12px; color: var(--sub); }
+.sprompt .sbtn { height: 38px; padding: 0 14px; font-size: 13.5px; }
+.sx { flex: none; width: 30px; height: 30px; border: 0; border-radius: 999px; background: var(--chip); color: var(--sub); }
+/* 팝업 위 닫기 줄 고정 */
+.sheethead { position: sticky; top: -10px; z-index: 3; background: var(--bg); margin: -10px -2px 0; padding: 10px 2px 8px; display: flex; flex-direction: column; gap: 4px; }
+.sheethead .grab { margin-bottom: 2px; }

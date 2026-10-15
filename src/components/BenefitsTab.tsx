@@ -31,10 +31,11 @@ function orgShort(o: string | null): string {
 
 const condOf = (b: BItem): Cond => ({ lo: b.lo, hi: b.hi, codes: b.k, hint: b.h });
 
-export default function BenefitsTab({ profile, items, error, region, liked, likeCounts, onOpen, goMy, onRetry }: {
+export default function BenefitsTab({ profile, items, error, region, liked, likeCounts, onOpen, goMy, onRetry, sharePrompt, onSharePrompt, onClosePrompt }: {
   profile: Profile; items: BItem[] | null; error: string | null; region: string;
   liked: Record<string, true>; likeCounts: Record<string, number>;
   onOpen: (id: string) => void; goMy: () => void; onRetry: () => void;
+  sharePrompt?: boolean; onSharePrompt?: () => void; onClosePrompt?: () => void;
 }) {
   const [cat, setCat] = useState('전체');
   const [q, setQ] = useState('');
@@ -154,6 +155,15 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
           </button>
           <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : nothing ? <>지금 조건에 맞는 혜택이<br />없어요</> : <>나에게 꼭 맞는 혜택<br />{all.fit.toLocaleString()}개를 찾았어요</>}</b>
         </section>
+      )}
+
+      {sharePrompt && profile.set && (
+        <div className="sprompt" role="status">
+          <span aria-hidden>👨‍👩‍👧</span>
+          <p><b>가족도 받을 수 있는 혜택이 있을지 몰라요</b><small>부모님·형제에게 올페어를 알려주세요</small></p>
+          <button className="sbtn" onClick={onSharePrompt}>알려주기</button>
+          <button className="sx" aria-label="닫기" onClick={onClosePrompt}>✕</button>
+        </div>
       )}
 
       {error ? (

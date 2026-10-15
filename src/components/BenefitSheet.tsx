@@ -82,8 +82,8 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
   return (
     <div className="sheet" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="box" role="dialog" aria-modal="true" aria-label={d?.name || '혜택 상세'}>
-        <div className="grab" />
-        <div className="row"><span className="tag">{d?.category || '혜택'}</span><button className="ghost" onClick={onClose}>닫기</button></div>
+        <div className="sheethead"><div className="grab" />
+        <div className="row"><span className="tag">{d?.category || '혜택'}</span><button className="ghost" onClick={onClose}>닫기</button></div></div>
         {err && <div className="empty">{err}</div>}
         {!d && !err && <div className="skel" style={{ height: 240 }} />}
         {d && (
@@ -119,7 +119,7 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
             <p className="note">정보는 공공데이터 기준이며, 정확한 자격은 신청처에서 확인하세요.</p>
             <div className="btns">
               <button className={`likebtn ${liked ? 'on' : ''}`} aria-pressed={liked} aria-label="좋아요" onClick={like}><IcHeart size={22} /><span>{likes.toLocaleString()}</span></button>
-              <button className="iconbtn" aria-label="공유하기" onClick={share} disabled={sharing}>{sharing ? <span className="spin" aria-hidden /> : <IcShare />}</button>
+              <button className="sharebtn" onClick={share} disabled={sharing}>{sharing ? <span className="spin" aria-hidden /> : <IcShare size={20} />}공유하기</button>
               <a className="go" href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('click_apply', { id: d.id })}>신청하러 가기 <IcOut /></a>
             </div>
           </>

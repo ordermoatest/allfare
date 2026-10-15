@@ -1,9 +1,9 @@
 'use client';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { IcHeart, IcPhone, IcRoute, StoreIcon } from './icons';
+import { IcHeart, IcPhone, IcRoute, IcShare, StoreIcon } from './icons';
 import { Store, km } from '@/lib/types';
 import { deviceId } from '@/lib/profile';
-import { track } from '@/lib/client';
+import { shareLink, track } from '@/lib/client';
 import { ITEMS, itemsFor } from '@/lib/items';
 
 type Review = {
@@ -117,6 +117,14 @@ export default function StoreSheet({ store: s, onClose, toast }: { store: Store;
     setBusy((b) => ({ ...b, [-rv.id]: false }));
   };
 
+  const shareStore = async () => {
+    const url = `${location.origin}/?tab=culture&lat=${s.lat.toFixed(5)}&lng=${s.lng.toFixed(5)}&at=${encodeURIComponent(s.name)}`;
+    const extra = sum?.yes ? ` · 결제 확인 ${sum.yes}명` : '';
+    const r = await shareLink(`${s.name} - 문화누리카드 사용처`, `${s.name}에서 문화누리카드를 쓸 수 있어요${extra}`, url);
+    track('share_store', { id: s.id, via: r });
+    if (r === 'copied') toast('링크를 복사했어요. 원하는 곳에 붙여넣어 보내세요');
+    if (r === 'fail') toast('공유하지 못했어요');
+  };
   const route = `https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`;
   const info = s.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(s.name)}`;
   const others = useMemo(() => {
@@ -169,8 +177,9 @@ export default function StoreSheet({ store: s, onClose, toast }: { store: Store;
   return (
     <div className="sheet" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="box" role="dialog" aria-modal="true" aria-label={s.name}>
-        <div className="grab" />
-        <div className="row"><span className="tag"><StoreIcon cat={s.category || ''} />{s.category || '기타'}</span><button className="ghost" onClick={onClose}>닫기</button></div>
+        <div className="sheethead"><div className="grab" />
+        <div className="row"><span className="tag"><StoreIcon cat={s.category || ''} />{s.category || '기타'}</span>
+          <span className="mineacts"><button className="ghost" onClick={shareStore}><IcShare size={16} />공유하기</button><button className="ghost" onClick={onClose}>닫기</button></span></div></div>
         <h1 style={{ fontSize: 22 }}>{s.name}</h1>
         <span className="cap">문화누리카드 가맹점 · 여기서 {km(s.distance)}</span>
         <div className="acts">

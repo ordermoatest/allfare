@@ -7,6 +7,8 @@ import BenefitSheet from './BenefitSheet';
 import StoreSheet from './StoreSheet';
 import { IcGift, IcPin, IcSliders } from './icons';
 import Brand from './Brand';
+import { IcShare } from './icons';
+import { shareLink, track } from '@/lib/client';
 import { BItem, Store } from '@/lib/types';
 import { EMPTY_PROFILE, Profile, clearProfile, loadNum, loadProfile, loadSet, saveNum, saveProfile, saveSet } from '@/lib/profile';
 
@@ -27,6 +29,7 @@ export default function App() {
   // 탭마다 스크롤 위치 기억 (페이지 전체 스크롤)
   const scrollPos = useRef<Record<Tab, number>>({ home: 0, culture: 0, my: 0 });
   const [mini, setMini] = useState(false);
+  const [sharePrompt, setSharePrompt] = useState(false);
   const headRef = useRef<HTMLElement>(null);
 
   const [list, setList] = useState<{ key: string; items: BItem[] | null; error: string | null; region: string }>({ key: '', items: null, error: null, region: '' });
@@ -92,6 +95,16 @@ export default function App() {
   };
   const toTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // 사이트 공유
+  const shareSite = async (from: string) => {
+    const r = await shareLink('올페어 - 내가 받을 수 있는 복지 혜택 찾기', '내가 받을 수 있는 복지 혜택, 1분이면 찾아요', `${location.origin}/`);
+    track('share_site', { from, via: r });
+    if (r === 'copied') toast('링크를 복사했어요. 원하는 곳에 붙여넣어 보내세요');
+    if (r === 'fail') toast('공유하지 못했어요');
+    if (from === 'prompt' && r !== 'cancel') closePrompt();
+  };
+  const closePrompt = () => { setSharePrompt(false); try { localStorage.setItem('af-share-asked', '1'); } catch { /* */ } };
+
   const onLiked = (id: string, on: boolean, count: number) => {
     setLikeCounts((c) => ({ ...c, [id]: count }));
     setLiked((l) => { const n = { ...l }; if (on) n[id] = true; else delete n[id]; saveSet('af-liked', n); return n; });
@@ -102,11 +115,15 @@ export default function App() {
 
   return (
     <div className="app">
-      <header ref={headRef} className={`apphead ${mini ? 'mini' : ''}`}><Brand onClick={toTop} mini={mini} /></header>
+      <header ref={headRef} className={`apphead ${mini ? 'mini' : ''}`}>
+        <Brand onClick={toTop} mini={mini} />
+        <button className="headshare" onClick={() => shareSite('header')} aria-label="올페어 공유하기"><IcShare size={18} /><span>공유</span></button>
+      </header>
       <div className="tabwrap" style={fs ? ({ zoom: FS[fs] / 100 } as React.CSSProperties) : undefined}>
       <main className="scroll" hidden={tab !== 'home'}>
         <BenefitsTab profile={profile} items={list.items} error={list.error} region={list.region} liked={liked} likeCounts={likeCounts}
-          onOpen={setBenefit} goMy={() => go('my')} onRetry={() => loadList(regionKey)} />
+          onOpen={setBenefit} goMy={() => go('my')} onRetry={() => loadList(regionKey)}
+          sharePrompt={sharePrompt} onSharePrompt={() => shareSite('prompt')} onClosePrompt={closePrompt} />
       </main>
       {opened.culture && (
         <main className="scroll" hidden={tab !== 'culture'}>
@@ -116,7 +133,10 @@ export default function App() {
       {opened.my && (
         <main className="scroll" hidden={tab !== 'my'}>
           <MyTab profile={profile} fs={fs} setFs={setFs} onHome={() => go('home')}
-            onSave={(p) => { setProfile(p); saveProfile(p); toast('저장했어요. 내 조건에 맞는 혜택을 보여드려요'); go('home'); }}
+            onSave={(p) => {
+              setProfile(p); saveProfile(p); toast('저장했어요. 내 조건에 맞는 혜택을 보여드려요'); go('home');
+              try { if (!localStorage.getItem('af-share-asked')) setSharePrompt(true); } catch { /* */ }
+            }}
             onReset={() => { clearProfile(); setProfile({ ...EMPTY_PROFILE }); toast('저장된 내 정보를 지웠어요'); }} />
         </main>
       )}
