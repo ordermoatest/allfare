@@ -404,3 +404,29 @@ button:disabled { cursor: default; opacity: .7; }
 .money span { white-space: nowrap; flex: none; }
 .gcalc-row .money { width: 160px; flex: none; }
 .gcalc-row > span, .gcalc-row > label { min-width: 0; }
+
+/* ===== v5 지역별 사용처 ===== */
+.rchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.rchip { height: 34px; padding: 0 12px; border-radius: 999px; background: var(--card); color: var(--sub); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+.rchip i { font-style: normal; font-size: 11px; background: var(--chip); border-radius: 999px; padding: 1px 6px; }
+.rsec h2 { display: flex; align-items: baseline; gap: 6px; }
+.rlist { list-style: none; padding: 0 !important; margin: 4px 0; display: flex; flex-direction: column; gap: 6px; }
+.rlist li { background: var(--card); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 1px; font-size: 14px; line-height: 1.5; }
+.rlist li b { font-size: 15px; }
+.rlist li span { color: var(--sub); font-size: 13px; }
+.rlist li a { color: var(--mint); font-size: 13px; text-decoration: none; font-weight: 600; }
+
+/* ===== v5 히어로 조건 요약 · 링크 정렬 · 소개 문단 ===== */
+.hero .hsum { all: unset; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; background: color-mix(in srgb, var(--on-mint) 14%, transparent); border-radius: 16px; padding: 10px 12px; }
+.hsum-l { flex: none; font-size: 11.5px; font-weight: 700; background: var(--on-mint); color: var(--mint); border-radius: 999px; padding: 2px 8px; margin-top: 1px; }
+.hsum-t { flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hsum-e { flex: none; font-size: 12.5px; font-weight: 700; opacity: .9; margin-top: 1px; }
+.plinks { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
+.plinks .plink { margin: 0; padding: 0; min-height: 28px; display: inline-flex; align-items: center; line-height: 1; font-size: 13px; font-family: inherit; }
+.seointro { background: var(--card); border-radius: 22px; padding: 16px 18px; }
+.seointro h2 { margin: 0 0 6px; font-size: 15px; }
+.seointro p, .seointro li { font-size: 13px; color: var(--sub); line-height: 1.65; margin: 0; }
+.seointro ul { margin: 6px 0 0; padding-left: 18px; }
+.seointro a { color: var(--mint); font-weight: 600; }
+.prow .money { min-width: 0; }
+.prow .money input { width: 100%; }

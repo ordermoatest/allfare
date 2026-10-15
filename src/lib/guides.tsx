@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import MedianCalc from '@/components/MedianCalc';
 
-export type Guide = { slug: string; emoji: string; title: string; sub?: string; desc: string; updated: string; cta: { label: string; href: string }; body: ReactNode };
+export type Guide = { slug: string; emoji: string; title: string; seoTitle: string; sub?: string; desc: string; updated: string; cta: { label: string; href: string }; body: ReactNode };
 
 const Tip = ({ children }: { children: ReactNode }) => <div className="gtip">💡 {children}</div>;
 const Check = ({ children }: { children: ReactNode }) => <div className="gcheck">✅ {children}</div>;
@@ -11,6 +11,7 @@ const Check = ({ children }: { children: ReactNode }) => <div className="gcheck"
 export const GUIDES: Guide[] = [
   {
     slug: 'median-income',
+    seoTitle: '2026 기준중위소득표·계산기 (1~6인 가구 월 금액)',
     emoji: '🧮',
     title: '기준중위소득, 우리 집은 몇 %일까요?',
     sub: '2026년 기준표 + 계산기',
@@ -49,6 +50,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'recognized-income',
+    seoTitle: '소득인정액 뜻과 계산 방법 (월급과 다른 점)',
     emoji: '🏠',
     title: '소득인정액은 월급이랑 뭐가 다른가요?',
     desc: '월급만 보면 대상인데 심사에서 떨어지는 이유, 소득인정액(소득평가액 + 재산의 소득환산액)을 쉽게 풀어 설명해요.',
@@ -79,6 +81,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'household-head',
+    seoTitle: '세대주 확인 방법 (주민등록등본 세대주·세대원 구분)',
     emoji: '📄',
     title: '나는 세대주일까요, 세대원일까요?',
     sub: '등본으로 1분 만에 확인하기',
@@ -113,6 +116,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'culture-nuri-card',
+    seoTitle: '2026 문화누리카드 금액·신청기간·대상·사용처 총정리',
     emoji: '🎫',
     title: '문화누리카드, 누가 얼마나 받을 수 있나요?',
     sub: '신청부터 사용처 찾기까지',
@@ -157,6 +161,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'newlywed',
+    seoTitle: '신혼부부 기준 혼인 7년 이내? 예비 신혼부부 조건 정리',
     emoji: '💍',
     title: '신혼부부 혜택, 혼인 몇 년까지 받을 수 있나요?',
     desc: '신혼부부 기준(혼인 7년 이내 등)과 예비 신혼부부 기준, 혼인 기간을 세는 방법을 정리했어요.',
@@ -189,6 +194,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'youth-age',
+    seoTitle: '청년 나이 기준 2026 (청년기본법 19~34세, 지역별 39세)',
     emoji: '🧑',
     title: '청년 혜택은 몇 살까지 받을 수 있나요?',
     sub: '법과 지역마다 다른 청년 나이',

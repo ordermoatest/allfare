@@ -171,8 +171,10 @@ export default function MyTab({ profile, fs, setFs, onSave, onReset, onHome }: {
             ? <>가구 합계 세전 기준 · 중위소득 약 <b>{pct}%</b> → <b>{bracketOf(pct)}</b></>
             : d.inc && !d.mi ? <>소득 구간 <b>{d.inc}</b></>
             : <>{d.hh}인 가구 중위소득은 월 {Math.round(medianOf(d.hh) / 10000).toLocaleString()}만원이에요</>}
+          <span className="plinks">
           <a className="plink" href="/guide/median-income">중위소득이 뭔가요?</a>
-          <button className="plink" style={{ marginLeft: 0 }} aria-expanded={pickInc} onClick={() => setPickInc(!pickInc)}>{pickInc ? '접기' : '직접 고르기'}</button>
+          <button className="plink" aria-expanded={pickInc} onClick={() => setPickInc(!pickInc)}>{pickInc ? '접기' : '직접 고르기'}</button>
+          </span>
         </div>
         {pickInc && (
           <div className="grid3" style={{ paddingBottom: 6 }}>

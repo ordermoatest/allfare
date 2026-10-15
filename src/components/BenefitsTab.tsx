@@ -141,18 +141,20 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
         </section>
       ) : (
         <section className="hero">
-          <div className="pills">
-            {age !== null && <span className="pill">만 {age}세</span>}
-            <span className="pill">{regionLabel(profile)}</span>
-            {profile.inc && <span className="pill">중위 {profile.inc}</span>}
-            {kids.length > 0 && <span className="pill">자녀 {kids.length}명</span>}
-            {profile.head === 'Y' && <span className="pill">세대주</span>}
-            {profile.marry === 'M' && <span className="pill">기혼</span>}
-            {profile.marry === 'P' && <span className="pill">결혼 예정</span>}
-            {profile.tags.filter((t) => t !== '해당 없음').slice(0, 2).map((t) => <span key={t} className="pill">{t}</span>)}
-          </div>
+          <button className="hsum" onClick={goMy} aria-label="내 조건 바꾸기">
+            <span className="hsum-l">내 조건</span>
+            <span className="hsum-t">{[
+              age !== null ? `만 ${age}세` : null,
+              regionLabel(profile),
+              profile.inc ? `중위 ${profile.inc}` : null,
+              kids.length ? `자녀 ${kids.length}명` : null,
+              profile.head === 'Y' ? '세대주' : null,
+              profile.marry === 'M' ? '기혼' : profile.marry === 'P' ? '결혼 예정' : null,
+              ...profile.tags.filter((t) => t !== '해당 없음'),
+            ].filter(Boolean).join(' · ')}</span>
+            <span className="hsum-e" aria-hidden>수정 ›</span>
+          </button>
           <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : nothing ? <>지금 조건에 맞는 혜택이<br />없어요</> : <>나에게 꼭 맞는 혜택<br />{all.fit.toLocaleString()}개를 찾았어요</>}</b>
-          <button onClick={goMy}>조건 바꾸기</button>
         </section>
       )}
 
@@ -200,6 +202,15 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
           {list}
         </>
       )}
+      <section className="seointro" aria-label="올페어 소개">
+        <h2>올페어로 할 수 있는 것</h2>
+        <p>올페어는 정부·지자체 복지 혜택 1만여 개 중에서 내 나이, 사는 곳, 소득, 자녀, 혼인 여부에 맞는 혜택을 골라주는 무료 조회 서비스예요. 로그인 없이 쓸 수 있고, 입력한 조건은 내 기기에만 저장돼요.</p>
+        <ul>
+          <li><a href="/guide/median-income">2026 기준중위소득 계산기</a>로 우리 집 소득이 몇 %인지 확인해요.</li>
+          <li><a href="/culture">지역별 문화누리카드 사용처</a>를 시·군·구별로 찾아요.</li>
+          <li><a href="/guide">복지 가이드</a>에서 신혼부부·청년 기준, 세대주 확인법을 쉽게 알아봐요.</li>
+        </ul>
+      </section>
       <a className="gbanner" href="/guide"><span aria-hidden>📘</span><span><b>복지 가이드</b><small>기준중위소득 계산기 · 문화누리카드 · 신혼부부·청년 기준</small></span><span aria-hidden>›</span></a>
       <Footer notes={['꼭 맞음·확인 필요 표시는 공개된 조건만 비교한 참고 정보예요.', '정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />
     </>

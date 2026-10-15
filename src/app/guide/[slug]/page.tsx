@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
 import { GUIDES, guideBySlug } from '@/lib/guides';
+import { SITE } from '@/lib/site';
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
@@ -12,10 +13,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const g = guideBySlug(params.slug);
   if (!g) return { title: '올페어' };
   return {
-    title: `${g.title} | 올페어 복지 가이드`,
+    title: `${g.seoTitle} | 올페어`,
     description: g.desc,
     alternates: { canonical: `/guide/${g.slug}` },
-    openGraph: { title: g.title, description: g.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+    openGraph: { title: g.seoTitle, description: g.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', images: [{ url: '/og.png', width: 1200, height: 630 }] },
   };
 }
 
@@ -24,8 +25,20 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
   if (!g) notFound();
   const others = GUIDES.filter((x) => x.slug !== g.slug);
   const [y, m, d] = g.updated.split('-').map(Number);
+  const url = `${SITE}/guide/${g.slug}`;
+  const ld = [
+    { '@context': 'https://schema.org', '@type': 'Article', headline: g.seoTitle, description: g.desc, datePublished: g.updated, dateModified: g.updated,
+      mainEntityOfPage: url, inLanguage: 'ko-KR', image: `${SITE}/og.png`,
+      author: { '@type': 'Organization', name: 'AllFare 올페어', url: SITE }, publisher: { '@type': 'Organization', name: 'AllFare 올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
+    { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '올페어', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: '복지 가이드', item: `${SITE}/guide` },
+      { '@type': 'ListItem', position: 3, name: g.title, item: url },
+    ] },
+  ];
   return (
     <main className="doc guide">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <Brand href="/" />
       <nav className="gcrumb"><a href="/guide">📘 복지 가이드</a></nav>
       <article>

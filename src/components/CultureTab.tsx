@@ -24,6 +24,12 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
   visible: boolean; onPick: (s: Store) => void; toast: (m: string) => void; onHome: () => void;
 }) {
   const [place, setPlace] = useState<Place>(DEFAULT);
+  // 지역 페이지에서 '지도로 보기'로 들어오면 그 지역을 기준 위치로
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const lat = Number(q.get('lat')), lng = Number(q.get('lng'));
+    if (lat > 32 && lat < 39.5 && lng > 124 && lng < 132) setPlace({ lat, lng, label: (q.get('at') || '선택한 지역').slice(0, 20), mode: 'search' });
+  }, []);
   const [stores, setStores] = useState<Store[] | null>(null);
   const [ready, setReady] = useState(true);
   const [err, setErr] = useState('');
