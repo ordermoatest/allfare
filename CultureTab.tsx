@@ -8,6 +8,7 @@ import { Place, Store, km, paidLine } from '@/lib/types';
 import { track } from '@/lib/client';
 import { MNURI, ONLINE_SHOPS } from '@/lib/online';
 import { ITEMS } from '@/lib/items';
+import { useBackClose } from '@/lib/useBackClose';
 
 const ONLINE = '🌐 온라인';
 
@@ -49,6 +50,9 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
   const [cands, setCands] = useState<Cand[] | null>(null);
   const [locating, setLocating] = useState(false);
   const [finding, setFinding] = useState(false);
+  // 지도 숫자 원을 눌렀을 때 보여줄 가게 묶음
+  const [group, setGroup] = useState<Store[] | null>(null);
+  useBackClose(sheet, () => setSheet(false));
 
   // 기준 위치가 바뀌면 3km 안 가맹점을 한 번에 받아두고 반경·분야·검색어는 화면에서 거름
   useEffect(() => {
@@ -121,6 +125,8 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
     };
     return inR.filter((s) => curCat === '전체' || (s.category || '기타') === curCat).sort(cmp[sort]);
   }, [inR, curCat, sort]);
+  // 목록 조건이 바뀌면 묶음 목록 닫기
+  useEffect(() => { setGroup(null); }, [shown, online]);
   const toggleFlt = (k: string) => { setFlt((f) => (f.includes(k) ? f.filter((x) => x !== k) : [...f, k])); track('filter_store', { f: k }); };
   const modeLabel = place.mode === 'gps' ? '현재 위치' : place.mode === 'search' ? '검색한 위치' : '기본 위치';
 
@@ -128,7 +134,8 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
     <>
       <h2 className="tabtitle">문화누리 사용처</h2>
 
-      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick}>
+      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick}
+        onCluster={(l) => { setGroup(l); track('map_cluster', { n: l.length }); }}>
         <button className="maploc" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
           <span style={{ color: 'var(--mint)' }}><IcPin /></span>
           <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}><small>{modeLabel}</small><b>{place.label} 근처</b></span>
@@ -138,6 +145,18 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
           {RADII.map((r) => <button key={r} className={radius === r ? 'on' : ''} aria-pressed={radius === r} onClick={() => setRadius(r)}>{km(r)}</button>)}
         </div>
       </KakaoMap>
+      {group && (
+        <section className="clist" aria-label={`이 근처 가맹점 ${group.length}곳`}>
+          <div className="clhead"><b>📍 이 근처 {group.length}곳</b><button className="ghost" onClick={() => setGroup(null)}>✕ 닫기</button></div>
+          {group.map((s) => (
+            <button key={s.id} className="clrow" onClick={() => onPick(s)}>
+              <span className="tag"><StoreIcon cat={s.category || ''} />{s.category || '기타'}</span>
+              <span className="clname"><b>{s.name}</b><small>{s.address}</small></span>
+              <span className="d">{km(s.distance)} ›</span>
+            </button>
+          ))}
+        </section>
+      )}
 
       <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
         <span style={{ color: 'var(--mute)' }}><IcSearch /></span>

@@ -6,6 +6,7 @@ export const IcSearch = ({ size = 20 }: P) => <svg {...base(size)}><circle cx="1
 export const IcGift = ({ size = 20 }: P) => <svg {...base(size)}><rect x="3" y="8" width="18" height="13" rx="3" /><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z" /></svg>;
 export const IcPin = ({ size = 20 }: P) => <svg {...base(size)}><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>;
 export const IcSliders = ({ size = 20 }: P) => <svg {...base(size)}><path d="M4 6h16M4 12h10M4 18h6" /><circle cx="18" cy="16" r="3" /></svg>;
+export const IcBook = ({ size = 20 }: P) => <svg {...base(size)}><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z" /></svg>;
 export const IcChevron = ({ size = 18 }: P) => <svg {...base(size)} strokeWidth={2.4}><path d="M9 6l6 6-6 6" /></svg>;
 export const IcGps = ({ size = 20 }: P) => <svg {...base(size)}><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="7.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22" /></svg>;
 export const IcHeart = ({ size = 20 }: P) => <svg {...base(size)} strokeWidth={1.9}><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>;
@@ -14,6 +15,7 @@ export const IcShare = ({ size = 22 }: P) => <svg {...base(size)} strokeWidth={1
 export const IcPhone = ({ size = 18 }: P) => <svg {...base(size)}><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>;
 export const IcRoute = ({ size = 18 }: P) => <svg {...base(size)}><path d="M3 11l18-8-8 18-2-8z" /></svg>;
 export const IcOut = ({ size = 18 }: P) => <svg {...base(size)}><path d="M7 17L17 7M9 7h8v8" /></svg>;
+export const IcBack = ({ size = 24 }: P) => <svg {...base(size)} strokeWidth={2.3}><path d="M9 14l-4-4 4-4" /><path d="M5 10h9a5 5 0 0 1 0 10h-2" /></svg>;
 
 // 가맹점 분류 아이콘 (원본 분류명에 들어간 단어로 고름)
 export function StoreIcon({ cat, size = 13 }: { cat: string; size?: number }) {
