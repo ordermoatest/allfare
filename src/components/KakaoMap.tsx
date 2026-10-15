@@ -1,20 +1,31 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { loadKakaoMaps } from '@/lib/client';
 import { Store } from '@/lib/types';
 
 const LEVEL: Record<number, number> = { 500: 4, 1000: 5, 3000: 7 };
+const GRID = 56; // 이 픽셀 안에 모인 핀은 숫자 원으로 묶음
 
-export default function KakaoMap({ lat, lng, radius, stores, visible, onPick }: {
-  lat: number; lng: number; radius: number; stores: Store[]; visible: boolean; onPick: (s: Store) => void;
+/**
+ * 카카오 지도
+ * - 기본은 '고정': 지도 위를 쓸어도 페이지가 스크롤됨. 핀·숫자 원 누르기는 됨
+ * - '지도 움직이기'를 켜면 끌기·확대 가능
+ */
+export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, children }: {
+  lat: number; lng: number; radius: number; stores: Store[]; visible: boolean; onPick: (s: Store) => void; children?: ReactNode;
 }) {
   const el = useRef<HTMLDivElement>(null);
-  const st = useRef<{ kakao?: any; map?: any; circle?: any; me?: any; markers: any[] }>({ markers: [] });
+  const st = useRef<{ kakao?: any; map?: any; circle?: any; me?: any; overlays: any[] }>({ overlays: [] });
   const [msg, setMsg] = useState('지도를 불러오는 중이에요');
   const [ready, setReady] = useState(false);
+  const [live, setLive] = useState(false);
+  const [hint, setHint] = useState(false);
+  const hintT = useRef<ReturnType<typeof setTimeout>>();
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
+  const storesRef = useRef(stores);
+  storesRef.current = stores;
 
   // 지도 만들기
   useEffect(() => {
@@ -23,15 +34,17 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick }: 
     loadKakaoMaps().then((kakao) => {
       if (!alive || !el.current) return;
       const center = new kakao.maps.LatLng(lat, lng);
-      const map = new kakao.maps.Map(el.current, { center, level: LEVEL[radius] || 5 });
+      const map = new kakao.maps.Map(el.current, { center, level: LEVEL[radius] || 5, draggable: false, scrollwheel: false, disableDoubleClickZoom: true });
+      map.setZoomable(false);
       const dot = document.createElement('div');
       dot.style.cssText = 'width:18px;height:18px;border-radius:50%;background:var(--me);border:3px solid #fff;box-shadow:0 0 0 2px rgba(45,108,223,.25)';
-      st.current = { kakao, map, markers: [],
+      st.current = { kakao, map, overlays: [],
         circle: new kakao.maps.Circle({ map, center, radius, strokeWeight: 2, strokeColor: '#0F8A68', strokeOpacity: 0.5, fillColor: '#0F8A68', fillOpacity: 0.08 }),
         me: new kakao.maps.CustomOverlay({ map, position: center, content: dot, yAnchor: 0.5, xAnchor: 0.5, zIndex: 3 }),
       };
+      kakao.maps.event.addListener(map, 'idle', () => drawPins());
       setMsg(''); setReady(true);
-    }).catch(() => setMsg('지도를 불러오지 못했어요. 카카오 앱 키와 등록된 도메인을 확인해 주세요.'));
+    }).catch(() => setMsg('지도를 불러오지 못했어요. 잠시 후 다시 열어주세요.'));
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
@@ -50,22 +63,73 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick }: 
     me.setPosition(c);
   }, [lat, lng, radius, ready]);
 
-  // 가맹점 표시
+  // 움직이기 켜고 끄기
   useEffect(() => {
+    const { map } = st.current;
+    if (!map) return;
+    map.setDraggable(live); map.setZoomable(live);
+  }, [live, ready]);
+
+  // 핀 그리기: 화면 위 가까운 핀끼리 숫자 원으로 묶음
+  function drawPins() {
     const { kakao, map } = st.current;
     if (!map) return;
-    st.current.markers.forEach((m) => m.setMap(null));
-    st.current.markers = stores.slice(0, 200).map((s) => {
-      const m = new kakao.maps.Marker({ map, position: new kakao.maps.LatLng(s.lat, s.lng), title: s.name, clickable: true });
-      kakao.maps.event.addListener(m, 'click', () => pickRef.current(s));
-      return m;
+    st.current.overlays.forEach((o) => o.setMap(null));
+    const proj = map.getProjection();
+    const groups = new Map<string, { list: Store[]; x: number; y: number }>();
+    for (const s of storesRef.current.slice(0, 400)) {
+      const pt = proj.containerPointFromCoords(new kakao.maps.LatLng(s.lat, s.lng));
+      const key = `${Math.floor(pt.x / GRID)}:${Math.floor(pt.y / GRID)}`;
+      const g = groups.get(key);
+      if (g) { g.list.push(s); g.x += pt.x; g.y += pt.y; } else groups.set(key, { list: [s], x: pt.x, y: pt.y });
+    }
+    const out: any[] = [];
+    groups.forEach((g) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      if (g.list.length === 1) {
+        const s = g.list[0];
+        btn.className = 'mk pin';
+        btn.setAttribute('aria-label', s.name);
+        btn.onclick = () => pickRef.current(s);
+        out.push(new kakao.maps.CustomOverlay({ map, position: new kakao.maps.LatLng(s.lat, s.lng), content: btn, yAnchor: 1, zIndex: 2 }));
+      } else {
+        const n = g.list.length;
+        const pos = proj.coordsFromContainerPoint(new kakao.maps.Point(g.x / n, g.y / n));
+        btn.className = `mk cl ${n >= 50 ? 'xl' : n >= 10 ? 'l' : ''}`;
+        btn.textContent = String(n);
+        btn.setAttribute('aria-label', `가맹점 ${n}곳, 눌러서 확대`);
+        btn.onclick = () => map.setLevel(Math.max(1, map.getLevel() - 2), { anchor: pos, animate: true });
+        out.push(new kakao.maps.CustomOverlay({ map, position: pos, content: btn, yAnchor: 0.5, xAnchor: 0.5, zIndex: 2 }));
+      }
     });
-  }, [stores, ready]);
+    st.current.overlays = out;
+  }
+  useEffect(() => { drawPins(); }, [stores, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 고정 상태: 위에 투명 판을 덮어 세로 스크롤은 페이지로, 톡 누르기는 아래 핀으로 전달
+  const showHint = () => { setHint(true); clearTimeout(hintT.current); hintT.current = setTimeout(() => setHint(false), 1400); };
+  const passTap = (e: React.MouseEvent<HTMLDivElement>) => {
+    const pad = e.currentTarget;
+    pad.style.pointerEvents = 'none';
+    const under = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    pad.style.pointerEvents = '';
+    const mk = under?.closest?.('.mk') as HTMLElement | null;
+    if (mk) mk.click(); else showHint();
+  };
 
   return (
-    <div className="map" role="region" aria-label="내 주변 가맹점 지도">
+    <div className={`map ${live ? 'live' : ''}`} role="region" aria-label="내 주변 가맹점 지도">
       <div ref={el} style={{ position: 'absolute', inset: 0 }} />
+      {!live && ready && <div className="lockpad" onClick={passTap} onTouchStart={(e) => { if (e.touches.length > 1) showHint(); }} />}
       {msg && <div className="msg">{msg}</div>}
+      {hint && !live && <div className="maphint"><span>지도를 옮기려면 &lsquo;지도 움직이기&rsquo;를 눌러주세요</span></div>}
+      {children}
+      {ready && (
+        <button className={`movebtn ${live ? 'on' : ''}`} onClick={() => setLive(!live)} aria-pressed={live}>
+          {live ? '✓ 완료' : '🖐 지도 움직이기'}
+        </button>
+      )}
     </div>
   );
 }

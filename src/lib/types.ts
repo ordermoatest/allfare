@@ -10,7 +10,7 @@ export type Store = {
   id: string; name: string; category: string | null; address: string | null;
   lat: number; lng: number; phone: string | null; place_url: string | null;
   distance: number; review_count: number;
-  paid_yes?: number; paid_no?: number; rating_avg?: number | null;
+  paid_yes?: number; paid_no?: number; rating_avg?: number | null; no_items?: string[];
 };
 
 export type Place = { lat: number; lng: number; label: string; mode: 'gps' | 'search' | 'home' };

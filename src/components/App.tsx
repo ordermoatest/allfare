@@ -6,6 +6,7 @@ import MyTab, { FS } from './MyTab';
 import BenefitSheet from './BenefitSheet';
 import StoreSheet from './StoreSheet';
 import { IcGift, IcPin, IcSliders } from './icons';
+import Brand from './Brand';
 import { BItem, Store } from '@/lib/types';
 import { EMPTY_PROFILE, Profile, clearProfile, loadNum, loadProfile, loadSet, saveNum, saveProfile, saveSet } from '@/lib/profile';
 
@@ -23,7 +24,10 @@ export default function App() {
   const [store, setStore] = useState<Store | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
-  const scrolls = useRef<Record<Tab, HTMLElement | null>>({ home: null, culture: null, my: null });
+  // 탭마다 스크롤 위치 기억 (페이지 전체 스크롤)
+  const scrollPos = useRef<Record<Tab, number>>({ home: 0, culture: 0, my: 0 });
+  const [mini, setMini] = useState(false);
+  const headRef = useRef<HTMLElement>(null);
 
   const [list, setList] = useState<{ key: string; items: BItem[] | null; error: string | null; region: string }>({ key: '', items: null, error: null, region: '' });
 
@@ -39,7 +43,28 @@ export default function App() {
     setReady(true);
   }, []);
 
-  useEffect(() => { document.documentElement.style.setProperty('--zoom', String(FS[fs] / 100)); }, [fs]);
+  // 스크롤하면 위 로고 줄이기
+  useEffect(() => {
+    const on = () => setMini(window.scrollY > 24);
+    on(); window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  // 고정 머리글 높이 → 분야 칩 줄이 그 아래에 붙도록
+  useEffect(() => {
+    const el = headRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => document.documentElement.style.setProperty('--hdr', `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // 두 손가락 확대 막기 (아이폰). 지도 움직이기 중일 때는 지도에서 허용
+  useEffect(() => {
+    const stop = (e: Event) => { const t = e.target as Element | null; if (!t?.closest?.('.map.live')) e.preventDefault(); };
+    document.addEventListener('gesturestart', stop);
+    return () => document.removeEventListener('gesturestart', stop);
+  }, []);
+  // 팝업이 열려 있으면 뒤 화면 스크롤 막기
+  useEffect(() => { document.body.style.overflow = benefit || store ? 'hidden' : ''; }, [benefit, store]);
 
   const toast = useCallback((m: string) => {
     setToastMsg(m);
@@ -59,10 +84,13 @@ export default function App() {
   useEffect(() => { if (ready && list.key !== regionKey) loadList(regionKey); }, [ready, regionKey, list.key, loadList]);
 
   const go = (t: Tab) => {
+    if (t === tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    scrollPos.current[tab] = window.scrollY;
     setTab(t);
     setOpened((o) => ({ ...o, [t]: true }));
-    requestAnimationFrame(() => scrolls.current[t]?.scrollTo({ top: 0 }));
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, scrollPos.current[t] || 0)));
   };
+  const toTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const onLiked = (id: string, on: boolean, count: number) => {
     setLikeCounts((c) => ({ ...c, [id]: count }));
@@ -71,31 +99,34 @@ export default function App() {
 
   const setFs = (n: number) => { setFsState(n); saveNum('af-fs', n); };
 
-  const scrollRef = (t: Tab) => (el: HTMLElement | null) => { scrolls.current[t] = el; };
 
   return (
     <div className="app">
-      <main className="scroll" ref={scrollRef('home')} hidden={tab !== 'home'}>
+      <header ref={headRef} className={`apphead ${mini ? 'mini' : ''}`}><Brand onClick={toTop} mini={mini} /></header>
+      <div className="tabwrap" style={fs ? ({ zoom: FS[fs] / 100 } as React.CSSProperties) : undefined}>
+      <main className="scroll" hidden={tab !== 'home'}>
         <BenefitsTab profile={profile} items={list.items} error={list.error} region={list.region} liked={liked} likeCounts={likeCounts}
           onOpen={setBenefit} goMy={() => go('my')} onRetry={() => loadList(regionKey)} />
       </main>
       {opened.culture && (
-        <main className="scroll" ref={scrollRef('culture')} hidden={tab !== 'culture'}>
+        <main className="scroll" hidden={tab !== 'culture'}>
           <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} onHome={() => go('home')} />
         </main>
       )}
       {opened.my && (
-        <main className="scroll" ref={scrollRef('my')} hidden={tab !== 'my'}>
+        <main className="scroll" hidden={tab !== 'my'}>
           <MyTab profile={profile} fs={fs} setFs={setFs} onHome={() => go('home')}
             onSave={(p) => { setProfile(p); saveProfile(p); toast('저장했어요. 내 조건에 맞는 혜택을 보여드려요'); go('home'); }}
             onReset={() => { clearProfile(); setProfile({ ...EMPTY_PROFILE }); toast('저장된 내 정보를 지웠어요'); }} />
         </main>
       )}
 
+      </div>
+
       <nav className="tabs" aria-label="메인 메뉴">
-        <button className={tab === 'home' ? 'on' : ''} aria-current={tab === 'home' ? 'page' : undefined} onClick={() => go('home')}><span className="ic"><IcGift /></span>혜택</button>
-        <button className={tab === 'culture' ? 'on' : ''} aria-current={tab === 'culture' ? 'page' : undefined} onClick={() => go('culture')}><span className="ic"><IcPin /></span>문화누리</button>
-        <button className={tab === 'my' ? 'on' : ''} aria-current={tab === 'my' ? 'page' : undefined} onClick={() => go('my')}><span className="ic"><IcSliders /></span>내 조건</button>
+        <button className={tab === 'home' ? 'on' : ''} aria-current={tab === 'home' ? 'page' : undefined} onClick={() => go('home')}><span className="ic"><IcGift size={24} /></span>내 혜택</button>
+        <button className={tab === 'culture' ? 'on' : ''} aria-current={tab === 'culture' ? 'page' : undefined} onClick={() => go('culture')}><span className="ic"><IcPin size={24} /></span>문화누리 지도</button>
+        <button className={tab === 'my' ? 'on' : ''} aria-current={tab === 'my' ? 'page' : undefined} onClick={() => go('my')}><span className="ic"><IcSliders size={24} /></span>내 조건</button>
       </nav>
 
       {benefit && <BenefitSheet id={benefit} profile={profile} liked={!!liked[benefit]} onLiked={onLiked} onClose={() => setBenefit(null)} toast={toast} />}

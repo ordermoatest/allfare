@@ -3,10 +3,13 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
 import KakaoMap from './KakaoMap';
-import Brand from './Brand';
 import { IcGps, IcPin, IcSearch, StoreIcon } from './icons';
 import { Place, Store, km, paidLine } from '@/lib/types';
 import { track } from '@/lib/client';
+import { MNURI, ONLINE_SHOPS } from '@/lib/online';
+import { ITEMS } from '@/lib/items';
+
+const ONLINE = '🌐 온라인';
 
 const RADII = [500, 1000, 3000];
 const SORTS = { d: '가까운 순', rv: '후기 많은 순', st: '별점 높은 순', pay: '결제 확인 많은 순', nm: '이름순' } as const;
@@ -39,6 +42,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
   const [kw, setKw] = useState('');
   const [sort, setSort] = useState<SortKey>('d');
   const [flt, setFlt] = useState<string[]>([]);
+  const [online, setOnline] = useState(false);
   // 기준 위치 바꾸기 창
   const [sheet, setSheet] = useState(false);
   const [locQ, setLocQ] = useState('');
@@ -122,32 +126,27 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
 
   return (
     <>
-      <div className="head"><Brand onClick={onHome} /></div>
       <h2 className="tabtitle">문화누리 사용처</h2>
 
-      <section className="cbox" aria-label="어디서 찾을까요">
-        <div className="cbh"><i>📍</i>어디서 찾을까요?</div>
-        <button className="locbar" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
+      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick}>
+        <button className="maploc" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
           <span style={{ color: 'var(--mint)' }}><IcPin /></span>
           <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}><small>{modeLabel}</small><b>{place.label} 근처</b></span>
           <span className="locbar-btn">바꾸기 ▾</span>
         </button>
-        <div className="seg" role="group" aria-label="검색 반경">
-          {RADII.map((r) => <button key={r} className={radius === r ? 'on' : ''} aria-pressed={radius === r} onClick={() => setRadius(r)}>반경 {km(r)}</button>)}
+        <div className="maprad" role="group" aria-label="검색 반경">
+          {RADII.map((r) => <button key={r} className={radius === r ? 'on' : ''} aria-pressed={radius === r} onClick={() => setRadius(r)}>{km(r)}</button>)}
         </div>
-      </section>
+      </KakaoMap>
 
-      <section className="cbox" aria-label="가게 이름으로 찾기">
-        <div className="cbh"><i>🔍</i>가게 이름으로 찾기<small>선택</small></div>
-        <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
-          <input value={kwInput} onChange={(e) => { setKwInput(e.target.value); if (!e.target.value) setKw(''); }} enterKeyHint="search" placeholder="예: 교보문고, CGV" aria-label="가게 이름 검색" />
-          {kwInput && <button type="button" className="gps" aria-label="검색어 지우기" onClick={clearKw}>✕</button>}
-          <button className="sbtn">검색</button>
-        </form>
-        {kw && <div className="kwinfo">&lsquo;{kw}&rsquo; 이름이 들어간 가게 {nameHits}곳 · 아래 목록과 지도에 표시돼요 <button className="linkbtn" style={{ minHeight: 28 }} onClick={clearKw}>검색 해제</button></div>}
-      </section>
-
-      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={shown} visible={visible} onPick={onPick} />
+      <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
+        <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
+        <input value={kwInput} onChange={(e) => { setKwInput(e.target.value); if (!e.target.value) setKw(''); }} enterKeyHint="search" placeholder="가게 이름 검색 (예: 교보문고)" aria-label="가게 이름 검색" />
+        {kwInput && <button type="button" className="gps" aria-label="검색어 지우기" onClick={clearKw}>✕</button>}
+        <button className="sbtn">검색</button>
+      </form>
+      {kw && <div className="kwinfo">&lsquo;{kw}&rsquo; 이름이 들어간 가게 {nameHits}곳 · 아래 목록과 지도에 표시돼요 <button className="linkbtn" style={{ minHeight: 28 }} onClick={clearKw}>검색 해제</button></div>}
+      <a className="regionlink" href="/culture">📋 지역별 사용처 목록 보기 <span aria-hidden>›</span></a>
 
       {err ? <div className="empty">{err}</div> : !stores ? (
         <div className="list" aria-busy="true"><div className="skel" /><div className="skel" /></div>
@@ -155,9 +154,23 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
         <div className="notice"><b>가맹점 위치 정보를 준비하고 있어요</b><span>전국 가맹점의 위치를 지도에 표시할 수 있게 정리하는 중이에요. 잠시 후 다시 열어주세요.</span></div>
       ) : (
         <>
-          <CatBar title={<>🗂️ 분야별 사용처 <span className="cap light">{shown.length}곳</span></>}
-            right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); track('sort_store', { s: e.target.value }); }}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
-            label="사용처 분야" items={cats} current={curCat} onPick={setCat} />
+          <CatBar title={<>🗂️ 분야별 사용처 <span className="cap light">{online ? `온라인 ${ONLINE_SHOPS.length}곳` : `${shown.length}곳`}</span></>}
+            right={online ? undefined : <label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); track('sort_store', { s: e.target.value }); }}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
+            label="사용처 분야" items={[cats[0], { key: ONLINE, count: ONLINE_SHOPS.length }, ...cats.slice(1)]} current={online ? ONLINE : curCat}
+            onPick={(k) => { if (k === ONLINE) { setOnline(true); track('online_shops'); } else { setOnline(false); setCat(k); } }} />
+          {online ? (
+            <div className="list">
+              <div className="notice" style={{ gap: 4 }}><b>🌐 온라인에서도 쓸 수 있어요</b><span>인터넷 서점·영화 예매·기차표·숙박 예약 등에서 결제할 수 있어요. 처음 결제할 때 카드 등록(농협카드 일반결제)이 필요할 수 있어요.</span></div>
+              {ONLINE_SHOPS.map((o) => (
+                <a key={o.name} className="item" href={o.url} target="_blank" rel="noopener noreferrer" onClick={() => track('online_shop', { name: o.name })} style={{ textDecoration: 'none' }}>
+                  <div className="row"><span className="tag">{o.cat}</span><span className="d" style={{ fontSize: 13 }}>바로가기 ›</span></div>
+                  <strong>{o.name}</strong>
+                  {o.tip && <span className="cap">{o.tip}</span>}
+                </a>
+              ))}
+              <a className="linkbtn" href={MNURI} target="_blank" rel="noopener noreferrer" style={{ textAlign: 'center' }}>전체 온라인 가맹점은 문화누리카드 누리집에서 확인 ›</a>
+            </div>
+          ) : (<>
           <div className="fltrow" role="group" aria-label="필터">
             {FILTERS.map((f) => <button key={f.k} className={`fc ${flt.includes(f.k) ? 'on' : ''}`} aria-pressed={flt.includes(f.k)} onClick={() => toggleFlt(f.k)}>{f.label}</button>)}
             {flt.length > 0 && <button className="linkbtn" style={{ minHeight: 32, fontSize: 13 }} onClick={() => setFlt([])}>필터 초기화</button>}
@@ -180,11 +193,12 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
                 <strong>{s.name}</strong>
                 <span className="cap">{s.address}</span>
                 {(s.paid_yes || s.paid_no || s.rating_avg) ? (() => { const pl = paidLine(s.paid_yes, s.paid_no, s.rating_avg); return (
-                  <span className="paidsum">{pl.text && <span className="paidok">✓ {pl.text}</span>}{pl.warn && <span className="paidno">⚠ {pl.warn}</span>}</span>
+                  <span className="paidsum">{pl.text && <span className="paidok">✓ {pl.text}</span>}{pl.warn && <span className="paidno">⚠ {s.no_items?.length ? `${s.no_items.map((k) => (ITEMS[k] || k).replace(/^\S+\s/, '')).join('·')} 결제 안 됨` : pl.warn}</span>}</span>
                 ); })() : null}
               </button>
             ))}
           </div>
+          </>)}
         </>
       )}
       <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden>🎫</span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>

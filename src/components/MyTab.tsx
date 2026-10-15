@@ -1,7 +1,6 @@
 'use client';
 import { ReactNode, useEffect, useState } from 'react';
 import Footer from './Footer';
-import Brand from './Brand';
 import { IcSearch } from './icons';
 import { INC, Profile, TAGS, bracketOf, fmtYmd, incomePercent, kidAge, kidAges, manAge, medianOf, parseYmd, regionLabel, yearsSince } from '@/lib/profile';
 import { SGG, SIDO_LIST } from '@/lib/regions';
@@ -109,13 +108,15 @@ export default function MyTab({ profile, fs, setFs, onSave, onReset, onHome }: {
 
   return (
     <>
-      <div className="head"><Brand onClick={onHome} /></div>
       <div className="head">
         <div><h2 className="tabtitle">내 조건</h2><div className="cap">로그인 없이 이 기기에만 저장돼요</div></div>
-        <div className="zoomctl" role="group" aria-label="글자 크기">
-          <button aria-label="글자 작게" onClick={() => setFs(Math.max(0, fs - 1))}>−</button>
-          <span className="zi"><IcSearch /><small>{FS[fs]}%</small></span>
-          <button aria-label="글자 크게" onClick={() => setFs(Math.min(FS.length - 1, fs + 1))}>+</button>
+        <div className="zoomwrap">
+          <span className="zlabel">글자 크게 보기</span>
+          <div className="zoomctl" role="group" aria-label="글자 크게 보기">
+            <button aria-label="글자 작게" onClick={() => setFs(Math.max(0, fs - 1))}>−</button>
+            <span className="zi"><IcSearch /><small>{FS[fs]}%</small></span>
+            <button aria-label="글자 크게" onClick={() => setFs(Math.min(FS.length - 1, fs + 1))}>+</button>
+          </div>
         </div>
       </div>
 

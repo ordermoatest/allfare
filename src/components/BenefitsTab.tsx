@@ -2,7 +2,6 @@
 import { useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
-import Brand from './Brand';
 import { IcHeartFill, IcSearch } from './icons';
 import { BItem } from '@/lib/types';
 import { Profile, kidAges, manAge, regionLabel } from '@/lib/profile';
@@ -127,7 +126,6 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
 
   return (
     <>
-      <div className="head"><Brand onClick={() => document.querySelector('main.scroll:not([hidden])')?.scrollTo({ top: 0, behavior: 'smooth' })} /></div>
       <label className="search"><span style={{ color: 'var(--mute)' }}><IcSearch /></span>
         <input value={q} onChange={(e) => setQ(e.target.value)} onBlur={() => query && track('search_benefit', { q: query })} placeholder="월세, 육아, 교통비로 찾아보세요" aria-label="혜택 검색" enterKeyHint="search" />
       </label>

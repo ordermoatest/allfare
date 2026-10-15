@@ -12,12 +12,12 @@ async function own(id: number, device: string) {
 // 내 후기 수정 (쓴 기기에서만)
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const id = Number(params.id);
-  const raw = (await req.json().catch(() => ({}))) as { body?: string; device?: string; paid?: boolean; rating?: number | null };
+  const raw = (await req.json().catch(() => ({}))) as { body?: string; device?: string; paid?: boolean; rating?: number | null; items?: unknown };
   if (!Number.isInteger(id) || id <= 0 || !validDevice(raw.device)) return NextResponse.json({ error: '잘못된 요청이에요' }, { status: 400 });
   if (!(await own(id, raw.device))) return NextResponse.json({ error: '이 기기에서 쓴 후기만 고칠 수 있어요' }, { status: 403 });
   const c = cleanReview(raw);
   if ('error' in c) return NextResponse.json({ error: c.error }, { status: 400 });
-  const { error } = await db().from('store_reviews').update({ body: c.body, paid: c.paid, rating: c.rating, edited: true, updated_at: new Date().toISOString() }).eq('id', id);
+  const { error } = await db().from('store_reviews').update({ body: c.body, paid: c.paid, rating: c.rating, items: c.items, edited: true, updated_at: new Date().toISOString() }).eq('id', id);
   if (error) return NextResponse.json({ error: '후기를 고치지 못했어요' }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
