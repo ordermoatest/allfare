@@ -4,37 +4,49 @@ import { GUIDES } from '@/lib/guides';
 import { upcoming } from '@/lib/events';
 import { track } from '@/lib/client';
 import { Logo } from './Brand';
-import { IcCalc, IcChevron, IcMap, IcShare, IcSliders } from './icons';
+import PopularNews from './PopularNews';
+import { IcCalc, IcChevron, IcShare, IcSliders } from './icons';
 
 type Tab = 'home' | 'culture' | 'explore' | 'my';
-const PICK = ['youth-rent', 'parent-benefit', 'basic-pension', 'work-incentive'];
+export type PcActive = 'home' | 'culture' | 'region' | 'guide' | 'news' | 'my' | '';
+const PICK = ['youth-rent', 'parent-benefit', 'basic-pension'];
 
-/** PC(넓은 화면) 상단 메뉴바 — 폰에서는 숨김 */
-export function PcTop({ tab, go, onShare, hasProfile }: { tab: Tab; go: (t: Tab) => void; onShare: () => void; hasProfile: boolean }) {
-  const item = (t: Tab, label: string) => (
-    <button className={tab === t ? 'on' : ''} aria-current={tab === t ? 'page' : undefined} onClick={() => { go(t); track('pc_menu', { to: t }); }}>{label}</button>
-  );
+/**
+ * PC(넓은 화면) 상단 메뉴바 — 폰에서는 숨김
+ * 메인(/)에서는 go로 탭만 바꾸고, 다른 페이지에서는 주소로 이동
+ */
+export function PcTop({ active, go, onShare, hasProfile }: { active: PcActive; go?: (t: Tab) => void; onShare: () => void; hasProfile: boolean }) {
+  const [open, setOpen] = useState(false);
+  const to = (t: Tab, href: string) => () => { track('pc_menu', { to: t }); if (go) go(t); else location.href = href; };
+  const culture = active === 'culture' || active === 'region';
   return (
     <header className="pctop">
       <div className="pctopin">
-        <button className="pclogo" onClick={() => go('home')} aria-label="올페어 처음으로"><Logo size={34} /><b>올페어</b><small>All <i>wel</i>Fare</small></button>
+        <button className="pclogo" onClick={to('home', '/')} aria-label="올페어 처음으로"><Logo size={34} /><b>올페어</b><small>All <i>wel</i>Fare</small></button>
         <nav className="pcmenu" aria-label="메인 메뉴">
-          {item('home', '맞춤 혜택')}
-          {item('culture', '문화누리 사용처')}
-          <a href="/culture" onClick={() => track('pc_menu', { to: 'region' })}>지역별 사용처</a>
-          {item('explore', '복지 가이드')}
+          <button className={active === 'home' ? 'on' : ''} onClick={to('home', '/')}>맞춤 혜택</button>
+          <div className={`pcdrop ${open ? 'open' : ''}`} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+            <button className={culture ? 'on' : ''} onClick={to('culture', '/?tab=culture')} aria-haspopup="true" aria-expanded={open}
+              onFocus={() => setOpen(true)}>문화누리 사용처 <span className="caret" aria-hidden>▾</span></button>
+            <div className="pcdmenu" role="menu">
+              <button role="menuitem" onClick={to('culture', '/?tab=culture')}><b>📍 내 주변 지도로 찾기</b><small>가까운 가맹점과 결제 후기</small></button>
+              <a role="menuitem" href="/culture" onClick={() => track('pc_menu', { to: 'region' })}><b>📋 지역별 목록으로 찾기</b><small>시·도, 시·군·구별 가맹점</small></a>
+            </div>
+          </div>
+          <a className={active === 'guide' ? 'on' : ''} href={go ? undefined : '/guide'} onClick={(e) => { if (go) { e.preventDefault(); go('explore'); } track('pc_menu', { to: 'guide' }); }} role={go ? 'button' : undefined} style={{ cursor: 'pointer' }}>복지 가이드</a>
+          <a className={active === 'news' ? 'on' : ''} href="/news" onClick={() => track('pc_menu', { to: 'news' })}>복지 소식</a>
         </nav>
         <div className="pctopr">
           <button className="pcbtn" onClick={onShare}><IcShare size={16} />공유</button>
-          <button className={`pcbtn pri ${tab === 'my' ? 'on' : ''}`} onClick={() => { go('my'); track('pc_menu', { to: 'my' }); }}>{hasProfile ? '내 조건 수정' : '내 조건 입력하기'}</button>
+          <button className={`pcbtn pri ${active === 'my' ? 'on' : ''}`} onClick={to('my', '/?tab=my')}>{hasProfile ? '내 조건 수정' : '내 조건 입력하기'}</button>
         </div>
       </div>
     </header>
   );
 }
 
-/** PC(넓은 화면)에서만 보이는 양옆 — 왼쪽: 소개·일정·QR / 오른쪽: 바로가기·가이드·공유 */
-export default function PcSide({ onShare, goTab }: { onShare: () => void; goTab: (t: 'culture' | 'my') => void }) {
+/** PC(넓은 화면)에서만 보이는 양옆 — 왼쪽: 소개·일정·QR / 오른쪽: 바로가기·인기 소식·가이드·공유 */
+export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: () => void }) {
   const picks = PICK.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean) as typeof GUIDES;
   // 날짜 계산은 브라우저에서 (서버와 하루 차이 방지)
   const [evs, setEvs] = useState<ReturnType<typeof upcoming>>([]);
@@ -77,9 +89,14 @@ export default function PcSide({ onShare, goTab }: { onShare: () => void; goTab:
           <p className="pclbl">바로가기</p>
           <div className="pclinks">
             <a href="/guide/median-income" onClick={() => track('pc_side', { to: 'calc' })}><IcCalc />기준중위소득 계산기<IcChevron size={15} /></a>
-            <a href="/culture" onClick={() => track('pc_side', { to: 'region' })}><IcMap />지역별 사용처 목록<IcChevron size={15} /></a>
-            <button onClick={() => { goTab('my'); track('pc_side', { to: 'my' }); }}><IcSliders size={18} />내 조건 입력하기<IcChevron size={15} /></button>
+            <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><span className="pcemo" aria-hidden>🎫</span>문화누리카드 신청·금액 안내<IcChevron size={15} /></a>
+            <button onClick={() => { onMy(); track('pc_side', { to: 'my' }); }}><IcSliders size={18} />내 조건 입력하기<IcChevron size={15} /></button>
           </div>
+        </section>
+        <section>
+          <p className="pclbl">인기 복지 소식</p>
+          <PopularNews variant="side" from="pc_side" />
+          <a className="pcmore" href="/news">소식 전체 보기 →</a>
         </section>
         <section>
           <p className="pclbl">많이 찾는 복지 가이드</p>

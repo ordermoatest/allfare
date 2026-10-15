@@ -683,3 +683,61 @@ nav.tabs .ic { width: 54px; }
 /* v12.1: 폰/PC 전용 글자 */
 .pconly { display: none; }
 @media (min-width: 1120px) { .pconly { display: inline; } .mobonly { display: none; } }
+
+/* v13: 복지 소식 */
+.nitem { background: var(--card); border-radius: 16px; padding: 14px 16px; margin: 10px 0; }
+.nitem > b { display: block; font-size: 15.5px; line-height: 1.45; color: var(--ink); }
+.nitem p b { color: var(--ink); }
+.nitem b a { color: var(--ink); text-decoration: none; }
+.nitem b a:hover { color: var(--mint); }
+.nitem p { margin: 6px 0 0; font-size: 14.5px; line-height: 1.7; color: var(--sub); }
+.ntag { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--mint-ink); background: var(--soft); border-radius: 6px; padding: 1px 7px; margin-right: 7px; vertical-align: 2px; }
+.nstats { display: flex; align-items: center; gap: 4px; flex: none; font-size: 13px; color: var(--mute); }
+.nstats > span { padding: 0 6px; font-weight: 600; }
+.nstats button { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 10px; border: 0; border-radius: 999px; background: var(--card); color: var(--sub); font-size: 13px; font-weight: 700; }
+.nstats button.on { color: #E5484D; }
+.nstats em, .nact em { font-style: normal; }
+.nact { display: flex; gap: 8px; margin: 22px 0 10px; }
+.nact button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 50px; border: 0; border-radius: 16px; font-size: 15px; font-weight: 700; }
+.nlike { background: var(--card); color: var(--sub); box-shadow: inset 0 0 0 1.5px var(--chip); }
+.nlike.on { color: #E5484D; box-shadow: inset 0 0 0 1.5px #F8D3D4; }
+.nlike em { color: var(--mute); margin-left: 2px; }
+.nshare { background: var(--mint); color: var(--on-mint); }
+.nnav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0 0; }
+.nnav a { background: var(--card); border-radius: 14px; padding: 12px 14px; text-decoration: none; color: var(--ink); }
+.nnav a.r { text-align: right; }
+.nnav small { display: block; font-size: 12px; color: var(--mute); }
+.nnav b { font-size: 14px; }
+.ndate { display: block; font-size: 12px; color: var(--mute); margin-bottom: 2px; }
+.nlitem .ndate { margin: 0 0 2px; }
+.cbmore { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--mint); text-decoration: none; }
+.pnews { background: var(--card); border-radius: 22px; padding: 14px 14px 6px; display: flex; flex-direction: column; }
+.pnh { display: flex; justify-content: space-between; align-items: center; padding: 0 4px 8px; }
+.pnh b { font-size: 16px; }
+.pnh a { font-size: 13px; font-weight: 700; color: var(--mint); text-decoration: none; }
+.pnrow { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.pnrow:active { background: var(--chip); border-radius: 12px; }
+.pnno { flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--soft); color: var(--mint-ink); display: grid; place-items: center; font-size: 13px; font-weight: 800; }
+.pnt { flex: 1; min-width: 0; }
+.pnt b { display: block; font-size: 15px; line-height: 1.4; }
+.pnt small { display: block; font-size: 12.5px; color: var(--sub); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pnrow > span:last-child { color: var(--mute); }
+
+/* v13: PC 상단 드롭다운 · 다른 페이지도 같은 틀 */
+@media (min-width: 1120px) {
+  .pcdrop { position: relative; height: 100%; display: flex; }
+  .pcdrop .caret { font-size: 10px; margin-left: 4px; color: var(--mute); }
+  .pcdmenu { display: none; position: absolute; top: 58px; left: 4px; min-width: 240px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.10); padding: 6px; z-index: 8; }
+  .pcdrop.open .pcdmenu { display: block; }
+  .pcdmenu button, .pcdmenu a { display: block; width: 100%; height: auto; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; text-decoration: none; color: var(--ink); }
+  .pcdmenu button::after, .pcdmenu a::after { display: none; }
+  .pcdmenu button:hover, .pcdmenu a:hover { background: var(--chip); }
+  .pcdmenu b { display: block; font-size: 14.5px; }
+  .pcdmenu small { display: block; font-size: 12.5px; color: var(--mute); font-weight: 500; margin-top: 2px; }
+  .pcemo { width: 18px; text-align: center; font-size: 15px; }
+
+  .doc { max-width: 480px; margin: 88px auto 48px; border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px 32px; }
+  .doc > .brand, .scroll > .brand { display: none !important; }
+  .doc > .gcrumb:first-of-type, .doc > h1:first-of-type { margin-top: 0 !important; }
+  .regionlink { display: none !important; }
+}

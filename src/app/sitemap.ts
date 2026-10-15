@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { db } from '@/lib/server/supabase';
 import { SITE } from '@/lib/site';
 import { GUIDES } from '@/lib/guides';
+import { NEWS } from '@/lib/news';
 import { SGG } from '@/lib/regions';
 import { SIDO_SHORT } from '@/lib/server/regionStores';
 
@@ -14,6 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/`, lastModified: now, changeFrequency: 'daily', priority: 1 },
     { url: `${SITE}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE}/guide`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE}/news`, lastModified: NEWS[0] ? new Date(NEWS[0].date) : now, changeFrequency: 'weekly', priority: 0.8 },
+    ...NEWS.map((n) => ({ url: `${SITE}/news/${n.slug}`, lastModified: new Date(n.date), changeFrequency: 'monthly' as const, priority: 0.7 })),
     { url: `${SITE}/culture`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     ...Object.entries(SGG).flatMap(([full, list]) => {
       const sh = encodeURIComponent(SIDO_SHORT[full]);

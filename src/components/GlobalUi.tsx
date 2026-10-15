@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { IcBack } from './icons';
+import PcSide, { PcActive, PcTop } from './PcSide';
+import { shareLink, track } from '@/lib/client';
+import { loadProfile } from '@/lib/profile';
 
 /**
  * 모든 페이지 공통
@@ -33,6 +36,15 @@ export default function GlobalUi() {
   useEffect(() => { setLoading(false); }, [path]);
 
   const sub = path !== '/' && !path.startsWith('/admin');
+  const [hasProfile, setHasProfile] = useState(false);
+  const [msg, setMsg] = useState('');
+  useEffect(() => { try { setHasProfile(loadProfile().set); } catch { /* */ } }, []);
+  const active: PcActive = path.startsWith('/culture') ? 'region' : path.startsWith('/guide') ? 'guide' : path.startsWith('/news') ? 'news' : path.startsWith('/benefit') ? 'home' : '';
+  const sharePage = async () => {
+    const r = await shareLink(document.title.replace(/\s*\|\s*올페어$/, ''), '올페어에서 확인해 보세요', location.origin + location.pathname);
+    track('share_page', { from: 'pc_top', via: r });
+    if (r === 'copied') { setMsg('링크를 복사했어요. 원하는 곳에 붙여넣어 보내세요'); setTimeout(() => setMsg(''), 2600); }
+  };
   const back = () => {
     let fromHere = false;
     try { fromHere = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* */ }
@@ -44,6 +56,9 @@ export default function GlobalUi() {
     <>
       {loading && <div className="navbar" aria-hidden />}
       {sub && <button className="backfab sub" onClick={back} aria-label="뒤로가기"><IcBack /></button>}
+      {sub && <PcTop active={active} onShare={sharePage} hasProfile={hasProfile} />}
+      {sub && <PcSide onShare={sharePage} onMy={() => { location.href = '/?tab=my'; }} />}
+      {msg && <div className="toast" role="status">{msg}</div>}
     </>
   );
 }

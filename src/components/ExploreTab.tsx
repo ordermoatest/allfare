@@ -5,6 +5,7 @@ import { IcSearch } from './icons';
 import { Profile } from '@/lib/profile';
 import { SGG, SIDO_SHORT } from '@/lib/regions';
 import { GROUPS, guidesIn } from '@/lib/guides';
+import { NEWS, fmtNewsDate } from '@/lib/news';
 import { track } from '@/lib/client';
 
 const href = (sido: string, sgg?: string) => {
@@ -69,6 +70,19 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
         <span><b>기준중위소득 계산기</b><small>우리 집 소득이 몇 %인지 바로 확인</small></span>
         <span className="cgo" aria-hidden>›</span>
       </a>
+
+      {NEWS.length > 0 && (
+        <section className="cbox" aria-label="복지 소식">
+          <div className="cbh"><i>📰</i>복지 소식<a className="cbmore" href="/news">전체 보기 ›</a></div>
+          <div className="glist" style={{ margin: 0 }}>
+            {NEWS.slice(0, 3).map((n) => (
+              <a key={n.slug} className="gitem soft" href={`/news/${n.slug}`} onClick={() => track('explore_news', { slug: n.slug })}>
+                <span className="gemoji" aria-hidden>{n.emoji}</span><span><small className="ndate">{fmtNewsDate(n.date)}</small><b>{n.title}</b>{n.sub && <small>{n.sub}</small>}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="cbox" aria-label="복지 가이드">
         <div className="cbh"><i>📘</i>복지 가이드</div>

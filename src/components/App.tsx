@@ -148,7 +148,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <PcTop tab={tab} go={go} onShare={() => shareSite('pc_top')} hasProfile={profile.set} />
+      <PcTop active={tab === 'explore' ? 'guide' : tab} go={go} onShare={() => shareSite('pc_top')} hasProfile={profile.set} />
       <header className={`apphead ${mini ? 'mini' : ''}`}>
         <Brand onClick={toTop} mini={mini} />
         <button className="headshare" onClick={() => shareSite('header')} aria-label="올페어 공유하기"><IcShare size={18} /><span>공유</span></button>
@@ -194,7 +194,7 @@ export default function App() {
       )}
       {benefit && <BenefitSheet id={benefit} profile={profile} liked={!!liked[benefit]} onLiked={onLiked} onClose={() => setBenefit(null)} toast={toast} />}
       {store && <StoreSheet store={store} onClose={() => setStore(null)} toast={toast} />}
-      <PcSide onShare={() => shareSite('pc')} goTab={(t) => go(t)} />
+      <PcSide onShare={() => shareSite('pc')} onMy={() => go('my')} />
       <A2hs blocked={!!benefit || !!store || sharePrompt} />
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
     </div>
