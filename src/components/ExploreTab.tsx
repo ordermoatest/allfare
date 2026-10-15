@@ -4,7 +4,7 @@ import Footer from './Footer';
 import { IcSearch } from './icons';
 import { Profile } from '@/lib/profile';
 import { SGG, SIDO_SHORT } from '@/lib/regions';
-import { GUIDES } from '@/lib/guides';
+import { GROUPS, guidesIn } from '@/lib/guides';
 import { track } from '@/lib/client';
 
 const href = (sido: string, sgg?: string) => {
@@ -72,13 +72,18 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
 
       <section className="cbox" aria-label="복지 가이드">
         <div className="cbh"><i>📘</i>복지 가이드</div>
-        <div className="glist" style={{ margin: 0 }}>
-          {GUIDES.map((g) => (
-            <a key={g.slug} className="gitem soft" href={`/guide/${g.slug}`} onClick={() => track('explore_guide', { slug: g.slug })}>
-              <span className="gemoji" aria-hidden>{g.emoji}</span><span><b>{g.title}</b></span>
-            </a>
-          ))}
-        </div>
+        {GROUPS.map((gr) => (
+          <div key={gr.key} className="eggroup">
+            <span className="eglabel">{gr.label}</span>
+            <div className="glist" style={{ margin: 0 }}>
+              {guidesIn(gr.key).map((g) => (
+                <a key={g.slug} className="gitem soft" href={`/guide/${g.slug}`} onClick={() => track('explore_guide', { slug: g.slug })}>
+                  <span className="gemoji" aria-hidden>{g.emoji}</span><span><b>{g.title}</b>{g.sub && <small>{g.sub}</small>}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
       <Footer />
     </>

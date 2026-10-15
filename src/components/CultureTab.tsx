@@ -4,7 +4,7 @@ import CatBar from './CatBar';
 import Footer from './Footer';
 import KakaoMap from './KakaoMap';
 import { IcGps, IcPin, IcSearch, StoreIcon } from './icons';
-import { Place, Store, km, paidLine } from '@/lib/types';
+import { Place, Store, fmtAsOf, km, paidLine } from '@/lib/types';
 import { track } from '@/lib/client';
 import { MNURI, ONLINE_SHOPS } from '@/lib/online';
 import { ITEMS } from '@/lib/items';
@@ -36,6 +36,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
   }, []);
   const [stores, setStores] = useState<Store[] | null>(null);
   const [ready, setReady] = useState(true);
+  const [asOf, setAsOf] = useState<string | null>(null);
   const [err, setErr] = useState('');
   const [radius, setRadius] = useState(1000);
   const [cat, setCat] = useState('전체');
@@ -60,7 +61,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
     fetch(`/api/stores?lat=${place.lat.toFixed(5)}&lng=${place.lng.toFixed(5)}&r=3000`).then(async (r) => {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
-      setStores(j.items); setReady(j.ready !== false);
+      setStores(j.items); setReady(j.ready !== false); setAsOf(j.asOf || null);
     }).catch((e) => setErr(e.message || '가맹점을 불러오지 못했어요'));
   }, [place]);
 
@@ -173,7 +174,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
         <div className="notice"><b>가맹점 위치 정보를 준비하고 있어요</b><span>전국 가맹점의 위치를 지도에 표시할 수 있게 정리하는 중이에요. 잠시 후 다시 열어주세요.</span></div>
       ) : (
         <>
-          <CatBar title={<>🗂️ 분야별 사용처 <span className="cap light">{online ? `온라인 ${ONLINE_SHOPS.length}곳` : `${shown.length}곳`}</span></>}
+          <CatBar title={<>🗂️ 분야별 사용처 <span className="cap light">{online ? `온라인 ${ONLINE_SHOPS.length}곳` : `${shown.length}곳`}{!online && fmtAsOf(asOf) ? ` · ${fmtAsOf(asOf)} 기준` : ''}</span></>}
             right={online ? undefined : <label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); track('sort_store', { s: e.target.value }); }}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
             label="사용처 분야" items={[cats[0], { key: ONLINE, count: ONLINE_SHOPS.length }, ...cats.slice(1)]} current={online ? ONLINE : curCat}
             onPick={(k) => { if (k === ONLINE) { setOnline(true); track('online_shops'); } else { setOnline(false); setCat(k); } }} />

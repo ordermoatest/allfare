@@ -5,6 +5,7 @@ import { deadlineLabel } from '@/lib/deadline';
 import { Cond, conditionSummary } from '@/lib/match';
 import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
+import { ogImage } from '@/lib/og';
 
 export const revalidate = 3600;
 
@@ -19,7 +20,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     title, description: desc,
     alternates: { canonical: `/benefit/${encodeURIComponent(b.id)}` },
     robots: b.active ? undefined : { index: false },
-    openGraph: { title: b.name, description: desc, type: 'article', locale: 'ko_KR', siteName: '올페어', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+    openGraph: { title: b.name, description: desc, type: 'article', locale: 'ko_KR', siteName: '올페어',
+      images: [ogImage({ t: b.name, s: deadlineLabel(b.deadlineKind, b.deadlineEnd).text, k: b.category || '복지 혜택', e: '🎁' })] },
+    twitter: { card: 'summary_large_image', title: b.name, description: desc },
   };
 }
 

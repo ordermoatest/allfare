@@ -2,12 +2,13 @@ import Brand from './Brand';
 import Footer from './Footer';
 import type { RegionStore } from '@/lib/server/regionStores';
 import { SITE } from '@/lib/site';
+import { fmtAsOf } from '@/lib/types';
 
 const PER_CAT = 30;
 
 /** 지역별 문화누리카드 사용처 (서버에서 그리는 검색용 페이지) */
-export default function RegionStores({ sidoShort, sidoFull, sgg, stores, siblings }: {
-  sidoShort: string; sidoFull: string; sgg?: string; stores: RegionStore[]; siblings: { label: string; href: string }[];
+export default function RegionStores({ sidoShort, sidoFull, sgg, stores, siblings, asOf }: {
+  sidoShort: string; sidoFull: string; sgg?: string; stores: RegionStore[]; siblings: { label: string; href: string }[]; asOf?: string | null;
 }) {
   const place = sgg ? `${sidoShort} ${sgg}` : sidoShort;
   const cats = new Map<string, RegionStore[]>();
@@ -74,7 +75,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
           <div className="rchips">{siblings.map((x) => <a key={x.href} href={x.href} className="rchip">{x.label}</a>)}</div>
         </section>
       )}
-      <Footer notes={['가맹점 목록은 한국문화예술위원회 공개 자료 기준이에요.', '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
+      <Footer notes={[`가맹점 목록은 한국문화예술위원회 공개 자료${fmtAsOf(asOf) ? ` ${fmtAsOf(asOf)}` : ''} 기준이에요.`, '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
     </main>
   );
 }

@@ -3,6 +3,7 @@ import { db } from '@/lib/server/supabase';
 import { SGG } from '@/lib/regions';
 import { shortCategory } from '@/lib/categories';
 import { todayKST } from '@/lib/deadline';
+import { lastSync } from '@/lib/server/asof';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       h: r.hint || undefined,
       lc: r.scope === 'local' ? 1 : undefined,
     }));
-    return NextResponse.json({ items, region: validSgg ? `${sido} ${sgg}` : validSido ? sido : '전국' }, {
+    return NextResponse.json({ items, asOf: await lastSync('benefits'), region: validSgg ? `${sido} ${sgg}` : validSido ? sido : '전국' }, {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400' },
     });
   } catch (e) {

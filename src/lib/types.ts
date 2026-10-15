@@ -24,3 +24,12 @@ export function paidLine(yes?: number, no?: number, avg?: number | null) {
   if (avg) parts.push(`★${avg.toFixed(1)}`);
   return { text: parts.join(' · '), warn: (no || 0) > 0 ? `결제 안 됨 제보 ${no}` : '' };
 }
+
+/** 기준일 표시: '10월 16일' (한국 시간) */
+export function fmtAsOf(iso?: string | null) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const k = new Date(d.getTime() + 9 * 3600000);
+  return `${k.getUTCMonth() + 1}월 ${k.getUTCDate()}일`;
+}

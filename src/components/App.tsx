@@ -8,6 +8,8 @@ import BenefitSheet from './BenefitSheet';
 import StoreSheet from './StoreSheet';
 import { IcBook, IcGift, IcPin, IcSliders } from './icons';
 import Brand from './Brand';
+import A2hs from './A2hs';
+import PcSide from './PcSide';
 import { IcBack, IcShare } from './icons';
 import { useBackClose } from '@/lib/useBackClose';
 import { shareLink, track } from '@/lib/client';
@@ -39,7 +41,7 @@ export default function App() {
   const [depth, setDepth] = useState(0);
   const [fabDim, setFabDim] = useState(false);
 
-  const [list, setList] = useState<{ key: string; items: BItem[] | null; error: string | null; region: string }>({ key: '', items: null, error: null, region: '' });
+  const [list, setList] = useState<{ key: string; items: BItem[] | null; error: string | null; region: string; asOf?: string | null }>({ key: '', items: null, error: null, region: '' });
 
   useEffect(() => {
     setProfile(loadProfile());
@@ -87,7 +89,7 @@ export default function App() {
     const [sido, sgg] = key.split('|');
     setList({ key, items: null, error: null, region: '' });
     fetch(`/api/benefits?sido=${encodeURIComponent(sido)}&sgg=${encodeURIComponent(sgg)}`)
-      .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); setList({ key, items: j.items, error: null, region: j.region }); })
+      .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); setList({ key, items: j.items, error: null, region: j.region, asOf: j.asOf }); })
       .catch((e) => setList({ key, items: null, error: e.message || '혜택을 불러오지 못했어요', region: '' }));
   }, []);
   useEffect(() => { if (ready && list.key !== regionKey) loadList(regionKey); }, [ready, regionKey, list.key, loadList]);
@@ -152,7 +154,7 @@ export default function App() {
       </header>
       <div className="tabwrap" style={fs ? ({ zoom: FS[fs] / 100 } as React.CSSProperties) : undefined}>
       <main className="scroll" hidden={tab !== 'home'}>
-        <BenefitsTab profile={profile} items={list.items} error={list.error} region={list.region} liked={liked} likeCounts={likeCounts}
+        <BenefitsTab profile={profile} items={list.items} error={list.error} region={list.region} asOf={list.asOf} liked={liked} likeCounts={likeCounts}
           onOpen={setBenefit} goMy={() => go('my')} onRetry={() => loadList(regionKey)}
           sharePrompt={sharePrompt} onSharePrompt={() => shareSite('prompt')} onClosePrompt={closePrompt} />
       </main>
@@ -191,6 +193,8 @@ export default function App() {
       )}
       {benefit && <BenefitSheet id={benefit} profile={profile} liked={!!liked[benefit]} onLiked={onLiked} onClose={() => setBenefit(null)} toast={toast} />}
       {store && <StoreSheet store={store} onClose={() => setStore(null)} toast={toast} />}
+      <PcSide onShare={() => shareSite('pc')} goTab={(t) => go(t)} />
+      <A2hs blocked={!!benefit || !!store || sharePrompt} />
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
     </div>
   );

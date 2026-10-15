@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/server/supabase';
+import { lastSync } from '@/lib/server/asof';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,5 +20,5 @@ export async function GET(req: NextRequest) {
     const { count } = await db().from('culture_stores').select('id', { count: 'exact', head: true }).eq('geo_status', 'ok');
     ready = (count ?? 0) > 1000;
   }
-  return NextResponse.json({ items: data || [], ready }, { headers: { 'Cache-Control': ready ? 'public, s-maxage=600' : 'no-store' } });
+  return NextResponse.json({ items: data || [], ready, asOf: await lastSync('stores_import') }, { headers: { 'Cache-Control': ready ? 'public, s-maxage=600' : 'no-store' } });
 }

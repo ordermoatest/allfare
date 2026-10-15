@@ -2,15 +2,29 @@
 // 해마다 바뀌는 숫자는 updated 날짜 기준. 바뀌면 여기만 고치면 돼요.
 import type { ReactNode } from 'react';
 import MedianCalc from '@/components/MedianCalc';
+import { GUIDES2 } from './guides2';
 
-export type Guide = { slug: string; emoji: string; title: string; seoTitle: string; sub?: string; desc: string; updated: string; cta: { label: string; href: string }; body: ReactNode };
+export type GuideGroup = 'basics' | 'youth' | 'family' | 'living' | 'senior';
+export type Guide = {
+  slug: string; group: GuideGroup; emoji: string; title: string; seoTitle: string; sub?: string; desc: string; updated: string;
+  kw?: string[]; faq?: { q: string; a: string }[];
+  cta: { label: string; href: string }; body: ReactNode;
+};
+export const GROUPS: { key: GuideGroup; label: string }[] = [
+  { key: 'basics', label: '🧭 기본 개념' },
+  { key: 'youth', label: '🧑 청년' },
+  { key: 'family', label: '👶 결혼·출산·육아' },
+  { key: 'living', label: '🧾 생활비' },
+  { key: 'senior', label: '👵 노후' },
+];
 
 const Tip = ({ children }: { children: ReactNode }) => <div className="gtip">💡 {children}</div>;
 const Check = ({ children }: { children: ReactNode }) => <div className="gcheck">✅ {children}</div>;
 
-export const GUIDES: Guide[] = [
+const BASE: Guide[] = [
   {
     slug: 'median-income',
+    group: 'basics',
     seoTitle: '2026 기준중위소득표·계산기 (1~6인 가구 월 금액)',
     emoji: '🧮',
     title: '기준중위소득, 우리 집은 몇 %일까요?',
@@ -50,6 +64,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'recognized-income',
+    group: 'basics',
     seoTitle: '소득인정액 뜻과 계산 방법 (월급과 다른 점)',
     emoji: '🏠',
     title: '소득인정액은 월급이랑 뭐가 다른가요?',
@@ -81,6 +96,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'household-head',
+    group: 'basics',
     seoTitle: '세대주 확인 방법 (주민등록등본 세대주·세대원 구분)',
     emoji: '📄',
     title: '나는 세대주일까요, 세대원일까요?',
@@ -116,6 +132,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'culture-nuri-card',
+    group: 'living',
     seoTitle: '2026 문화누리카드 금액·신청기간·대상·사용처 총정리',
     emoji: '🎫',
     title: '문화누리카드, 누가 얼마나 받을 수 있나요?',
@@ -173,6 +190,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'newlywed',
+    group: 'family',
     seoTitle: '신혼부부 기준 혼인 7년 이내? 예비 신혼부부 조건 정리',
     emoji: '💍',
     title: '신혼부부 혜택, 혼인 몇 년까지 받을 수 있나요?',
@@ -206,6 +224,7 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: 'youth-age',
+    group: 'youth',
     seoTitle: '청년 나이 기준 2026 (청년기본법 19~34세, 지역별 39세)',
     emoji: '🧑',
     title: '청년 혜택은 몇 살까지 받을 수 있나요?',
@@ -242,5 +261,8 @@ export const GUIDES: Guide[] = [
     ),
   },
 ];
+
+export const GUIDES: Guide[] = [...BASE, ...GUIDES2];
+export const guidesIn = (g: GuideGroup) => GUIDES.filter((x) => x.group === g);
 
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);

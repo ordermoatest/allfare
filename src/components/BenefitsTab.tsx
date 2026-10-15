@@ -9,6 +9,7 @@ import { Cond, Tier, firstReason, fitReason, tierOf } from '@/lib/match';
 import { CATEGORY_ORDER } from '@/lib/categories';
 import { deadlineLabel } from '@/lib/deadline';
 import { track } from '@/lib/client';
+import { fmtAsOf } from '@/lib/types';
 
 const SORTS = { dl: '마감 임박순', new: '최신순', like: '좋아요순', view: '조회순' } as const;
 type SortKey = keyof typeof SORTS;
@@ -31,8 +32,8 @@ function orgShort(o: string | null): string {
 
 const condOf = (b: BItem): Cond => ({ lo: b.lo, hi: b.hi, codes: b.k, hint: b.h });
 
-export default function BenefitsTab({ profile, items, error, region, liked, likeCounts, onOpen, goMy, onRetry, sharePrompt, onSharePrompt, onClosePrompt }: {
-  profile: Profile; items: BItem[] | null; error: string | null; region: string;
+export default function BenefitsTab({ profile, items, error, region, asOf, liked, likeCounts, onOpen, goMy, onRetry, sharePrompt, onSharePrompt, onClosePrompt }: {
+  profile: Profile; items: BItem[] | null; error: string | null; region: string; asOf?: string | null;
   liked: Record<string, true>; likeCounts: Record<string, number>;
   onOpen: (id: string) => void; goMy: () => void; onRetry: () => void;
   sharePrompt?: boolean; onSharePrompt?: () => void; onClosePrompt?: () => void;
@@ -191,7 +192,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
                 ))}
               </div>
               <CatBar
-                title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
+                title={<>분야별 보기 <span className="cap light">{[profile.set ? region : '', fmtAsOf(asOf) ? `${fmtAsOf(asOf)} 업데이트` : ''].filter(Boolean).join(' · ')}</span></>}
                 right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
                 label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
               />
@@ -200,7 +201,7 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
           ) : (
             <>
               <CatBar
-                title={<>분야별 보기 <span className="cap light">{profile.set ? region + ' 기준' : ''}</span></>}
+                title={<>분야별 보기 <span className="cap light">{[profile.set ? region : '', fmtAsOf(asOf) ? `${fmtAsOf(asOf)} 업데이트` : ''].filter(Boolean).join(' · ')}</span></>}
                 right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
                 label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
               />
@@ -216,10 +217,10 @@ export default function BenefitsTab({ profile, items, error, region, liked, like
         <ul>
           <li><a href="/guide/median-income">2026 기준중위소득 계산기</a>로 우리 집 소득이 몇 %인지 확인해요.</li>
           <li><a href="/culture">지역별 문화누리카드 사용처</a>를 시·군·구별로 찾아요.</li>
-          <li><a href="/guide">복지 가이드</a>에서 신혼부부·청년 기준, 세대주 확인법을 쉽게 알아봐요.</li>
+          <li><a href="/guide">복지 가이드</a>에서 <a href="/guide/youth-rent">청년월세 지원</a>, <a href="/guide/parent-benefit">부모급여</a>, <a href="/guide/child-allowance">아동수당</a>, <a href="/guide/basic-pension">기초연금</a>, <a href="/guide/work-incentive">근로장려금</a> 같은 주요 혜택을 쉽게 알아봐요.</li>
         </ul>
       </section>
-      <a className="gbanner" href="/guide"><span aria-hidden>📘</span><span><b>복지 가이드</b><small>기준중위소득 계산기 · 문화누리카드 · 신혼부부·청년 기준</small></span><span aria-hidden>›</span></a>
+      <a className="gbanner" href="/guide"><span aria-hidden>📘</span><span><b>복지 가이드</b><small>청년월세 · 부모급여 · 아동수당 · 기초연금 · 근로장려금 등 16가지</small></span><span aria-hidden>›</span></a>
       <Footer notes={['꼭 맞음·확인 필요 표시는 공개된 조건만 비교한 참고 정보예요.', '정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />
     </>
   );
