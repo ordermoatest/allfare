@@ -33,7 +33,7 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
   return (
     <>
       <div>
-        <h2 className="tabtitle">알아보기</h2>
+        <h2 className="tabtitle"><span className="mobonly">알아보기</span><span className="pconly">복지 가이드</span></h2>
         <div className="cap">혜택 받기 전에 알아두면 좋은 정보를 모았어요</div>
       </div>
 
