@@ -7,6 +7,7 @@ import { SGG } from '@/lib/regions';
 import { SIDO_BY_SHORT, storesOf } from '@/lib/server/regionStores';
 import { ogImage } from '@/lib/og';
 import { lastSync } from '@/lib/server/asof';
+import ShareButton from '@/components/ShareButton';
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -41,7 +42,7 @@ export default async function SidoPage({ params }: { params: { sido: string } })
     <main className="doc guide">
       <Brand href="/" />
       <nav className="gcrumb"><a href="/culture">🎫 지역별 문화누리카드 사용처</a> › {short}</nav>
-      <h1>{short} 문화누리카드 사용처</h1>
+      <div className="gtitle"><h1>{short} 문화누리카드 사용처</h1><ShareButton title={`${short} 문화누리카드 사용처`} text="시·군·구별 가맹점 모음 · 올페어" from="sido" /></div>
       <p>{full}의 시·군·구를 골라 문화누리카드를 쓸 수 있는 가맹점을 확인해 보세요.</p>
       <div className="rchips">{list.map((g) => <a key={g} className="rchip" href={`/culture/${encodeURIComponent(short)}/${encodeURIComponent(g)}`}>{g}</a>)}</div>
       <a className="gcta" href="/?tab=culture">📍 내 주변 사용처 지도로 보기 →</a>

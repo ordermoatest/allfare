@@ -9,7 +9,7 @@ import StoreSheet from './StoreSheet';
 import { IcBook, IcGift, IcPin, IcSliders } from './icons';
 import Brand from './Brand';
 import A2hs from './A2hs';
-import PcSide from './PcSide';
+import PcSide, { PcTop } from './PcSide';
 import { IcBack, IcShare } from './icons';
 import { useBackClose } from '@/lib/useBackClose';
 import { shareLink, track } from '@/lib/client';
@@ -148,6 +148,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <PcTop tab={tab} go={go} onShare={() => shareSite('pc_top')} hasProfile={profile.set} />
       <header className={`apphead ${mini ? 'mini' : ''}`}>
         <Brand onClick={toTop} mini={mini} />
         <button className="headshare" onClick={() => shareSite('header')} aria-label="올페어 공유하기"><IcShare size={18} /><span>공유</span></button>

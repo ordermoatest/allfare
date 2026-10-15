@@ -4,6 +4,7 @@ import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
 import { GROUPS, GUIDES, guideBySlug } from '@/lib/guides';
 import { ogImage } from '@/lib/og';
+import ShareButton from '@/components/ShareButton';
 import { SITE } from '@/lib/site';
 
 export function generateStaticParams() {
@@ -18,9 +19,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     description: g.desc,
     keywords: g.kw,
     alternates: { canonical: `/guide/${g.slug}` },
-    openGraph: { title: g.seoTitle, description: g.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', modifiedTime: g.updated,
+    openGraph: { title: g.title, description: g.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', modifiedTime: g.updated,
       images: [ogImage({ t: g.title, s: g.sub, k: '복지 가이드', e: g.emoji })] },
-    twitter: { card: 'summary_large_image', title: g.seoTitle, description: g.desc },
+    twitter: { card: 'summary_large_image', title: g.title, description: g.desc },
   };
 }
 
@@ -51,7 +52,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
       <article>
         <h1><span aria-hidden>{g.emoji} </span>{g.title}</h1>
         {g.sub && <p className="gsubt">{g.sub}</p>}
-        <p className="gsmall">{y}년 {m}월 {d}일 기준 · 올페어</p>
+        <div className="gmeta"><p className="gsmall">{y}년 {m}월 {d}일 기준 · 올페어</p><ShareButton title={g.title} text={g.sub || g.desc} from="guide_top" /></div>
         {g.body}
         {g.faq && g.faq.length > 0 && (
           <section className="gfaq">
@@ -62,6 +63,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           </section>
         )}
       </article>
+      <ShareButton title={g.title} text={g.sub ? `${g.sub} · 올페어 복지 가이드` : '올페어 복지 가이드'} from="guide_bottom" big />
       <a className="gcta" href={g.cta.href}>{g.cta.label} →</a>
       <section className="gmore">
         <h2>다른 가이드도 읽어보세요</h2>

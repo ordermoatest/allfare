@@ -6,6 +6,7 @@
   --map: #D6ECE3; --me: #2D6CDF; --wel: #AEB8B3;
   --zoom: 1;
   --font-sans: 'IBM Plex Sans KR';
+  --line: #E1E8E4;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -13,7 +14,7 @@
     --bg: #0F1613; --card: #18221E; --soft: #163A2F; --chip: #1F2B26;
     --ink: #EAF2EE; --sub: #A3B2AB; --mute: #7F8E87;
     --mint: #2DB58C; --mint-ink: #9FE6CC; --on-mint: #06241B; --warn: #F08A72;
-    --map: #1A2D26; --me: #6EA0F5; --wel: #5E6B65; color-scheme: dark;
+    --map: #1A2D26; --me: #6EA0F5; --wel: #5E6B65; --line: #26342E; color-scheme: dark;
   }
 }
 * { box-sizing: border-box; }
@@ -605,37 +606,76 @@ nav.tabs .ic { width: 54px; }
 .a2go { border: 0; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--mint); color: #fff; font-weight: 700; font-size: 13px; }
 .a2x { border: 0; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--chip); color: var(--sub); font-weight: 700; font-size: 13px; }
 
-/* v11: PC 넓은 화면 양옆 안내 (A안) */
-.pcside { display: none; }
-@media (min-width: 1120px) {
-  .pcside { display: flex; flex-direction: column; gap: 16px; position: fixed; top: 32px; width: 290px; max-height: calc(100vh - 64px); overflow-y: auto; z-index: 3; }
-  .pcside.left { right: calc(50% + 240px + 40px); }
-  .pcside.right { left: calc(50% + 240px + 40px); }
-  .pcbrand { display: flex; align-items: center; gap: 12px; }
-  .pcbrand img { border-radius: 16px; }
-  .pcbrand b { display: block; font-size: 24px; }
-  .pcbrand span { font-size: 14px; font-weight: 700; color: var(--sub); }
-  .pcbrand i { font-style: normal; color: var(--mute); }
-  .pclead { font-size: 22px; font-weight: 800; line-height: 1.4; margin: 6px 0 0; }
-  .pcfeat { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  .pcfeat li { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border-radius: 18px; padding: 14px; }
-  .pcfeat li > span { font-size: 22px; line-height: 1.2; }
-  .pcfeat b { display: block; font-size: 15px; }
-  .pcfeat small { display: block; font-size: 13px; color: var(--sub); margin-top: 2px; line-height: 1.45; }
-  .pcqr { display: flex; gap: 14px; align-items: center; background: var(--card); border-radius: 18px; padding: 14px; }
-  .pcqr img { background: #fff; border-radius: 10px; padding: 8px; box-sizing: content-box; flex: none; width: 96px; height: 96px; }
-  .pcqr b { display: block; font-size: 15px; }
-  .pcqr small { display: block; font-size: 13px; color: var(--sub); margin-top: 4px; line-height: 1.45; }
-  .pccard { background: var(--card); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 2px; }
-  .pccard h3 { margin: 2px 4px 8px; font-size: 15px; }
-  .pclink { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; text-align: left; padding: 10px 6px; border-radius: 12px; color: var(--ink); font: inherit; font-size: 14.5px; font-weight: 600; text-decoration: none; cursor: pointer; }
-  .pclink:hover { background: var(--chip); }
-  .pclink > span { width: 28px; text-align: center; font-size: 17px; }
-  .pclink em { margin-left: auto; font-style: normal; color: var(--mute); }
-  .pcmore { font-size: 13.5px; color: var(--mint); font-weight: 700; text-decoration: none; padding: 8px 6px 2px; }
-  .pcshare { display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border: 0; border-radius: 16px; background: var(--mint); color: #fff; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; }
-  .app { box-shadow: 0 0 0 1px color-mix(in srgb, var(--sub) 10%, transparent); }
-}
 .eggroup .gitem { padding: 10px 12px; border-radius: 14px; }
 .eggroup .gitem b { font-size: 14.5px; }
 .eggroup .gemoji { width: 34px; height: 34px; font-size: 17px; }
+
+/* v12: 페이지 공유 버튼 */
+.gmeta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.gmeta .gsmall { margin: 0; }
+.gtitle { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.gtitle h1 { margin-right: 4px; }
+.gtitle .pshare { margin-top: 8px; }
+.pshare { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--card); color: var(--mint); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.pshare.big { display: flex; width: 100%; justify-content: center; height: 50px; border-radius: 16px; font-size: 15px; margin: 18px 0 10px; box-shadow: inset 0 0 0 1.5px var(--soft); }
+.pshare:active { transform: scale(.97); }
+
+/* v12: PC 웹사이트형 화면 (넓은 화면만) */
+.pctop, .pcside { display: none; }
+@media (min-width: 1120px) {
+  :root, html.hmini { --hdrh: 65px; }
+  .apphead, nav.tabs, .backfab { display: none !important; }
+  .pctop { display: block; position: fixed; top: 0; left: 0; right: 0; z-index: 6; background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .pctopin { max-width: 1180px; margin: 0 auto; height: 64px; display: flex; align-items: center; gap: 36px; padding: 0 24px; }
+  .pclogo { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 0; color: var(--ink); }
+  .pclogo b { font-size: 18px; }
+  .pclogo small { font-size: 12.5px; font-weight: 600; color: var(--mute); }
+  .pclogo i { font-style: normal; color: var(--wel); }
+  .pcmenu { display: flex; height: 100%; }
+  .pcmenu button, .pcmenu a { border: 0; background: none; height: 100%; padding: 0 14px; display: flex; align-items: center; font-size: 15px; font-weight: 600; color: var(--sub); text-decoration: none; position: relative; }
+  .pcmenu button:hover, .pcmenu a:hover { color: var(--ink); }
+  .pcmenu .on { color: var(--ink); }
+  .pcmenu .on::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: var(--ink); }
+  .pctopr { margin-left: auto; display: flex; gap: 8px; }
+  .pcbtn { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .pcbtn:hover { border-color: color-mix(in srgb, var(--sub) 35%, transparent); }
+  .pcbtn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .app { margin: 88px auto 48px; min-height: calc(100vh - 64px - 72px); padding-bottom: 12px; border: 1px solid var(--line); border-radius: 16px; }
+  .toast { bottom: 32px; }
+
+  .pcside { display: flex; flex-direction: column; gap: 28px; position: fixed; top: 89px; width: 260px; max-height: calc(100vh - 110px); overflow-y: auto; z-index: 3; scrollbar-width: none; }
+  .pcside.left { right: calc(50% + 240px + 40px); }
+  .pcside.right { left: calc(50% + 240px + 40px); }
+  .pclbl { font-size: 12px; font-weight: 700; color: var(--mute); letter-spacing: .03em; margin: 0 0 10px; }
+  .pcintro h2 { font-size: 21px; line-height: 1.42; margin: 0 0 8px; letter-spacing: -.3px; }
+  .pcintro p { margin: 0; font-size: 14px; color: var(--sub); line-height: 1.6; }
+  .pcev { border-top: 1px solid var(--line); }
+  .pcev a { display: grid; grid-template-columns: 52px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .pcev a:hover > span:last-child b { color: var(--mint); }
+  .pcdate { display: flex; flex-direction: column; }
+  .pcdate b { font-size: 15px; font-variant-numeric: tabular-nums; }
+  .pcdate em { font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--mint-ink); }
+  .pcdate em.hot { color: var(--warn); }
+  .pcev a > span:last-child b { display: block; font-size: 14px; font-weight: 600; line-height: 1.4; }
+  .pcev small { display: block; font-size: 12.5px; color: var(--mute); margin-top: 2px; }
+  .pcqr { display: flex; gap: 12px; align-items: center; }
+  .pcqr img { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px; box-sizing: content-box; flex: none; }
+  .pcqr b { display: block; font-size: 13.5px; }
+  .pcqr small { display: block; font-size: 12px; color: var(--mute); margin-top: 2px; }
+  .pclinks a, .pclinks button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 0; border: 0; border-bottom: 1px solid var(--line); background: none; font-size: 14.5px; font-weight: 600; color: var(--ink); text-decoration: none; text-align: left; }
+  .pclinks > :first-child { border-top: 1px solid var(--line); }
+  .pclinks svg:first-child { color: var(--mint); }
+  .pclinks svg:last-child { margin-left: auto; color: var(--mute); transition: transform .15s; }
+  .pclinks a:hover svg:last-child, .pclinks button:hover svg:last-child { transform: translateX(3px); color: var(--ink); }
+  .pcguides a { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .pcguides a:first-child { border-top: 1px solid var(--line); }
+  .pcguides b { display: block; font-size: 14px; font-weight: 600; line-height: 1.45; }
+  .pcguides small { font-size: 12px; color: var(--mute); }
+  .pcguides a:hover b { color: var(--mint); }
+  .pcmore { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--mint); text-decoration: none; }
+  .pcsharebox { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--card); }
+  .pcsharebox b { display: block; font-size: 14px; }
+  .pcsharebox p { margin: 4px 0 12px; font-size: 12.5px; color: var(--mute); }
+  .pcsharebox button { width: 100%; height: 38px; border: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+}

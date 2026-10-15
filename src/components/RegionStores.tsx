@@ -1,4 +1,5 @@
 import Brand from './Brand';
+import ShareButton from './ShareButton';
 import Footer from './Footer';
 import type { RegionStore } from '@/lib/server/regionStores';
 import { SITE } from '@/lib/site';
@@ -30,7 +31,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <Brand href="/" />
       <nav className="gcrumb"><a href="/culture">🎫 지역별 문화누리카드 사용처</a> › <a href={`/culture/${encodeURIComponent(sidoShort)}`}>{sidoShort}</a>{sgg && <> › {sgg}</>}</nav>
-      <h1>{place} 문화누리카드 사용처</h1>
+      <div className="gtitle"><h1>{place} 문화누리카드 사용처</h1><ShareButton title={`${place} 문화누리카드 사용처`} text={stores.length ? `가맹점 ${stores.length.toLocaleString()}곳 · 올페어` : '올페어'} from="region_top" /></div>
       {stores.length ? (
         <p>{sidoFull}{sgg ? ` ${sgg}` : ''}에서 문화누리카드를 쓸 수 있는 가맹점은 <b>{stores.length.toLocaleString()}곳</b>이에요.
           {catList.length > 0 && <> {catList.slice(0, 3).map(([c, l]) => `${c} ${l.length}곳`).join(', ')} 순으로 많아요.</>}</p>
@@ -68,6 +69,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
         <li>가맹점 목록은 공개 자료 기준이라 실제와 다를 수 있어요. 방문 전에 가게에 결제 가능 여부를 확인해 보세요.</li>
       </ul>
       <a className="plink" href="/guide/culture-nuri-card">문화누리카드 신청 방법 자세히 보기 →</a>
+      <ShareButton title={`${place} 문화누리카드 사용처`} text="우리 동네 문화누리카드 사용처 · 올페어" from="region_bottom" big label="이 지역 사용처 공유하기" />
 
       {siblings.length > 0 && (
         <section className="rsec">

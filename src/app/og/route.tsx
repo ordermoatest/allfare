@@ -22,18 +22,24 @@ export async function GET(req: NextRequest) {
   const size = t.length > 30 ? 60 : t.length > 18 ? 70 : 80;
   try {
     const all = `${t}${s}${k}${brand}${foot}AF`;
-    const [b, r] = await Promise.all([font(all, 700), font(all, 500)]);
+    const [b, r, logo] = await Promise.all([
+      font(all, 700), font(all, 500),
+      fetch(new URL('/icon-192.png', req.url)).then((x) => (x.ok ? x.arrayBuffer() : null)).catch(() => null),
+    ]);
     return new ImageResponse(
       (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#F2F7F4', padding: '64px 72px', fontFamily: 'Plex' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 18, background: '#0F8A68', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700 }}>AF</div>
+            {logo
+              ? /* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text, @typescript-eslint/no-explicit-any */
+                <img src={logo as any} width={64} height={64} style={{ borderRadius: 18 }} />
+              : <div style={{ width: 64, height: 64, borderRadius: 18, background: '#0F8A68', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700 }}>AF</div>}
             <div style={{ display: 'flex', fontSize: 30, fontWeight: 700, color: '#16201C' }}>올페어<span style={{ marginLeft: 12, color: '#55635D', fontWeight: 500 }}>All welFare</span></div>
             {k && <div style={{ display: 'flex', marginLeft: 'auto', background: '#E2F3EC', color: '#0B5A44', fontSize: 26, fontWeight: 700, padding: '10px 22px', borderRadius: 999 }}>{k}</div>}
           </div>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 40 }}>
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 26 }}>
-              <div style={{ display: 'flex', fontSize: size, fontWeight: 700, color: '#16201C', lineHeight: 1.25, letterSpacing: -1 }}>{t}</div>
+              <div style={{ display: 'flex', fontSize: size, fontWeight: 700, color: '#16201C', lineHeight: 1.25, letterSpacing: -1, wordBreak: 'keep-all' }}>{t}</div>
               {s && <div style={{ display: 'flex', alignSelf: 'flex-start', background: '#0F8A68', color: '#fff', fontSize: 34, fontWeight: 700, padding: '12px 26px', borderRadius: 18 }}>{s}</div>}
             </div>
             {e && <div style={{ display: 'flex', width: 220, height: 220, borderRadius: 56, background: '#fff', alignItems: 'center', justifyContent: 'center', fontSize: 130 }}>{e}</div>}

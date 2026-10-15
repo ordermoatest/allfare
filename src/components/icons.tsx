@@ -15,6 +15,8 @@ export const IcShare = ({ size = 22 }: P) => <svg {...base(size)} strokeWidth={1
 export const IcPhone = ({ size = 18 }: P) => <svg {...base(size)}><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>;
 export const IcRoute = ({ size = 18 }: P) => <svg {...base(size)}><path d="M3 11l18-8-8 18-2-8z" /></svg>;
 export const IcOut = ({ size = 18 }: P) => <svg {...base(size)}><path d="M7 17L17 7M9 7h8v8" /></svg>;
+export const IcCalc = ({ size = 18 }: P) => <svg {...base(size)} strokeWidth={1.9}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2" /></svg>;
+export const IcMap = ({ size = 18 }: P) => <svg {...base(size)} strokeWidth={1.9}><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" /></svg>;
 export const IcBack = ({ size = 24 }: P) => <svg {...base(size)} strokeWidth={2.3}><path d="M9 14l-4-4 4-4" /><path d="M5 10h9a5 5 0 0 1 0 10h-2" /></svg>;
 
 // 가맹점 분류 아이콘 (원본 분류명에 들어간 단어로 고름)

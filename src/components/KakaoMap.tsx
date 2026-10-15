@@ -127,10 +127,19 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, on
     if (mk) mk.click(); else showHint();
   };
 
+  // PC: 고정 상태에서도 핀·숫자 위에 마우스를 올리면 손가락 모양
+  const hoverPin = (e: React.MouseEvent<HTMLDivElement>) => {
+    const pad = e.currentTarget;
+    pad.style.pointerEvents = 'none';
+    const under = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    pad.style.pointerEvents = '';
+    pad.style.cursor = under?.closest?.('.mk') ? 'pointer' : 'default';
+  };
+
   return (
     <div className={`map ${live ? 'live' : ''}`} role="region" aria-label="내 주변 가맹점 지도">
       <div ref={el} style={{ position: 'absolute', inset: 0 }} />
-      {!live && ready && <div className="lockpad" onClick={passTap} onTouchStart={(e) => { if (e.touches.length > 1) showHint(); }} />}
+      {!live && ready && <div className="lockpad" onClick={passTap} onMouseMove={hoverPin} onTouchStart={(e) => { if (e.touches.length > 1) showHint(); }} />}
       {msg && <div className="msg">{msg}</div>}
       {hint && !live && <div className="maphint"><span>지도를 옮기려면 &lsquo;지도 움직이기&rsquo;를 눌러주세요</span></div>}
       {children}
