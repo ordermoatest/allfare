@@ -8,10 +8,15 @@ export type Profile = {
   mi: string;      // 가구 월 소득(만원)
   inc: string;     // 중위소득 구간 (INC 중 하나, '' = 미입력)
   tags: string[];  // 해당하는 것
+  gender: '' | 'M' | 'F';
+  head: '' | 'Y' | 'N';      // 주민등록상 세대주 여부
+  hasKids: '' | 'Y' | 'N';
+  kids: string[];            // 자녀 출생연월 YYMM
+  pregnant: '' | 'Y' | 'N';
   set: boolean;    // '이 조건으로 혜택 보기'를 눌렀는지
 };
 
-export const EMPTY_PROFILE: Profile = { birth: '', sido: '', sgg: '', hh: 1, mi: '', inc: '', tags: [], set: false };
+export const EMPTY_PROFILE: Profile = { birth: '', sido: '', sgg: '', hh: 1, mi: '', inc: '', tags: [], gender: '', head: '', hasKids: '', kids: [], pregnant: '', set: false };
 
 export const INC = ['50% 이하', '51~75%', '76~100%', '101~200%', '200% 초과', '잘 모름'] as const;
 
@@ -47,22 +52,53 @@ export function regionLabel(p: Profile): string {
   return [p.sido, p.sgg].filter(Boolean).join(' ');
 }
 
-// 해당하는 것 → 정부24 지원조건 코드
-export const TAGS: { label: string; code: string | null }[] = [
-  { label: '직장인', code: 'JA0326' },
-  { label: '구직 중', code: 'JA0327' },
-  { label: '대학생', code: 'JA0320' },
-  { label: '임산부', code: 'JA0302' },
-  { label: '출산·입양', code: 'JA0303' },
-  { label: '장애인', code: 'JA0328' },
-  { label: '보훈대상', code: 'JA0329' },
-  { label: '무주택', code: 'JA0412' },
-  { label: '1인 가구', code: 'JA0404' },
-  { label: '한부모·조손', code: 'JA0403' },
-  { label: '다자녀', code: 'JA0411' },
-  { label: '다문화', code: 'JA0401' },
-  { label: '해당 없음', code: null },
+// 해당하는 것 → 정부24 지원조건 코드 (다자녀·임신·자녀 학년은 자녀 정보로 자동 판단)
+export const TAGS: { label: string; codes: string[] }[] = [
+  { label: '직장인', codes: ['JA0326'] },
+  { label: '구직 중', codes: ['JA0327'] },
+  { label: '대학생', codes: ['JA0320'] },
+  { label: '출산·입양', codes: ['JA0303'] },
+  { label: '장애인', codes: ['JA0328'] },
+  { label: '보훈대상', codes: ['JA0329'] },
+  { label: '질병·질환자', codes: ['JA0330'] },
+  { label: '농어업인', codes: ['JA0313', 'JA0314', 'JA0315', 'JA0316'] },
+  { label: '무주택', codes: ['JA0412'] },
+  { label: '1인 가구', codes: ['JA0404'] },
+  { label: '한부모·조손', codes: ['JA0403'] },
+  { label: '다문화', codes: ['JA0401'] },
+  { label: '북한이탈주민', codes: ['JA0402'] },
+  { label: '해당 없음', codes: [] },
 ];
+
+/** 자녀 출생연월 YYMM → 만 나이 (잘못된 값이면 null) */
+export function kidAge(yymm: string): number | null {
+  if (!/^\d{4}$/.test(yymm)) return null;
+  const now = new Date();
+  const yy = +yymm.slice(0, 2), m = +yymm.slice(2, 4);
+  if (m < 1 || m > 12) return null;
+  const y = (yy > now.getFullYear() % 100 ? 1900 : 2000) + yy;
+  if (y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth() + 1)) return null;
+  let a = now.getFullYear() - y;
+  if (now.getMonth() + 1 < m) a--;
+  return a;
+}
+export function kidAges(p: Profile): number[] {
+  return p.hasKids === 'Y' ? p.kids.map(kidAge).filter((x): x is number => x !== null) : [];
+}
+
+/** 내가 고른 것 + 자녀 정보로 자동 판단한 조건 코드 */
+export function myCodes(p: Profile): Set<string> {
+  const s = new Set<string>();
+  TAGS.forEach((t) => { if (p.tags.includes(t.label)) t.codes.forEach((c) => s.add(c)); });
+  const ages = kidAges(p);
+  if (ages.length >= 2) s.add('JA0411');
+  if (p.pregnant === 'Y') s.add('JA0302');
+  if (ages.some((a) => a < 1)) s.add('JA0303');
+  if (ages.some((a) => a >= 6 && a <= 12)) s.add('JA0317');
+  if (ages.some((a) => a >= 12 && a <= 15)) s.add('JA0318');
+  if (ages.some((a) => a >= 15 && a <= 18)) s.add('JA0319');
+  return s;
+}
 
 // ---------- 브라우저 저장 ----------
 const KEY = 'af-profile-v1';
@@ -76,6 +112,10 @@ export function loadProfile(): Profile {
   try {
     const p: Profile = { ...EMPTY_PROFILE, ...JSON.parse(raw) };
     if (p.sido === '인천광역시' && p.sgg === '서구') p.sgg = '서해구'; // 2026.7 이름 변경
+    // 예전 버전에서 고른 항목 옮기기
+    if (p.tags.includes('임산부')) { p.pregnant = 'Y'; }
+    p.tags = p.tags.filter((t) => TAGS.some((x) => x.label === t));
+    if (!Array.isArray(p.kids)) p.kids = [];
     return p;
   } catch { return { ...EMPTY_PROFILE }; }
 }

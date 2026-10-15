@@ -5,6 +5,7 @@ import { geocodeAddress, searchPlace } from './kakao';
 import { parseDeadline } from '../deadline';
 import { scopeOf } from '../regions';
 import { isPersonService } from '../match';
+import { parseHint } from '../hints';
 
 const ODCLOUD = 'https://api.odcloud.kr/api';
 type Row = Record<string, unknown>;
@@ -101,6 +102,7 @@ export async function syncBenefits() {
         source_updated: ts(r['수정일시']),
         scope: sc.scope, sido: sc.sido, sgg: sc.sgg,
         cond: c, cond_codes: codes, age_min: lo, age_max: hi,
+        hint: parseHint(s(r['서비스명']), s(r['지원대상']), s(r['선정기준'])),
         person_ok: isPersonService(codes, s(r['사용자구분'])),
         active: true,
         synced_at: started,

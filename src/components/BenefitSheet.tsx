@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { IcHeart, IcOut, IcShare } from './icons';
 import { Profile, deviceId } from '@/lib/profile';
 import { conditionSummary, evaluate, explain, Match } from '@/lib/match';
+import type { Hint } from '@/lib/hints';
 import { deadlineLabel } from '@/lib/deadline';
 import { shareLink, track } from '@/lib/client';
 
@@ -11,7 +12,7 @@ type Detail = {
   target: string | null; criteria: string | null; content: string | null; how: string | null;
   deadlineText: string | null; deadlineKind: string | null; deadlineEnd: string | null;
   url: string | null; org: string | null; dept: string | null; receiver: string | null; phone: string | null;
-  views: number; likes: number; lo: number; hi: number; codes: string[];
+  views: number; likes: number; lo: number; hi: number; codes: string[]; hint: Hint | null;
 };
 
 const MT: Record<Match, [string, string]> = {
@@ -39,31 +40,42 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
     }).catch((e) => setErr(e.message || '불러오지 못했어요'));
   }, [id]);
 
+  // 좋아요: 누르자마자 숫자를 바꾸고, 저장 실패하면 되돌림
   const like = async () => {
     if (busy) return;
     setBusy(true);
+    const before = { liked, likes };
+    const next = !liked;
+    setLikes(likes + (next ? 1 : -1)); onLiked(id, next, likes + (next ? 1 : -1));
     try {
       const r = await fetch('/api/like', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, device: deviceId() }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       setLikes(j.count); onLiked(id, j.liked, j.count);
       if (j.liked) track('like_benefit', { id });
-    } catch (e) { toast(e instanceof Error ? e.message : '잠시 후 다시 시도해 주세요'); }
+    } catch {
+      setLikes(before.likes); onLiked(id, before.liked, before.likes);
+      toast('좋아요를 저장하지 못했어요. 잠시 후 다시 시도해 주세요');
+    }
     setBusy(false);
   };
 
+  const [sharing, setSharing] = useState(false);
   const share = async () => {
-    if (!d) return;
+    if (!d || sharing) return;
+    setSharing(true);
     const url = `${location.origin}/benefit/${encodeURIComponent(d.id)}`;
     const r = await shareLink(d.name, d.summary || '올페어에서 확인해 보세요', url);
+    setSharing(false);
     track('share_benefit', { id: d.id, via: r });
-    if (r === 'copied') toast('링크를 복사했어요');
+    if (r === 'copied') toast('링크를 복사했어요. 원하는 곳에 붙여넣어 보내세요');
     if (r === 'fail') toast('공유하지 못했어요');
   };
 
-  const m = d ? evaluate({ lo: d.lo, hi: d.hi, codes: d.codes }, profile) : 'check';
-  const conds = d ? conditionSummary({ lo: d.lo, hi: d.hi, codes: d.codes }) : [];
-  const checks = d && profile.set ? explain({ lo: d.lo, hi: d.hi, codes: d.codes }, profile) : [];
+  const cond = d ? { lo: d.lo, hi: d.hi, codes: d.codes, hint: d.hint } : null;
+  const m = cond ? evaluate(cond, profile) : 'check';
+  const conds = cond ? conditionSummary(cond) : [];
+  const checks = cond && profile.set ? explain(cond, profile) : [];
   const dl = d ? deadlineLabel(d.deadlineKind, d.deadlineEnd) : null;
   const applyUrl = d?.url || 'https://www.gov.kr';
 
@@ -107,7 +119,7 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
             <p className="note">정보는 공공데이터 기준이며, 정확한 자격은 신청처에서 확인하세요.</p>
             <div className="btns">
               <button className={`likebtn ${liked ? 'on' : ''}`} aria-pressed={liked} aria-label="좋아요" onClick={like}><IcHeart size={22} /><span>{likes.toLocaleString()}</span></button>
-              <button className="iconbtn" aria-label="공유하기" onClick={share}><IcShare /></button>
+              <button className="iconbtn" aria-label="공유하기" onClick={share} disabled={sharing}>{sharing ? <span className="spin" aria-hidden /> : <IcShare />}</button>
               <a className="go" href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('click_apply', { id: d.id })}>신청하러 가기 <IcOut /></a>
             </div>
           </>

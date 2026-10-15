@@ -198,3 +198,104 @@ hr { border: 0; height: 1px; background: var(--chip); margin: 0; }
 .doc h1 { font-size: 22px; margin-bottom: 8px; }
 .doc h2 { font-size: 16px; margin: 24px 0 6px; }
 .doc p, .doc li { color: var(--sub); }
+
+/* ===== v3 ===== */
+/* 브랜드·탭 제목 */
+.brandname { font-size: 19px; font-weight: 700; letter-spacing: -.5px; }
+.brandbtn { border: 0; background: none; padding: 0; text-align: left; color: inherit; }
+.tabtitle { margin: 0; font-size: 20px; letter-spacing: -.5px; }
+
+/* 진행 표시 */
+.spin { display: inline-block; width: 14px; height: 14px; border-radius: 999px; border: 2px solid currentColor; border-right-color: transparent; vertical-align: -2px; margin-right: 6px; animation: spin .7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2s; } }
+button:disabled { cursor: default; opacity: .7; }
+
+/* 혜택 카드 */
+.org { background: var(--chip); color: var(--sub); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.org.local { background: color-mix(in srgb, var(--me) 12%, var(--card)); color: var(--me); }
+.mt.all { background: var(--soft); color: var(--mint-ink); }
+.fitwhy { font-size: 12px; color: var(--mint); font-weight: 600; line-height: 1.45; }
+.switchrow { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 20px; padding: 12px 16px; cursor: pointer; }
+.switchrow > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.switchrow b { font-size: 14px; }
+.switchrow small { font-size: 12px; color: var(--sub); }
+.switchrow input { appearance: none; -webkit-appearance: none; flex: none; width: 48px; height: 28px; border-radius: 999px; background: var(--chip); position: relative; margin: 0; cursor: pointer; transition: background .2s; }
+.switchrow input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 999px; background: var(--card); box-shadow: 0 1px 3px rgb(0 0 0 / .25); transition: transform .2s; }
+.switchrow input:checked { background: var(--mint); }
+.switchrow input:checked::after { transform: translateX(20px); }
+.tier { display: flex; flex-direction: column; gap: 10px; }
+.tierhead { width: 100%; border: 0; background: none; padding: 6px 4px; display: flex; align-items: center; gap: 10px; color: inherit; min-height: 48px; }
+.tierhead b { font-size: 16px; letter-spacing: -.3px; display: flex; align-items: center; gap: 6px; }
+.tierhead small { display: block; font-size: 12px; color: var(--sub); margin-top: 2px; }
+.tcount { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 9px; font-variant-numeric: tabular-nums; }
+.tcount.ok { background: var(--mint); color: var(--on-mint); }
+.tcount.check, .tcount.all { background: var(--chip); color: var(--sub); }
+.tcount.no { background: var(--chip); color: var(--warn); }
+.chev { flex: none; width: 32px; height: 32px; border-radius: 999px; background: var(--card); color: var(--mint); display: grid; place-items: center; font-size: 14px; }
+
+/* 내 조건 */
+.seg.small { background: var(--chip); }
+.seg.small button { height: 40px; }
+.kids { display: flex; flex-direction: column; gap: 8px; }
+.kidrow { display: flex; align-items: center; gap: 8px; }
+.field .kidrow input { flex: 1; height: 44px; }
+.agebadge.small { height: 44px; padding: 0 10px; font-size: 14px; min-width: 70px; }
+.kidx { flex: none; width: 36px; height: 36px; border: 0; border-radius: 999px; background: var(--chip); color: var(--sub); }
+.resetbtn { border: 0; background: none; color: var(--mute); font-size: 13px; font-weight: 600; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; align-self: center; }
+.resetbtn.armed { color: var(--warn); }
+
+/* 후기 · 결제 확인 */
+.paidsum { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 600; }
+.paidok { color: var(--mint); }
+.paidno { color: var(--warn); background: color-mix(in srgb, var(--warn) 10%, var(--card)); border-radius: 999px; padding: 1px 8px; }
+.paybtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.paybtns button { height: 44px; border: 0; border-radius: 999px; background: var(--chip); color: var(--sub); font-weight: 600; font-size: 14px; }
+.paybtns button.on.yes { background: var(--mint); color: var(--on-mint); }
+.paybtns button.on.no { background: var(--warn); color: var(--card); }
+.starpick { display: flex; align-items: center; gap: 2px; }
+.starpick .cap { margin-right: 6px; }
+.starpick button { width: 36px; height: 36px; border: 0; background: none; font-size: 24px; color: var(--chip); padding: 0; line-height: 1; }
+.starpick button.on { color: #F5B301; }
+.stars { color: #F5B301; font-size: 13px; letter-spacing: 1px; }
+.stars i { font-style: normal; color: var(--chip); }
+.rev .stars i { color: color-mix(in srgb, var(--sub) 30%, transparent); }
+.rmeta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.pbadge { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 8px; background: var(--card); color: var(--sub); }
+.pbadge.yes { color: var(--mint); }
+.pbadge.no { color: var(--warn); }
+.minerev { background: var(--soft); box-shadow: inset 0 0 0 1.5px var(--mint); }
+.mineacts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.mineacts .ghost { height: 34px; padding: 0 12px; }
+.ghost.danger { color: var(--warn); }
+.rsend, .sbtn, .ghost, .morebtn, .cta { display: inline-flex; align-items: center; justify-content: center; }
+
+/* 관리자 */
+.admin { display: flex; flex-direction: column; gap: 14px; }
+.astats { margin: 0; color: var(--sub); font-size: 14px; }
+.astats b { color: var(--ink); }
+.abtns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.abtn { border: 0; border-radius: 20px; background: var(--card); padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink); min-height: 76px; text-align: center; }
+.abtn strong { font-size: 15px; display: inline-flex; align-items: center; }
+.abtn span { font-size: 12px; color: var(--sub); }
+.abtn.on { background: var(--mint); color: var(--on-mint); }
+.abtn.on span { color: var(--on-mint); }
+@media (max-width: 520px) { .abtns { grid-template-columns: 1fr; } .abtn { flex-direction: row; justify-content: space-between; min-height: 56px; padding: 12px 18px; } }
+.amsg { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--soft); color: var(--mint-ink); font-size: 14px; }
+.amsg.bad { background: color-mix(in srgb, var(--warn) 12%, var(--card)); color: var(--warn); }
+.logbtn { border: 0; background: none; padding: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; color: inherit; font-weight: 700; min-height: 32px; text-align: left; }
+.reddot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: var(--warn); margin-left: 4px; vertical-align: middle; }
+.logrow { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--sub); padding-top: 8px; border-top: 1px solid var(--chip); overflow-wrap: anywhere; }
+.logrow b { color: var(--ink); font-weight: 600; }
+.logrow.bad b { color: var(--warn); }
+.atabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.atabs button { flex: none; height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--chip); color: var(--sub); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.atabs button.on { background: var(--mint); color: var(--on-mint); }
+.atabs em { font-style: normal; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: var(--warn); color: var(--card); }
+.atabs em.new { background: var(--me); }
+.admin .search { background: var(--chip); }
+.arev.dim { opacity: .6; }
+.starpick button { color: color-mix(in srgb, var(--sub) 28%, transparent); }
+.starpick button.on { color: #F5B301; }
+.rform .row { flex-wrap: wrap; }
+.rform .mineacts { flex-wrap: nowrap; margin-left: auto; }

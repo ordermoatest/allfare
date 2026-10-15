@@ -29,33 +29,20 @@ export function loadKakaoMaps(): Promise<any> {
   return mapsPromise;
 }
 
-/** 카카오톡 공유 → 안 되면 기기 공유 → 링크 복사 */
-export async function shareLink(title: string, text: string, url: string): Promise<'kakao' | 'native' | 'copied' | 'fail'> {
-  const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+/** 휴대폰 기본 공유창 → 안 되면 링크 복사 (카카오 앱 설정을 거치지 않아 링크가 그대로 전달됨) */
+export async function shareLink(title: string, text: string, url: string): Promise<'native' | 'copied' | 'fail' | 'cancel'> {
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try { await navigator.share({ title, text, url }); return 'native'; }
+    catch (e) { if (e instanceof Error && e.name === 'AbortError') return 'cancel'; }
+  }
+  try { await navigator.clipboard.writeText(url); return 'copied'; } catch { /* 아래로 */ }
   try {
-    if (key) {
-      await loadScript('https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js', 'kakao-sdk');
-      const K = (window as any).Kakao;
-      if (K && !K.isInitialized()) K.init(key);
-      if (K?.Share) {
-        K.Share.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: title.slice(0, 80),
-            description: text.slice(0, 100),
-            imageUrl: `${location.origin}/og.png`,
-            imageWidth: 1200, imageHeight: 630,
-            link: { mobileWebUrl: url, webUrl: url },
-          },
-          buttons: [{ title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } }],
-        });
-        return 'kakao';
-      }
-    }
-  } catch { /* 다음 방법으로 */ }
-  try {
-    if (navigator.share) { await navigator.share({ title, text, url }); return 'native'; }
-  } catch { /* 취소 등 */ }
-  try { await navigator.clipboard.writeText(url); return 'copied'; } catch { return 'fail'; }
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok ? 'copied' : 'fail';
+  } catch { return 'fail'; }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

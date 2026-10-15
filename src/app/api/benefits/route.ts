@@ -6,7 +6,7 @@ import { todayKST } from '@/lib/deadline';
 
 export const dynamic = 'force-dynamic';
 
-const COLS = 'id,name,summary,category,org,deadline_kind,deadline_end,views,like_count,registered_at,age_min,age_max,cond_codes';
+const COLS = 'id,name,summary,category,org,deadline_kind,deadline_end,views,like_count,registered_at,age_min,age_max,cond_codes,hint,scope';
 
 // 지역 기준 혜택 목록 (내 조건 판정·검색·정렬은 브라우저에서)
 export async function GET(req: NextRequest) {
@@ -47,6 +47,8 @@ export async function GET(req: NextRequest) {
       lo: r.age_min,
       hi: r.age_max,
       k: r.cond_codes,
+      h: r.hint || undefined,
+      lc: r.scope === 'local' ? 1 : undefined,
     }));
     return NextResponse.json({ items, region: validSgg ? `${sido} ${sgg}` : validSido ? sido : '전국' }, {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400' },

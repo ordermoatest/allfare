@@ -44,3 +44,8 @@ src/lib            조건 판정(match), 지역(regions), 마감일(deadline), �
 src/lib/server     Supabase·카카오·동기화 (서버 전용)
 supabase/          DB 스키마 SQL
 ```
+
+## v3 업데이트 (배포 순서)
+1. Supabase SQL Editor에서 `allfare_v3.sql` 실행 (후기 결제확인·별점·수정, 혜택 힌트 컬럼)
+2. 깃허브에 v3 파일 덮어쓰고 푸시 → Vercel 자동 배포
+3. `/admin` → [혜택 동기화] 한 번 실행 (자녀 나이·세대주 힌트 채우기, 인천 서해구 반영)

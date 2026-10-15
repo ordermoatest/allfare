@@ -78,12 +78,12 @@ export default function App() {
       </main>
       {opened.culture && (
         <main className="scroll" ref={scrollRef('culture')} hidden={tab !== 'culture'}>
-          <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} />
+          <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} onHome={() => go('home')} />
         </main>
       )}
       {opened.my && (
         <main className="scroll" ref={scrollRef('my')} hidden={tab !== 'my'}>
-          <MyTab profile={profile} fs={fs} setFs={setFs}
+          <MyTab profile={profile} fs={fs} setFs={setFs} onHome={() => go('home')}
             onSave={(p) => { setProfile(p); saveProfile(p); toast('저장했어요. 내 조건에 맞는 혜택을 보여드려요'); go('home'); }}
             onReset={() => { clearProfile(); setProfile({ ...EMPTY_PROFILE }); toast('저장된 내 정보를 지웠어요'); }} />
         </main>

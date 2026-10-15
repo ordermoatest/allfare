@@ -16,20 +16,20 @@ export function Logo({ size = 44 }: { size?: number }) {
   );
 }
 
-export default function Brand({ href }: { href?: string }) {
+export default function Brand({ href, onClick }: { href?: string; onClick?: () => void }) {
   const body = (
     <>
       <Logo />
       <div style={{ minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <h1>올페어</h1>
+          <span className="brandname">올페어</span>
           <span className="slogan">All <span className="wel">wel</span>Fare</span>
         </div>
         <div className="cap">내 혜택, 내 주변 사용처 한 번에</div>
       </div>
     </>
   );
-  return href
-    ? <a href={href} className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>{body}</a>
-    : <div className="brand">{body}</div>;
+  if (href) return <a href={href} className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>{body}</a>;
+  if (onClick) return <button className="brand brandbtn" onClick={onClick} aria-label="혜택 탭 처음으로">{body}</button>;
+  return <div className="brand">{body}</div>;
 }

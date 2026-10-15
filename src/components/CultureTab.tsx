@@ -3,16 +3,17 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
 import KakaoMap from './KakaoMap';
+import Brand from './Brand';
 import { IcGps, IcPin, IcSearch, StoreIcon } from './icons';
-import { Place, Store, km } from '@/lib/types';
+import { Place, Store, km, paidLine } from '@/lib/types';
 import { track } from '@/lib/client';
 
 const RADII = [500, 1000, 3000];
 const DEFAULT: Place = { lat: 37.57103, lng: 126.97646, label: '광화문역', mode: 'home' };
 type Cand = { lat: number; lng: number; label: string; sub: string };
 
-export default function CultureTab({ visible, onPick, toast }: {
-  visible: boolean; onPick: (s: Store) => void; toast: (m: string) => void;
+export default function CultureTab({ visible, onPick, toast, onHome }: {
+  visible: boolean; onPick: (s: Store) => void; toast: (m: string) => void; onHome: () => void;
 }) {
   const [place, setPlace] = useState<Place>(DEFAULT);
   const [stores, setStores] = useState<Store[] | null>(null);
@@ -27,6 +28,7 @@ export default function CultureTab({ visible, onPick, toast }: {
   const [locQ, setLocQ] = useState('');
   const [cands, setCands] = useState<Cand[] | null>(null);
   const [locating, setLocating] = useState(false);
+  const [finding, setFinding] = useState(false);
 
   // 기준 위치가 바뀌면 3km 안 가맹점을 한 번에 받아두고 반경·분야·검색어는 화면에서 거름
   useEffect(() => {
@@ -41,14 +43,15 @@ export default function CultureTab({ visible, onPick, toast }: {
   const searchLoc = async (e?: FormEvent) => {
     e?.preventDefault();
     const v = locQ.trim();
-    if (!v) return;
-    setCands(null);
+    if (!v || finding) return;
+    setCands(null); setFinding(true);
     try {
       const r = await fetch(`/api/geo?q=${encodeURIComponent(v)}`);
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       setCands(j.items);
     } catch (er) { setCands([]); toast(er instanceof Error ? er.message : '검색하지 못했어요'); }
+    setFinding(false);
   };
 
   const pickPlace = (c: Cand) => {
@@ -87,7 +90,8 @@ export default function CultureTab({ visible, onPick, toast }: {
 
   return (
     <>
-      <h1>문화누리 사용처</h1>
+      <div className="head"><Brand onClick={onHome} /></div>
+      <h2 className="tabtitle">문화누리 사용처</h2>
 
       <button className="locbar" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
         <span style={{ color: 'var(--mint)' }}><IcPin /></span>
@@ -132,6 +136,9 @@ export default function CultureTab({ visible, onPick, toast }: {
                 </div>
                 <strong>{s.name}</strong>
                 <span className="cap">{s.address}</span>
+                {(s.paid_yes || s.paid_no || s.rating_avg) ? (() => { const pl = paidLine(s.paid_yes, s.paid_no, s.rating_avg); return (
+                  <span className="paidsum">{pl.text && <span className="paidok">✓ {pl.text}</span>}{pl.warn && <span className="paidno">⚠ {pl.warn}</span>}</span>
+                ); })() : null}
               </button>
             ))}
           </div>
@@ -148,12 +155,13 @@ export default function CultureTab({ visible, onPick, toast }: {
             <form className="search" style={{ paddingRight: 5 }} onSubmit={searchLoc}>
               <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
               <input autoFocus value={locQ} onChange={(e) => setLocQ(e.target.value)} enterKeyHint="search" placeholder="역·동네·주소 (예: 광화문역)" aria-label="역, 동네, 주소 검색" />
-              <button className="sbtn">찾기</button>
+              <button className="sbtn" disabled={finding}>{finding ? <i className="spin" /> : '찾기'}</button>
             </form>
             <button className="item" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onClick={locateMe} disabled={locating}>
-              <span style={{ color: 'var(--mint)' }}><IcGps /></span><strong>{locating ? '위치 확인 중…' : '현재 위치로'}</strong>
+              <span style={{ color: 'var(--mint)' }}><IcGps /></span><strong>{locating ? <><i className="spin" />위치 확인 중…</> : '현재 위치로'}</strong>
             </button>
-            {cands === null && locQ && <span className="cap" style={{ textAlign: 'center' }}>찾기를 누르면 후보가 나와요</span>}
+            {cands?.length === 0 && !finding && <span className="cap" style={{ textAlign: 'center' }}>검색 결과가 없어요. 역 이름이나 동 이름으로 찾아보세요</span>}
+            {cands === null && locQ && !finding && <span className="cap" style={{ textAlign: 'center' }}>찾기를 누르면 후보가 나와요</span>}
             {cands && cands.length > 0 && <span className="cap">검색 결과</span>}
             {cands?.map((c, i) => (
               <button key={i} className="item" style={{ gap: 2 }} onClick={() => pickPlace(c)}>
