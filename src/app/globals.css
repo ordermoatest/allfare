@@ -785,6 +785,9 @@ nav.tabs .ic { width: 54px; }
 .cstick { position: sticky; top: calc(var(--hdrh) + env(safe-area-inset-top, 0px) - 1px); z-index: 3; background: var(--bg); display: flex; flex-direction: column; gap: 8px; margin: 0 -16px; padding: 2px 16px 10px; }
 .cstick .map { height: 260px; transition: height .22s; }
 .cstick.mini .map { height: 170px; }
+/* 지도가 줄어든 만큼 아래 여백으로 채워서 페이지 길이·목록 위치가 안 변하게 */
+.cstick { transition: margin-bottom .22s; }
+.cstick.mini { margin-bottom: 90px; }
 .cstick.mini .maploc { padding: 5px 10px; }
 .cstick.mini .maploc small { display: none; }
 .cstick .search { margin: 0; }

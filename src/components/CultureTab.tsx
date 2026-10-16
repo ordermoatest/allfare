@@ -60,7 +60,12 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
   const [mini, setMini] = useState(false);
   useEffect(() => {
     if (!visible) return;
-    const on = () => setMini(window.scrollY > 120);
+    // 작아지는 기준(200px)과 다시 커지는 기준(60px)을 따로 둬서 경계에서 왔다갔다 하지 않게
+    const on = () => {
+      const y = window.scrollY;
+      const room = document.documentElement.scrollHeight - window.innerHeight;
+      setMini((m) => (room < 400 ? false : m ? y > 60 : y > 200));
+    };
     on(); window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);
   }, [visible]);
