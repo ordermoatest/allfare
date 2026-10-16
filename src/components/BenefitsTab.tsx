@@ -217,7 +217,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
       <PopularNews variant="card" from="home" />
       <section className="seointro" aria-label="올페어 소개">
         <h2>올페어로 할 수 있는 것</h2>
-        <p>올페어는 정부·지자체 복지 혜택 1만여 개 중에서 내 나이, 사는 곳, 소득, 자녀, 혼인 여부에 맞는 혜택을 골라주는 무료 조회 서비스예요. 로그인 없이 쓸 수 있고, 입력한 조건은 내 기기에만 저장돼요.</p>
+        <p>올페어(allfare.kr)는 정부·지자체 복지 혜택 1만여 개 중에서 내 나이, 사는 곳, 소득, 자녀, 혼인 여부에 맞는 혜택을 골라주는 무료 조회 서비스예요. 로그인 없이 쓸 수 있고, 입력한 조건은 내 기기에만 저장돼요.</p>
         <ul>
           <li><a href="/guide/median-income">2026 기준중위소득 계산기</a>로 우리 집 소득이 몇 %인지 확인해요.</li>
           <li><a href="/culture">지역별 문화누리카드 사용처</a>를 시·군·구별로 찾아요.</li>

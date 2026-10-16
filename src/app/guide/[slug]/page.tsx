@@ -37,7 +37,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
   const ld = [
     { '@context': 'https://schema.org', '@type': 'Article', headline: g.seoTitle, description: g.desc, datePublished: g.updated, dateModified: g.updated,
       mainEntityOfPage: url, inLanguage: 'ko-KR', image: `${SITE}${ogImage({ t: g.title, s: g.sub, k: '복지 가이드', e: g.emoji }).url}`, keywords: g.kw?.join(', '),
-      author: { '@type': 'Organization', name: 'AllFare 올페어', url: SITE }, publisher: { '@type': 'Organization', name: 'AllFare 올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
+      author: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', url: `${SITE}/` }, publisher: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: '올페어', item: `${SITE}/` },
       { '@type': 'ListItem', position: 2, name: '복지 가이드', item: `${SITE}/guide` },

@@ -38,7 +38,7 @@ export default function NewsPage({ params }: { params: { slug: string } }) {
   const ld = [
     { '@context': 'https://schema.org', '@type': 'NewsArticle', headline: n.seoTitle, description: n.desc, datePublished: n.date, dateModified: n.date,
       mainEntityOfPage: url, inLanguage: 'ko-KR', image: `${SITE}${card(n).url}`, keywords: n.kw?.join(', '),
-      author: { '@type': 'Organization', name: 'AllFare 올페어', url: SITE }, publisher: { '@type': 'Organization', name: 'AllFare 올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
+      author: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', url: `${SITE}/` }, publisher: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: '올페어', item: `${SITE}/` },
       { '@type': 'ListItem', position: 2, name: '복지 소식', item: `${SITE}/news` },

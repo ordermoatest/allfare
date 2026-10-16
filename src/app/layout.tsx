@@ -10,6 +10,7 @@ const NAVER = process.env.NEXT_PUBLIC_NAVER_VERIFY; // 네이버 서치어드바
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
+  applicationName: '올페어',
   title: '올페어 - 나에게 맞는 복지 혜택 찾기 · 내 주변 문화누리카드 사용처 찾기',
   description: '생년월일·사는 곳·소득만 넣으면 받을 수 있는 정부·지자체 복지 혜택 1만여 개 중 나에게 맞는 것을 골라드려요. 내 주변 문화누리카드 사용처도 지도로 찾고, 기준중위소득 계산기도 써보세요.',
   keywords: ['복지 혜택 조회', '정부 지원금 찾기', '문화누리카드 사용처', '문화누리카드 가맹점', '기준중위소득 계산기', '청년 지원금', '신혼부부 혜택'],
