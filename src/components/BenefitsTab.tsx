@@ -141,7 +141,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
           <button onClick={goMy}>내 조건 입력하기</button>
         </section>
       ) : (
-        <section className="hero">
+        <section className="herox">
           <button className="hsum" onClick={goMy} aria-label="내 조건 바꾸기">
             <span className="hsum-l">내 조건</span>
             <span className="hsum-t">{[
@@ -155,7 +155,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
             ].filter(Boolean).join(' · ')}</span>
             <span className="hsum-e" aria-hidden>수정 ›</span>
           </button>
-          <b>{!items ? <>내 조건에 맞는 혜택을<br />찾는 중이에요</> : items.length === 0 ? <>혜택 정보를<br />준비하고 있어요</> : nothing ? <>지금 조건에 맞는 혜택이<br />없어요</> : <>나에게 꼭 맞는 혜택<br />{all.fit.toLocaleString()}개를 찾았어요</>}</b>
+          <b className="hxt">{!items ? '내 조건에 맞는 혜택을 찾는 중이에요' : items.length === 0 ? '혜택 정보를 준비하고 있어요' : nothing ? '지금 조건에 맞는 혜택이 없어요' : <>나에게 꼭 맞는 혜택 <em>{all.fit.toLocaleString()}개</em></>}</b>
         </section>
       )}
 

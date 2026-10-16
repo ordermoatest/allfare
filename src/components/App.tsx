@@ -160,7 +160,7 @@ export default function App() {
           sharePrompt={sharePrompt} onSharePrompt={() => shareSite('prompt')} onClosePrompt={closePrompt} />
       </main>
       {opened.culture && (
-        <main className="scroll" hidden={tab !== 'culture'}>
+        <main className="scroll ctab" hidden={tab !== 'culture'}>
           <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} onHome={() => go('home')} />
         </main>
       )}

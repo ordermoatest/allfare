@@ -5,7 +5,7 @@ import { upcoming } from '@/lib/events';
 import { track } from '@/lib/client';
 import { Logo } from './Brand';
 import PopularNews from './PopularNews';
-import { IcCalc, IcChevron, IcShare, IcSliders } from './icons';
+import { IcCalc, IcChevron, IcShare } from './icons';
 
 type Tab = 'home' | 'culture' | 'explore' | 'my';
 export type PcActive = 'home' | 'culture' | 'region' | 'guide' | 'news' | 'my' | '';
@@ -66,7 +66,7 @@ export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: (
         </div>
         {evs.length > 0 && (
           <section>
-            <p className="pclbl">놓치면 안 되는 일정{today && ` · ${today}`}</p>
+            <p className="pclbl">놓치면 안 되는 일정{today && <small>{today}</small>}</p>
             <div className="pcev">
               {evs.map((e) => (
                 <a key={e.title} href={`/guide/${e.slug}`} onClick={() => track('pc_event', { slug: e.slug })}>
@@ -89,8 +89,7 @@ export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: (
           <p className="pclbl">바로가기</p>
           <div className="pclinks">
             <a href="/guide/median-income" onClick={() => track('pc_side', { to: 'calc' })}><IcCalc />기준중위소득 계산기<IcChevron size={15} /></a>
-            <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><span className="pcemo" aria-hidden>🎫</span>문화누리카드 신청·금액 안내<IcChevron size={15} /></a>
-            <button onClick={() => { onMy(); track('pc_side', { to: 'my' }); }}><IcSliders size={18} />내 조건 입력하기<IcChevron size={15} /></button>
+            <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><span className="pcemo" aria-hidden>🎫</span>문화누리카드 안내<IcChevron size={15} /></a>
           </div>
         </section>
         <section>

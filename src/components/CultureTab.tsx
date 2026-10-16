@@ -53,6 +53,17 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
   const [finding, setFinding] = useState(false);
   // 지도 숫자 원을 눌렀을 때 보여줄 가게 묶음
   const [group, setGroup] = useState<Store[] | null>(null);
+  // 목록에서 고른 가게 (지도에 빨갛게)
+  const [focus, setFocus] = useState<string | null>(null);
+  // 목록을 내리면 지도를 조금 작게
+  const [mini, setMini] = useState(false);
+  useEffect(() => {
+    if (!visible) return;
+    const on = () => setMini(window.scrollY > 120);
+    on(); window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, [visible]);
+  const pickFromList = (s: Store) => { setFocus(s.id); onPick(s); track('store_from_list'); };
   useBackClose(sheet, () => setSheet(false));
 
   // 기준 위치가 바뀌면 3km 안 가맹점을 한 번에 받아두고 반경·분야·검색어는 화면에서 거름
@@ -127,7 +138,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
     return inR.filter((s) => curCat === '전체' || (s.category || '기타') === curCat).sort(cmp[sort]);
   }, [inR, curCat, sort]);
   // 목록 조건이 바뀌면 묶음 목록 닫기
-  useEffect(() => { setGroup(null); }, [shown, online]);
+  useEffect(() => { setGroup(null); setFocus(null); }, [shown, online]);
   const toggleFlt = (k: string) => { setFlt((f) => (f.includes(k) ? f.filter((x) => x !== k) : [...f, k])); track('filter_store', { f: k }); };
   const modeLabel = place.mode === 'gps' ? '현재 위치' : place.mode === 'search' ? '검색한 위치' : '기본 위치';
 
@@ -135,17 +146,26 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
     <>
       <h2 className="tabtitle">문화누리 사용처</h2>
 
-      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick}
+      <div className={`cstick ${mini ? 'mini' : ''}`}>
+      <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick} focusId={focus}
         onCluster={(l) => { setGroup(l); track('map_cluster', { n: l.length }); }}>
         <button className="maploc" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
           <span style={{ color: 'var(--mint)' }}><IcPin /></span>
           <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}><small>{modeLabel}</small><b>{place.label} 근처</b></span>
           <span className="locbar-btn">바꾸기 ▾</span>
         </button>
-        <div className="maprad" role="group" aria-label="검색 반경">
-          {RADII.map((r) => <button key={r} className={radius === r ? 'on' : ''} aria-pressed={radius === r} onClick={() => setRadius(r)}>{km(r)}</button>)}
-        </div>
+        <button className="maprad1" aria-label={`검색 반경 ${km(radius)}, 눌러서 바꾸기`} onClick={() => setRadius(RADII[(RADII.indexOf(radius) + 1) % RADII.length])}>
+          반경 <b>{km(radius)}</b> <span aria-hidden>↻</span>
+        </button>
       </KakaoMap>
+
+      <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
+        <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
+        <input value={kwInput} onChange={(e) => { setKwInput(e.target.value); if (!e.target.value) setKw(''); }} enterKeyHint="search" placeholder="가게 이름 검색 (예: 교보문고)" aria-label="가게 이름 검색" />
+        {kwInput && <button type="button" className="gps" aria-label="검색어 지우기" onClick={clearKw}>✕</button>}
+        <button className="sbtn">검색</button>
+      </form>
+      </div>
       {group && (
         <section className="clist" aria-label={`이 근처 가맹점 ${group.length}곳`}>
           <div className="clhead"><b>📍 이 근처 {group.length}곳</b><button className="ghost" onClick={() => setGroup(null)}>✕ 닫기</button></div>
@@ -158,15 +178,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
           ))}
         </section>
       )}
-
-      <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
-        <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
-        <input value={kwInput} onChange={(e) => { setKwInput(e.target.value); if (!e.target.value) setKw(''); }} enterKeyHint="search" placeholder="가게 이름 검색 (예: 교보문고)" aria-label="가게 이름 검색" />
-        {kwInput && <button type="button" className="gps" aria-label="검색어 지우기" onClick={clearKw}>✕</button>}
-        <button className="sbtn">검색</button>
-      </form>
       {kw && <div className="kwinfo">&lsquo;{kw}&rsquo; 이름이 들어간 가게 {nameHits}곳 · 아래 목록과 지도에 표시돼요 <button className="linkbtn" style={{ minHeight: 28 }} onClick={clearKw}>검색 해제</button></div>}
-      <a className="regionlink" href="/culture">📋 지역별 사용처 목록 보기 <span aria-hidden>›</span></a>
 
       {err ? <div className="empty">{err}</div> : !stores ? (
         <div className="list" aria-busy="true"><div className="skel" /><div className="skel" /></div>
@@ -205,7 +217,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
               </div>
             )}
             {shown.map((s) => (
-              <button key={s.id} className="item" onClick={() => onPick(s)}>
+              <button key={s.id} className={`item ${focus === s.id ? 'focus' : ''}`} onClick={() => pickFromList(s)}>
                 <div className="row">
                   <span className="tags"><span className="tag"><StoreIcon cat={s.category || ''} />{s.category || '기타'}</span>{s.review_count > 0 && <span className="mt check">후기 {s.review_count}</span>}</span>
                   <span className="d">{km(s.distance)}</span>
