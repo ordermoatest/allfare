@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Footer from './Footer';
-import { IcSearch } from './icons';
+import { IcCalc, IcPin, IcSearch } from './icons';
 import { Profile } from '@/lib/profile';
 import { SGG, SIDO_SHORT } from '@/lib/regions';
 import { GROUPS, GuideGroup, guidesIn } from '@/lib/guides';
@@ -46,19 +46,33 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
         <div className="cap">혜택 받기 전에 알아두면 좋은 정보를 모았어요</div>
       </div>
 
-      <div className="eseg" role="tablist" aria-label="알아보기 메뉴">
-        {PANES.map((p) => (
-          <button key={p.k} role="tab" aria-selected={pane === p.k} className={pane === p.k ? 'on' : ''} onClick={() => { setPane(p.k); track('explore_pane', { p: p.k }); }}>{p.label}</button>
-        ))}
+      {/* 탭 버튼·칩·계산기(또는 검색창)는 위에 고정, 아래 목록만 스크롤 */}
+      <div className="estick">
+        <div className="eseg" role="tablist" aria-label="알아보기 메뉴">
+          {PANES.map((p) => (
+            <button key={p.k} role="tab" aria-selected={pane === p.k} className={pane === p.k ? 'on' : ''} onClick={() => { setPane(p.k); track('explore_pane', { p: p.k }); }}>{p.label}</button>
+          ))}
+        </div>
+        {pane === 'guide' && (
+          <>
+            <div className="echips" role="group" aria-label="가이드 분야">
+              <button className={grp === 'all' ? 'on' : ''} onClick={() => setGrp('all')}>전체</button>
+              {GORDER.map((k) => <button key={k} className={grp === k ? 'on' : ''} onClick={() => setGrp(k)}>{glabel(k)}</button>)}
+            </div>
+            <a className="ecalc" href="/guide/median-income" onClick={() => track('explore_calc')}><IcCalc size={18} />기준중위소득 계산기<em aria-hidden>›</em></a>
+          </>
+        )}
+        {pane === 'region' && (
+          <label className="search" style={{ height: 48 }}>
+            <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="우리 동네 검색 (예: 종로, 세종)" aria-label="우리 동네 검색" enterKeyHint="search" />
+            {q && <button type="button" className="gps" aria-label="검색어 지우기" onClick={() => setQ('')}>✕</button>}
+          </label>
+        )}
       </div>
 
       {pane === 'guide' && (
         <>
-          <div className="echips" role="group" aria-label="가이드 분야">
-            <button className={grp === 'all' ? 'on' : ''} onClick={() => setGrp('all')}>전체</button>
-            {GORDER.map((k) => <button key={k} className={grp === k ? 'on' : ''} onClick={() => setGrp(k)}>{glabel(k)}</button>)}
-          </div>
-          <a className="ecalc" href="/guide/median-income" onClick={() => track('explore_calc')}><span aria-hidden>🧮</span>기준중위소득 계산기<em aria-hidden>›</em></a>
           <div className="elist">
             {guides.map((g) => (
               <a key={g.slug} href={`/guide/${g.slug}`} onClick={() => track('explore_guide', { slug: g.slug })}>
@@ -84,11 +98,6 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
 
       {pane === 'region' && (
         <>
-          <label className="search" style={{ height: 48 }}>
-            <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="우리 동네 검색 (예: 종로, 세종)" aria-label="우리 동네 검색" enterKeyHint="search" />
-            {q && <button type="button" className="gps" aria-label="검색어 지우기" onClick={() => setQ('')}>✕</button>}
-          </label>
           {v && (
             <div className="elist">
               {hits.length ? hits.map((r) => (
@@ -99,7 +108,7 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
             </div>
           )}
           {mine && (
-            <a className="ecalc" href={mine.href} onClick={() => track('explore_region', { from: 'mine' })}><span aria-hidden>📍</span>내 지역: {mine.label} 사용처<em aria-hidden>›</em></a>
+            <a className="ecalc" href={mine.href} onClick={() => track('explore_region', { from: 'mine' })}><IcPin size={18} />내 지역: {mine.label} 사용처<em aria-hidden>›</em></a>
           )}
           <p className="elbl">시·도에서 고르기</p>
           <div className="esido">

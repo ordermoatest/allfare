@@ -161,7 +161,7 @@ export default function App() {
       </main>
       {opened.culture && (
         <main className="scroll ctab" hidden={tab !== 'culture'}>
-          <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} onHome={() => go('home')} />
+          <CultureTab visible={tab === 'culture'} onPick={setStore} toast={toast} onHome={() => go('home')} onMore={(h) => go(h ? 'home' : 'my')} />
         </main>
       )}
       {opened.explore && (
@@ -193,7 +193,7 @@ export default function App() {
         <button className={`backfab ${fabDim ? 'dim' : ''}`} onClick={() => history.back()} aria-label="이전 화면으로"><IcBack /></button>
       )}
       {benefit && <BenefitSheet id={benefit} profile={profile} liked={!!liked[benefit]} onLiked={onLiked} onClose={() => setBenefit(null)} toast={toast} />}
-      {store && <StoreSheet store={store} onClose={() => setStore(null)} toast={toast} />}
+      {store && <StoreSheet store={store} onClose={() => setStore(null)} toast={toast} onMore={(h) => { setStore(null); setTimeout(() => go(h ? 'home' : 'my'), 320); }} />}
       <PcSide onShare={() => shareSite('pc')} onMy={() => go('my')} />
       <A2hs blocked={!!benefit || !!store || sharePrompt} />
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}

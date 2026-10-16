@@ -5,7 +5,7 @@ import { upcoming } from '@/lib/events';
 import { track } from '@/lib/client';
 import { Logo } from './Brand';
 import PopularNews from './PopularNews';
-import { IcCalc, IcChevron, IcShare } from './icons';
+import { IcCalc, IcChevron, IcShare, IcTicket } from './icons';
 
 type Tab = 'home' | 'culture' | 'explore' | 'my';
 export type PcActive = 'home' | 'culture' | 'region' | 'guide' | 'news' | 'my' | '';
@@ -29,8 +29,8 @@ export function PcTop({ active, go, onShare, hasProfile }: { active: PcActive; g
             <button className={culture ? 'on' : ''} onClick={to('culture', '/?tab=culture')} aria-haspopup="true" aria-expanded={open}
               onFocus={() => setOpen(true)}>문화누리 사용처 <span className="caret" aria-hidden>▾</span></button>
             <div className="pcdmenu" role="menu">
-              <button role="menuitem" onClick={to('culture', '/?tab=culture')}><b>📍 내 주변 지도로 찾기</b><small>가까운 가맹점과 결제 후기</small></button>
-              <a role="menuitem" href="/culture" onClick={() => track('pc_menu', { to: 'region' })}><b>📋 지역별 목록으로 찾기</b><small>시·도, 시·군·구별 가맹점</small></a>
+              <button role="menuitem" onClick={to('culture', '/?tab=culture')}><b>내 주변 지도로 찾기</b><small>가까운 가맹점과 결제 후기</small></button>
+              <a role="menuitem" href="/culture" onClick={() => track('pc_menu', { to: 'region' })}><b>지역별 목록으로 찾기</b><small>시·도, 시·군·구별 가맹점</small></a>
             </div>
           </div>
           <a className={active === 'guide' ? 'on' : ''} href={go ? undefined : '/guide'} onClick={(e) => { if (go) { e.preventDefault(); go('explore'); } track('pc_menu', { to: 'guide' }); }} role={go ? 'button' : undefined} style={{ cursor: 'pointer' }}>복지 가이드</a>
@@ -61,7 +61,7 @@ export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: (
     <>
       <aside className="pcside left" aria-label="올페어 소개와 일정">
         <div className="pcintro">
-          <h2>내가 받을 수 있는 복지 혜택, 1분이면 찾아요</h2>
+          <h2><span>내가 받을 수 있는</span> <span>복지 혜택,</span> <span>1분이면 찾아요</span></h2>
           <p>정부·지자체 혜택 1만여 개 중에서 나에게 맞는 것만 골라드려요. 로그인 없이 무료예요.</p>
         </div>
         {evs.length > 0 && (
@@ -89,7 +89,7 @@ export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: (
           <p className="pclbl">바로가기</p>
           <div className="pclinks">
             <a href="/guide/median-income" onClick={() => track('pc_side', { to: 'calc' })}><IcCalc />기준중위소득 계산기<IcChevron size={15} /></a>
-            <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><span className="pcemo" aria-hidden>🎫</span>문화누리카드 안내<IcChevron size={15} /></a>
+            <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><IcTicket />문화누리카드 안내<IcChevron size={15} /></a>
           </div>
         </section>
         <section>

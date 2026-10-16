@@ -1,5 +1,6 @@
 import Brand from './Brand';
 import ShareButton from './ShareButton';
+import MoreBenefits from './MoreBenefits';
 import Footer from './Footer';
 import type { RegionStore } from '@/lib/server/regionStores';
 import { SITE } from '@/lib/site';
@@ -77,6 +78,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
           <div className="rchips">{siblings.map((x) => <a key={x.href} href={x.href} className="rchip">{x.label}</a>)}</div>
         </section>
       )}
+      <MoreBenefits from="region" />
       <Footer notes={[`가맹점 목록은 한국문화예술위원회 공개 자료${fmtAsOf(asOf) ? ` ${fmtAsOf(asOf)}` : ''} 기준이에요.`, '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
     </main>
   );

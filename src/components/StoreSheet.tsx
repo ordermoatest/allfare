@@ -1,6 +1,7 @@
 'use client';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IcHeart, IcPhone, IcRoute, IcShare, StoreIcon } from './icons';
+import MoreBenefits from './MoreBenefits';
 import { Store, km } from '@/lib/types';
 import { deviceId } from '@/lib/profile';
 import { shareLink, track } from '@/lib/client';
@@ -19,7 +20,7 @@ const initials = (nick: string) => nick.replace(/^이용자\s*/, '').slice(0, 2)
 const PaidBadge = ({ paid }: { paid: boolean | null }) => paid === null ? null
   : <span className={`pbig ${paid ? 'y' : 'n'}`}>{paid ? '✓ 결제 됐어요' : '✕ 결제 안 됐어요'}</span>;
 
-export default function StoreSheet({ store: s, onClose, toast }: { store: Store; onClose: () => void; toast: (m: string) => void }) {
+export default function StoreSheet({ store: s, onClose, toast, onMore }: { store: Store; onClose: () => void; toast: (m: string) => void; onMore?: (hasProfile: boolean) => void }) {
   const [reviews, setReviews] = useState<Review[] | null>(null);
   const [mine, setMine] = useState<Review | null>(null);
   const [sum, setSum] = useState<Summary | null>(null);
@@ -274,6 +275,7 @@ export default function StoreSheet({ store: s, onClose, toast }: { store: Store;
           </div>
         </section>
         <p className="note">방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.</p>
+        {onMore && <MoreBenefits from="store_sheet" onGo={onMore} />}
       </div>
     </div>
   );

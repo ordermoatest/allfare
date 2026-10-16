@@ -13,6 +13,12 @@ export const ONLINE_SHOPS: OnlineShop[] = [
   { name: '고속버스 (코버스)', cat: '교통', url: 'https://www.kobus.co.kr' },
   { name: '야놀자', cat: '숙박·여행', url: 'https://www.yanolja.com', tip: '문화누리 전용관에서 예약' },
   { name: '여기어때', cat: '숙박·여행', url: 'https://www.goodchoice.kr', tip: '문화누리 전용관에서 예약' },
+  { name: '밀리의서재', cat: '도서', url: 'https://www.millie.co.kr' },
+  { name: '넷플릭스', cat: 'OTT', url: 'https://www.netflix.com/kr/' },
+  { name: '티빙', cat: 'OTT', url: 'https://www.tving.com' },
+  { name: '웨이브', cat: 'OTT', url: 'https://www.wavve.com' },
+  { name: '왓챠', cat: 'OTT', url: 'https://watcha.com' },
+  { name: '디즈니플러스', cat: 'OTT', url: 'https://www.disneyplus.com/ko-kr' },
   { name: '멜론', cat: '음원', url: 'https://www.melon.com' },
   { name: '지니뮤직', cat: '음원', url: 'https://www.genie.co.kr' },
 ];

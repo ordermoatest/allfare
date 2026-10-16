@@ -3,29 +3,30 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
 import KakaoMap from './KakaoMap';
-import { IcGps, IcPin, IcSearch, StoreIcon } from './icons';
+import { IcGps, IcPin, IcSearch, IcTicket, StoreIcon } from './icons';
+import MoreBenefits from './MoreBenefits';
 import { Place, Store, fmtAsOf, km, paidLine } from '@/lib/types';
 import { track } from '@/lib/client';
 import { MNURI, ONLINE_SHOPS } from '@/lib/online';
 import { ITEMS } from '@/lib/items';
 import { useBackClose } from '@/lib/useBackClose';
 
-const ONLINE = '🌐 온라인';
+const ONLINE = '온라인';
 
 const RADII = [500, 1000, 3000];
 const SORTS = { d: '가까운 순', rv: '후기 많은 순', st: '별점 높은 순', pay: '결제 확인 많은 순', nm: '이름순' } as const;
 type SortKey = keyof typeof SORTS;
 const FILTERS = [
-  { k: 'pay', label: '✓ 결제 확인된 곳만', ok: (s: Store) => (s.paid_yes || 0) > 0 },
-  { k: 'rv', label: '💬 후기 있는 곳만', ok: (s: Store) => s.review_count > 0 },
-  { k: 'tel', label: '📞 전화번호 있는 곳만', ok: (s: Store) => !!s.phone },
-  { k: 'bad', label: '⚠ 결제 안 됨 제보 빼기', ok: (s: Store) => !(s.paid_no || 0) },
+  { k: 'pay', label: '결제 확인된 곳만', ok: (s: Store) => (s.paid_yes || 0) > 0 },
+  { k: 'rv', label: '후기 있는 곳만', ok: (s: Store) => s.review_count > 0 },
+  { k: 'tel', label: '전화번호 있는 곳만', ok: (s: Store) => !!s.phone },
+  { k: 'bad', label: '결제 안 됨 제보 빼기', ok: (s: Store) => !(s.paid_no || 0) },
 ] as const;
 const DEFAULT: Place = { lat: 37.57103, lng: 126.97646, label: '광화문역', mode: 'home' };
 type Cand = { lat: number; lng: number; label: string; sub: string };
 
-export default function CultureTab({ visible, onPick, toast, onHome }: {
-  visible: boolean; onPick: (s: Store) => void; toast: (m: string) => void; onHome: () => void;
+export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
+  visible: boolean; onPick: (s: Store) => void; toast: (m: string) => void; onHome: () => void; onMore: (hasProfile: boolean) => void;
 }) {
   const [place, setPlace] = useState<Place>(DEFAULT);
   // 지역 페이지에서 '지도로 보기'로 들어오면 그 지역을 기준 위치로
@@ -168,7 +169,7 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
       </div>
       {group && (
         <section className="clist" aria-label={`이 근처 가맹점 ${group.length}곳`}>
-          <div className="clhead"><b>📍 이 근처 {group.length}곳</b><button className="ghost" onClick={() => setGroup(null)}>✕ 닫기</button></div>
+          <div className="clhead"><b>이 근처 {group.length}곳</b><button className="ghost" onClick={() => setGroup(null)}>✕ 닫기</button></div>
           {group.map((s) => (
             <button key={s.id} className="clrow" onClick={() => onPick(s)}>
               <span className="tag"><StoreIcon cat={s.category || ''} />{s.category || '기타'}</span>
@@ -186,13 +187,13 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
         <div className="notice"><b>가맹점 위치 정보를 준비하고 있어요</b><span>전국 가맹점의 위치를 지도에 표시할 수 있게 정리하는 중이에요. 잠시 후 다시 열어주세요.</span></div>
       ) : (
         <>
-          <CatBar title={<>🗂️ 분야별 사용처 <span className="cap light">{online ? `온라인 ${ONLINE_SHOPS.length}곳` : `${shown.length}곳`}{!online && fmtAsOf(asOf) ? ` · ${fmtAsOf(asOf)} 기준` : ''}</span></>}
+          <CatBar title={<>분야별 사용처 <span className="cap light">{online ? `온라인 ${ONLINE_SHOPS.length}곳` : `${shown.length}곳`}{!online && fmtAsOf(asOf) ? ` · ${fmtAsOf(asOf)} 기준` : ''}</span></>}
             right={online ? undefined : <label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); track('sort_store', { s: e.target.value }); }}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
             label="사용처 분야" items={[cats[0], { key: ONLINE, count: ONLINE_SHOPS.length }, ...cats.slice(1)]} current={online ? ONLINE : curCat}
             onPick={(k) => { if (k === ONLINE) { setOnline(true); track('online_shops'); } else { setOnline(false); setCat(k); } }} />
           {online ? (
             <div className="list">
-              <div className="notice" style={{ gap: 4 }}><b>🌐 온라인에서도 쓸 수 있어요</b><span>인터넷 서점·영화 예매·기차표·숙박 예약 등에서 결제할 수 있어요. 처음 결제할 때 카드 등록(농협카드 일반결제)이 필요할 수 있어요.</span></div>
+              <div className="notice" style={{ gap: 4 }}><b>온라인에서도 쓸 수 있어요</b><span>인터넷 서점·영화 예매·OTT·기차표·숙박 예약 등에서 결제할 수 있어요. 처음 결제할 때 카드 등록(농협카드 일반결제)이 필요할 수 있어요.</span></div>
               {ONLINE_SHOPS.map((o) => (
                 <a key={o.name} className="item" href={o.url} target="_blank" rel="noopener noreferrer" onClick={() => track('online_shop', { name: o.name })} style={{ textDecoration: 'none' }}>
                   <div className="row"><span className="tag">{o.cat}</span><span className="d" style={{ fontSize: 13 }}>바로가기 ›</span></div>
@@ -233,7 +234,9 @@ export default function CultureTab({ visible, onPick, toast, onHome }: {
           </>)}
         </>
       )}
-      <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden>🎫</span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>
+      <MoreBenefits from="culture_tab" onGo={onMore} />
+      <a className="gbanner" href="/guide/culture-nuri-year-end"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드 남은 잔액, 어디에 쓸까요?</b><small>연말 사용처 · 잔액 조회 · 온라인 가맹점 모음</small></span><span aria-hidden>›</span></a>
+      <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>
       <Footer notes={['가맹점 목록은 한국문화예술위원회 공개 자료 기준이에요.', '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
 
       {sheet && (

@@ -30,3 +30,5 @@ export function StoreIcon({ cat, size = 13 }: { cat: string; size?: number }) {
   if (/체육|스포츠|운동|경기/.test(c)) return <svg {...p}><circle cx="12" cy="12" r="8" /><path d="M4 12h16M12 4c3 3 3 13 0 16" /></svg>;
   return <svg {...p}><path d="M5 20V9l7-5 7 5v11" /><path d="M9 20v-6h6v6" /></svg>;
 }
+export const IcTicket = ({ size = 18 }: P) => <svg {...base(size)} strokeWidth={1.9}><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5a2.5 2.5 0 0 0 0-5z" /><path d="M14 5v14" strokeDasharray="2 2.5" /></svg>;
+export const IcX = ({ size = 16 }: P) => <svg {...base(size)} strokeWidth={2.2}><path d="M6 6l12 12M18 6L6 18" /></svg>;

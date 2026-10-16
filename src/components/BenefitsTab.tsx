@@ -1,4 +1,5 @@
 'use client';
+import SeasonBanner from './SeasonBanner';
 import { useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
@@ -129,6 +130,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
 
   return (
     <>
+      <SeasonBanner />
       <label className="search"><span style={{ color: 'var(--mute)' }}><IcSearch /></span>
         <input value={q} onChange={(e) => setQ(e.target.value)} onBlur={() => query && track('search_benefit', { q: query })} placeholder="월세, 육아, 교통비로 찾아보세요" aria-label="혜택 검색" enterKeyHint="search" />
       </label>

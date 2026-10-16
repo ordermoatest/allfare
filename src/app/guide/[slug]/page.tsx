@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Brand from '@/components/Brand';
+import MoreBenefits from '@/components/MoreBenefits';
 import Footer from '@/components/Footer';
 import { GROUPS, GUIDES, guideBySlug } from '@/lib/guides';
 import { ogImage } from '@/lib/og';
@@ -75,6 +76,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
+      <MoreBenefits from="guide" />
       <Footer notes={['가이드 내용은 작성 시점 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>
   );

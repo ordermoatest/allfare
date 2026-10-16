@@ -831,3 +831,35 @@ nav.tabs .ic { width: 54px; }
   .pcside > section, .pcqr, .pcsharebox { padding: 14px 16px 12px; }
   .tcell { min-height: 0; }
 }
+
+/* v15: 알아보기 위쪽 고정 */
+.estick { position: sticky; top: calc(var(--hdrh) + env(safe-area-inset-top, 0px) - 1px); z-index: 3; background: var(--bg); display: flex; flex-direction: column; gap: 10px; margin: -4px -16px 0; padding: 6px 16px 10px; }
+.estick .search { margin: 0; }
+.ecalc svg { flex: none; }
+
+/* v15: 홈 시즌 띠배너 */
+.sbanner { display: flex; align-items: stretch; background: var(--card); border-radius: 14px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--warn) 35%, transparent); overflow: hidden; }
+.sbanner a { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 11px 4px 11px 12px; text-decoration: none; color: var(--ink); }
+.sbanner em { flex: none; font-style: normal; font-size: 12px; font-weight: 800; color: #fff; background: var(--warn); border-radius: 6px; padding: 3px 7px; }
+.sbanner span { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sbanner a svg { flex: none; color: var(--mute); }
+.sbanner button { flex: none; border: 0; background: none; width: 40px; color: var(--mute); display: grid; place-items: center; }
+
+/* v15: 다른 혜택 둘러보기 */
+.morebn { display: flex; align-items: flex-start; gap: 12px; background: var(--soft); border-radius: 18px; padding: 16px; text-decoration: none; color: var(--ink); margin: 6px 0; }
+.morebn .mbic { flex: none; width: 38px; height: 38px; border-radius: 12px; background: var(--card); color: var(--mint); display: grid; place-items: center; }
+.morebn .mbtx { flex: 1; min-width: 0; }
+.morebn em { display: inline-block; margin-top: 8px; font-style: normal; font-size: 14px; font-weight: 800; color: var(--mint-ink); }
+.morebn b { display: block; font-size: 15px; line-height: 1.4; }
+.morebn small { display: block; font-size: 12.5px; color: var(--sub); line-height: 1.5; margin-top: 2px; }
+.morebn:active, .morebn.tapped { transform: scale(.98); }
+.gbanner > .gbic { color: var(--mint); display: grid; place-items: center; }
+
+/* v15: PC 왼쪽 소개 줄바꿈 */
+@media (min-width: 1120px) {
+  .pcintro h2 { font-size: 20px; line-height: 1.45; word-break: keep-all; }
+  .pcintro h2 span { white-space: nowrap; }
+  .pcdmenu b { font-weight: 700; }
+}
+
+.gtable td:first-child { white-space: nowrap; }

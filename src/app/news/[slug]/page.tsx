@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Brand from '@/components/Brand';
+import MoreBenefits from '@/components/MoreBenefits';
 import Footer from '@/components/Footer';
 import NewsStats from '@/components/NewsStats';
 import { NEWS, fmtNewsDate, newsBySlug } from '@/lib/news';
@@ -71,6 +72,7 @@ export default function NewsPage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
+      <MoreBenefits from="news" />
       <Footer notes={['소식 내용은 발행일 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>
   );
