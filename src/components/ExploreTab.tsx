@@ -92,7 +92,7 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
               </a>
             ))}
           </div>
-          <p className="cap" style={{ textAlign: 'center' }}>매주 월요일 새 소식이 올라와요</p>
+          <p className="cap" style={{ textAlign: 'center' }}>매주 월·목요일 새 소식이 올라와요</p>
         </>
       )}
 
