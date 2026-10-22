@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
 import KakaoMap from './KakaoMap';
@@ -69,7 +69,43 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
     on(); window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);
   }, [visible]);
-  const pickFromList = (s: Store) => { setFocus(s.id); onPick(s); track('store_from_list'); };
+  // 폰: 지도 전체 화면 + 아래 시트 (PC는 지금처럼 위에 고정)
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1120px)');
+    const on = () => setFull(!mq.matches);
+    on(); mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  // 시트 높이: 끌어서 조절, 손을 떼면 낮게·중간·높게 중 가까운 곳으로
+  const [sh, setSh] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{ y: number; h: number } | null>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const snaps = () => {
+    const head = (document.querySelector('.apphead') as HTMLElement | null)?.getBoundingClientRect().height || 68;
+    const nav = (document.querySelector('nav.tabs') as HTMLElement | null)?.getBoundingClientRect().height || 80;
+    const avail = window.innerHeight - head - nav;
+    return [150, Math.round(avail * 0.48), Math.max(300, avail - 74)]; // 높게: 위치 버튼은 보이게
+  };
+  useEffect(() => { if (full && visible && !sh) setSh(snaps()[1]); }, [full, visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  const toSnap = (i: number) => setSh(snaps()[i]);
+  const gDown = (e: PointerEvent<HTMLDivElement>) => { drag.current = { y: e.clientY, h: sh }; setDragging(true); e.currentTarget.setPointerCapture(e.pointerId); };
+  const gMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return;
+    const [lo, , hi] = snaps();
+    setSh(Math.max(lo - 40, Math.min(hi, drag.current.h + (drag.current.y - e.clientY))));
+  };
+  const gUp = () => {
+    if (!drag.current) return;
+    const moved = Math.abs(sh - drag.current.h) > 6;
+    drag.current = null; setDragging(false);
+    const ss = snaps();
+    if (!moved) { const i = ss.findIndex((x) => x === sh); setSh(ss[i === 0 ? 1 : i === 1 ? 0 : 1] ?? ss[1]); return; } // 톡 누르면 낮게↔중간
+    setSh(ss.reduce((a, c) => (Math.abs(c - sh) < Math.abs(a - sh) ? c : a)));
+    track('sheet_drag');
+  };
+  const pickFromList = (s: Store) => { setFocus(s.id); onPick(s); track('store_from_list'); if (full) toSnap(1); };
   useBackClose(sheet, () => setSheet(false));
 
   // 기준 위치가 바뀌면 3km 안 가맹점을 한 번에 받아두고 반경·분야·검색어는 화면에서 거름
@@ -148,13 +184,10 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
   const toggleFlt = (k: string) => { setFlt((f) => (f.includes(k) ? f.filter((x) => x !== k) : [...f, k])); track('filter_store', { f: k }); };
   const modeLabel = place.mode === 'gps' ? '현재 위치' : place.mode === 'search' ? '검색한 위치' : '기본 위치';
 
-  return (
-    <>
-      <h2 className="tabtitle">문화누리 사용처</h2>
-
-      <div className={`cstick ${mini ? 'mini' : ''}`}>
+  const mapEl = (
       <KakaoMap lat={place.lat} lng={place.lng} radius={radius} stores={online ? [] : shown} visible={visible} onPick={onPick} focusId={focus}
-        onCluster={(l) => { setGroup(l); track('map_cluster', { n: l.length }); }}>
+        free={full}
+        onCluster={(l) => { setGroup(l); track('map_cluster', { n: l.length }); if (full) { toSnap(1); inner.current?.scrollTo({ top: 0 }); } }}>
         <button className="maploc" onClick={() => setSheet(true)} aria-label="기준 위치 바꾸기">
           <span style={{ color: 'var(--mint)' }}><IcPin /></span>
           <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}><small>{modeLabel}</small><b>{place.label} 근처</b></span>
@@ -164,14 +197,17 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
           반경 <b>{km(radius)}</b> <span aria-hidden>↻</span>
         </button>
       </KakaoMap>
-
+  );
+  const searchEl = (
       <form className="search" style={{ paddingRight: 5 }} onSubmit={applyKw}>
         <span style={{ color: 'var(--mute)' }}><IcSearch /></span>
         <input value={kwInput} onChange={(e) => { setKwInput(e.target.value); if (!e.target.value) setKw(''); }} enterKeyHint="search" placeholder="가게 이름 검색 (예: 교보문고)" aria-label="가게 이름 검색" />
         {kwInput && <button type="button" className="gps" aria-label="검색어 지우기" onClick={clearKw}>✕</button>}
         <button className="sbtn">검색</button>
       </form>
-      </div>
+  );
+  const body = (
+    <>
       {group && (
         <section className="clist" aria-label={`이 근처 가맹점 ${group.length}곳`}>
           <div className="clhead"><b>이 근처 {group.length}곳</b><button className="ghost" onClick={() => setGroup(null)}>✕ 닫기</button></div>
@@ -244,6 +280,26 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
       <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>
       <Footer notes={['가맹점 목록은 한국문화예술위원회 공개 자료 기준이에요.', '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
 
+    </>
+  );
+
+  return (
+    <>
+      {full ? (
+        <div className={`cfull ${sh > snaps()[1] + 40 ? 'hi' : ''}`} style={{ ['--sh' as string]: `${sh}px` } as React.CSSProperties}>
+          <div className="cmap">{mapEl}</div>
+          <div className={`csheet ${dragging ? 'drag' : ''}`}>
+            <div className="cgrab" onPointerDown={gDown} onPointerMove={gMove} onPointerUp={gUp} onPointerCancel={gUp} role="slider" aria-label="목록 높이 조절" aria-valuenow={sh}><i /></div>
+            <div className="csin" ref={inner}>{searchEl}{body}</div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2 className="tabtitle">문화누리 사용처</h2>
+          <div className={`cstick ${mini ? 'mini' : ''}`}>{mapEl}{searchEl}</div>
+          {body}
+        </>
+      )}
       {sheet && (
         <div className="sheet" onClick={(e) => { if (e.target === e.currentTarget) setSheet(false); }}>
           <div className="box" role="dialog" aria-modal="true" aria-label="기준 위치 바꾸기">

@@ -26,18 +26,21 @@ const short = (t: string, n: number) => (t.length > n ? t.slice(0, n) + '…' : 
  * - 기본은 '고정': 지도 위를 쓸어도 페이지가 스크롤됨. 핀·숫자 원 누르기는 됨
  * - '지도 움직이기'를 켜면 끌기·확대 가능
  */
-export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, onCluster, focusId, children }: {
+export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, onCluster, focusId, free, children }: {
   lat: number; lng: number; radius: number; stores: Store[]; visible: boolean; onPick: (s: Store) => void;
   /** 목록에서 고른 가게: 지도에서 빨갛게 강조하고 그 위치로 이동 */
   focusId?: string | null;
   /** 숫자 원을 눌렀을 때 그 안의 가게 목록 (10곳 이하이거나 더 확대할 수 없을 때) */
   onCluster?: (list: Store[]) => void; children?: ReactNode;
+  /** 폰 전체 화면 지도: 페이지가 스크롤되지 않으니 처음부터 끌기·확대 가능 */
+  free?: boolean;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const st = useRef<{ kakao?: any; map?: any; circle?: any; me?: any; overlays: any[] }>({ overlays: [] });
   const [msg, setMsg] = useState('지도를 불러오는 중이에요');
   const [ready, setReady] = useState(false);
-  const [live, setLive] = useState(false);
+  const [live, setLive] = useState(!!free);
+  useEffect(() => { if (free) setLive(true); }, [free]);
   const [hint, setHint] = useState(false);
   const hintT = useRef<ReturnType<typeof setTimeout>>();
   const pickRef = useRef(onPick);
@@ -186,13 +189,13 @@ export default function KakaoMap({ lat, lng, radius, stores, visible, onPick, on
   };
 
   return (
-    <div className={`map ${live ? 'live' : ''}`} role="region" aria-label="내 주변 가맹점 지도">
+    <div className={`map ${live && !free ? 'live' : ''} ${free ? 'free' : ''}`} role="region" aria-label="내 주변 가맹점 지도">
       <div ref={el} style={{ position: 'absolute', inset: 0 }} />
-      {!live && ready && <div className="lockpad" onClick={passTap} onMouseMove={hoverPin} onTouchStart={(e) => { if (e.touches.length > 1) showHint(); }} />}
+      {!free && !live && ready && <div className="lockpad" onClick={passTap} onMouseMove={hoverPin} onTouchStart={(e) => { if (e.touches.length > 1) showHint(); }} />}
       {msg && <div className="msg">{msg}</div>}
       {hint && !live && <div className="maphint"><span>지도를 옮기려면 &lsquo;지도 움직이기&rsquo;를 눌러주세요</span></div>}
       {children}
-      {ready && (
+      {ready && !free && (
         <button className={`movebtn ${live ? 'on' : ''}`} onClick={() => setLive(!live)} aria-pressed={live}>
           {live ? '✓ 완료' : '🖐 지도 움직이기'}
         </button>
