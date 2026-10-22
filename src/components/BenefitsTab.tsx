@@ -64,7 +64,7 @@ function chipsOf(b: BItem, t: Tier, p: Profile): Chip[] {
   const out = t === 'fit' ? ok : t === 'maybe' ? [...ok, ...q] : t === 'no' ? [...x, ...ok] : ok.length ? ok : [{ k: 'any' as const, t: '조건 없이 신청' }];
   return out.slice(0, 4);
 }
-const OPEN_KEY = 'af-open-only';
+const SOON_KEY = 'af-soon-only';
 
 export default function BenefitsTab({ profile, items, error, region, asOf, liked, likeCounts, onOpen, goMy, onRetry, sharePrompt, onSharePrompt, onClosePrompt }: {
   profile: Profile; items: BItem[] | null; error: string | null; region: string; asOf?: string | null;
@@ -77,10 +77,10 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
   const [sort, setSort] = useState<SortKey>('dl');
   const [picked, setPicked] = useState<Tier | null>(null);
   const [limit, setLimit] = useState(PAGE);
-  // 지금 신청할 수 있는 것만 (기기에 기억)
-  const [openOnly, setOpenOnly] = useState(false);
-  useEffect(() => { try { setOpenOnly(localStorage.getItem(OPEN_KEY) === '1'); } catch { /* */ } }, []);
-  const toggleOpen = () => { const v = !openOnly; setOpenOnly(v); setLimit(PAGE); try { localStorage.setItem(OPEN_KEY, v ? '1' : '0'); } catch { /* */ } track('open_only', { on: v ? 1 : 0 }); };
+  // 마감 임박만 보기: 30일 안에 신청이 끝나는 혜택만 (기기에 기억)
+  const [soonOnly, setSoonOnly] = useState(false);
+  useEffect(() => { try { setSoonOnly(localStorage.getItem(SOON_KEY) === '1'); } catch { /* */ } }, []);
+  const toggleSoon = () => { const v = !soonOnly; setSoonOnly(v); setLimit(PAGE); try { localStorage.setItem(SOON_KEY, v ? '1' : '0'); } catch { /* */ } track('soon_only', { on: v ? 1 : 0 }); };
 
   const likesOf = (b: BItem) => likeCounts[b.id] ?? b.l;
 
@@ -89,10 +89,10 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
 
   const query = q.trim().replace(/\s+/g, '');
   const visible = useMemo(() => {
-    const base = openOnly ? judged.filter(({ b }) => !dueOf(b).ended) : judged;
+    const base = soonOnly ? judged.filter(({ b }) => { const d = dueOf(b); return d.hot && !d.ended; }) : judged;
     if (!query) return base;
     return base.filter(({ b }) => (b.n + b.s + (b.o || '') + b.c).replace(/\s+/g, '').includes(query));
-  }, [judged, query, openOnly]);
+  }, [judged, query, soonOnly]);
 
   // 분야를 고른 상태의 4칸 숫자
   const inCat = useMemo(() => visible.filter(({ b }) => cat === '전체' || b.c === cat), [visible, cat]);
@@ -158,7 +158,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
   const sec = SECTIONS.find((x) => x.tier === pick)!;
   const list = (
     <div className="list">
-      {sorted.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
+      {sorted.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{soonOnly ? <>30일 안에 마감되는 혜택이 없어요<br /><button className="linkbtn" onClick={toggleSoon}>전체 혜택 보기</button></> : query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
       {sorted.slice(0, limit).map(({ b }) => card(b, pick))}
       {sorted.length > limit && <button className="morebtn" onClick={() => setLimit((l) => l + PAGE)}>더 보기 ({(sorted.length - limit).toLocaleString()}개 남음)</button>}
     </div>
@@ -235,7 +235,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
                 right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
                 label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
               />
-              <div className="opentog"><span>지금 신청할 수 있는 것만<small>신청 기간이 끝난 혜택은 숨겨요</small></span><button role="switch" aria-checked={openOnly} aria-label="지금 신청할 수 있는 것만 보기" className={`swt ${openOnly ? 'on' : ''}`} onClick={toggleOpen} /></div>
+              <div className="opentog"><span>마감 임박만 보기<small>30일 안에 신청이 끝나는 혜택만 보여줘요</small></span><button role="switch" aria-checked={soonOnly} aria-label="마감 임박 혜택만 보기" className={`swt ${soonOnly ? 'on' : ''}`} onClick={toggleSoon} /></div>
               <div className="thead"><strong>{sec.name} · {cat === '전체' ? '전체' : cat} {sorted.length.toLocaleString()}개</strong></div>
             </>
           ) : (
