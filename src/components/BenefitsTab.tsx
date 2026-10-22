@@ -151,7 +151,9 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
     );
   };
 
-  const sec = SECTIONS.find((x) => x.tier === pick)!;
+  const sortSel = <label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>;
+  const pickCat = (k: string) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); };
+  const asOfLine = [profile.set ? region : '', fmtAsOf(asOf) ? `${fmtAsOf(asOf)} 정부24 기준` : ''].filter(Boolean).join(' · ');
   const list = (
     <div className="list">
       {sorted.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
@@ -189,7 +191,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
             ].filter(Boolean).join(' · ')}</span>
             <span className="hsum-e" aria-hidden>수정 ›</span>
           </button>
-          <b className="hxt">{!items ? '내 조건에 맞는 혜택을 찾는 중이에요' : items.length === 0 ? '혜택 정보를 준비하고 있어요' : nothing ? '지금 조건에 맞는 혜택이 없어요' : <>나에게 꼭 맞는 혜택 <em>{all.fit.toLocaleString()}개</em></>}</b>
+          {(!items || items.length === 0 || nothing) && <b className="hxt">{!items ? '내 조건에 맞는 혜택을 찾는 중이에요' : items.length === 0 ? '혜택 정보를 준비하고 있어요' : '지금 조건에 맞는 혜택이 없어요'}</b>}
         </section>
       )}
 
@@ -226,24 +228,18 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
                   </button>
                 ))}
               </div>
-              <CatBar
-                title={<>분야별 보기 <span className="cap light">{[profile.set ? region : '', fmtAsOf(asOf) ? `${fmtAsOf(asOf)} 업데이트` : ''].filter(Boolean).join(' · ')}</span></>}
-                right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
-                label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
-              />
-              <div className="thead"><strong>{sec.name} · {cat === '전체' ? '전체' : cat} {sorted.length.toLocaleString()}개</strong></div>
+              <CatBar label="혜택 분야" items={counts} current={cat} onPick={pickCat} />
+              <div className="thead"><span className="tcount"><b>{sorted.length.toLocaleString()}개</b> 혜택</span>{sortSel}</div>
             </>
           ) : (
             <>
-              <CatBar
-                title={<>분야별 보기 <span className="cap light">{[profile.set ? region : '', fmtAsOf(asOf) ? `${fmtAsOf(asOf)} 업데이트` : ''].filter(Boolean).join(' · ')}</span></>}
-                right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
-                label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
-              />
-            <div className="cap" style={{ padding: '0 4px' }}>조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.</div>
+              <CatBar label="혜택 분야" items={counts} current={cat} onPick={pickCat} />
+              <div className="cap" style={{ padding: '0 4px' }}>조건 입력 전이라 전국 공통 혜택을 보여드려요. 사는 곳을 입력하면 우리 동네 혜택도 나와요.</div>
+              <div className="thead"><span className="tcount"><b>{sorted.length.toLocaleString()}개</b> 혜택</span>{sortSel}</div>
             </>
           )}
           {list}
+          {asOfLine && <p className="cap asofline">{asOfLine}</p>}
         </>
       )}
       <PopularNews variant="card" from="home" />

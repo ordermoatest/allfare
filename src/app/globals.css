@@ -917,3 +917,21 @@ nav.tabs .ic { width: 54px; }
 .ssgg a span { color: var(--sub); font-variant-numeric: tabular-nums; }
 .gbanner.bguide > span:first-child { font-size: inherit; flex: 1; min-width: 0; }
 .gbanner.bguide > span:nth-child(2) { flex: none; }
+
+/* v18: 홈 정리 — 4칸을 한 줄 탭으로, 반복 제목 제거 */
+.tgrid { display: flex; gap: 4px; background: var(--card); border-radius: 16px; padding: 4px; }
+.tgrid .tcell { flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 8px 2px 7px; border-radius: 12px; background: none; box-shadow: none; text-align: center; min-height: 0; }
+.tgrid .tcell em { font-size: 12.5px; white-space: nowrap; }
+.tgrid .tcell b { font-size: 18px; letter-spacing: -.4px; color: var(--ink); }
+.tgrid .tcell.no b { color: var(--warn); }
+.tgrid .tcell.on { background: var(--mint); }
+.tgrid .tcell.no.on { background: var(--warn); }
+.tgrid .tcell.on em, .tgrid .tcell.on b { color: var(--on-mint); }
+.tgrid .tcell.no.on em, .tgrid .tcell.no.on b { color: var(--card); }
+.thead { padding: 2px 4px 0; }
+.tcount { font-size: 14px; color: var(--sub); font-weight: 600; }
+.tcount b { color: var(--ink); font-weight: 800; }
+.asofline { text-align: center; margin: 4px 0 0; }
+.herox { gap: 0; }
+.tgrid + .catbar { padding-top: 0; }
+.catbar + .thead { margin-top: -6px; }
