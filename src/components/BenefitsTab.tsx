@@ -1,15 +1,15 @@
 'use client';
 import SeasonBanner from './SeasonBanner';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CatBar from './CatBar';
 import Footer from './Footer';
 import PopularNews from './PopularNews';
 import { IcHeartFill, IcSearch } from './icons';
 import { BItem } from '@/lib/types';
 import { Profile, kidAges, manAge, regionLabel } from '@/lib/profile';
-import { Cond, Tier, firstReason, fitReason, tierOf } from '@/lib/match';
+import { Check, Cond, Tier, explain, tierOf } from '@/lib/match';
 import { CATEGORY_ORDER } from '@/lib/categories';
-import { deadlineLabel } from '@/lib/deadline';
+import { daysLeft } from '@/lib/deadline';
 import { track } from '@/lib/client';
 import { fmtAsOf } from '@/lib/types';
 
@@ -34,6 +34,38 @@ function orgShort(o: string | null): string {
 
 const condOf = (b: BItem): Cond => ({ lo: b.lo, hi: b.hi, codes: b.k, hint: b.h });
 
+/** 카드 오른쪽 위 신청 기간 (30일 이내 마감은 주황) */
+function dueOf(b: BItem): { text: string; hot: boolean; ended: boolean } {
+  if (b.dk === 'dated' && b.de) {
+    const n = daysLeft(b.de)!;
+    if (n < 0) return { text: '신청 종료', hot: false, ended: true };
+    if (n === 0) return { text: '오늘 마감', hot: true, ended: false };
+    return { text: `마감 D-${n}`, hot: n <= 30, ended: false };
+  }
+  if (b.dk === 'always') return { text: '상시 신청', hot: false, ended: false };
+  if (b.dk === 'no_application') return { text: '신청 불필요', hot: false, ended: false };
+  return { text: '기한 확인', hot: false, ended: false };
+}
+
+/** 조건 한 줄을 칩 글자로 ("만 19~34세 대상 · 현재 만 39세" → "만 19~34세") */
+const chipText = (c: Check) => {
+  const t = (c.status === 'ok' && c.short) || c.detail.split(' · ')[0].replace(/\s*대상.*$/, '').replace(/\s*\(설명 기준\)/, '');
+  return /^\d/.test(t) && c.label === '소득' ? `중위소득 ${t}` : t; // "51~75%" → "중위소득 51~75%"
+};
+type Chip = { k: 'ok' | 'q' | 'x' | 'any'; t: string };
+/** 카드 조건 칩: 꼭 맞음=✓만 / 확인 필요=✓+? / 누구나=조건 없음 / 안 맞음=✕ 먼저 */
+function chipsOf(b: BItem, t: Tier, p: Profile): Chip[] {
+  if (!p.set) return [];
+  const cs = explain(condOf(b), p);
+  const ok: Chip[] = cs.filter((c) => c.status === 'ok').sort((a, z) => Number(!!z.specific) - Number(!!a.specific)).map((c) => ({ k: 'ok', t: chipText(c) }));
+  if (b.lc && (t === 'fit' || t === 'maybe')) ok.unshift({ k: 'ok', t: p.sgg || regionLabel(p) });
+  const q: Chip[] = cs.filter((c) => c.status === 'unknown').map((c) => ({ k: 'q', t: chipText(c) }));
+  const x: Chip[] = cs.filter((c) => c.status === 'no').map((c) => ({ k: 'x', t: chipText(c) + (/(만|이상|이하|이내)$/.test(chipText(c)) ? '' : '만') }));
+  const out = t === 'fit' ? ok : t === 'maybe' ? [...ok, ...q] : t === 'no' ? [...x, ...ok] : ok.length ? ok : [{ k: 'any' as const, t: '조건 없이 신청' }];
+  return out.slice(0, 4);
+}
+const OPEN_KEY = 'af-open-only';
+
 export default function BenefitsTab({ profile, items, error, region, asOf, liked, likeCounts, onOpen, goMy, onRetry, sharePrompt, onSharePrompt, onClosePrompt }: {
   profile: Profile; items: BItem[] | null; error: string | null; region: string; asOf?: string | null;
   liked: Record<string, true>; likeCounts: Record<string, number>;
@@ -45,6 +77,10 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
   const [sort, setSort] = useState<SortKey>('dl');
   const [picked, setPicked] = useState<Tier | null>(null);
   const [limit, setLimit] = useState(PAGE);
+  // 지금 신청할 수 있는 것만 (기기에 기억)
+  const [openOnly, setOpenOnly] = useState(false);
+  useEffect(() => { try { setOpenOnly(localStorage.getItem(OPEN_KEY) === '1'); } catch { /* */ } }, []);
+  const toggleOpen = () => { const v = !openOnly; setOpenOnly(v); setLimit(PAGE); try { localStorage.setItem(OPEN_KEY, v ? '1' : '0'); } catch { /* */ } track('open_only', { on: v ? 1 : 0 }); };
 
   const likesOf = (b: BItem) => likeCounts[b.id] ?? b.l;
 
@@ -53,9 +89,10 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
 
   const query = q.trim().replace(/\s+/g, '');
   const visible = useMemo(() => {
-    if (!query) return judged;
-    return judged.filter(({ b }) => (b.n + b.s + (b.o || '') + b.c).replace(/\s+/g, '').includes(query));
-  }, [judged, query]);
+    const base = openOnly ? judged.filter(({ b }) => !dueOf(b).ended) : judged;
+    if (!query) return base;
+    return base.filter(({ b }) => (b.n + b.s + (b.o || '') + b.c).replace(/\s+/g, '').includes(query));
+  }, [judged, query, openOnly]);
 
   // 분야를 고른 상태의 4칸 숫자
   const inCat = useMemo(() => visible.filter(({ b }) => cat === '전체' || b.c === cat), [visible, cat]);
@@ -76,7 +113,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
 
   const sorted = useMemo(() => {
     const cmp: Record<SortKey, (a: BItem, b: BItem) => number> = {
-      dl: (a, b) => (a.de || '9999').localeCompare(b.de || '9999') || b.v - a.v,
+      dl: (a, b) => Number(dueOf(a).ended) - Number(dueOf(b).ended) || (a.de || '9999').localeCompare(b.de || '9999') || b.v - a.v, // 신청 종료는 맨 뒤로
       new: (a, b) => (b.r || '').localeCompare(a.r || ''),
       like: (a, b) => likesOf(b) - likesOf(a) || b.v - a.v,
       view: (a, b) => b.v - a.v,
@@ -97,24 +134,23 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
   const choose = (t: Tier) => { setPicked(t); setLimit(PAGE); track('pick_tier', { tier: t }); };
 
   const card = (b: BItem, t: Tier) => {
-    const d = deadlineLabel(b.dk, b.de);
+    const d = dueOf(b);
     const on = !!liked[b.id];
-    const sec = SECTIONS.find((s) => s.tier === t)!;
-    const why = !profile.set ? '' : t === 'fit' ? fitReason(condOf(b), profile) : t === 'no' ? firstReason(condOf(b), profile) : '';
+    const n = likesOf(b);
+    const chips = chipsOf(b, t, profile);
     return (
-      <button key={b.id} className="item" onClick={() => onOpen(b.id)}>
+      <button key={b.id} className={`item ${t === 'no' ? 'dimx' : ''} ${d.ended ? 'ended' : ''}`} onClick={() => onOpen(b.id)}>
         <div className="row" style={{ alignItems: 'flex-start' }}>
           <span className="tags">
             <span className="tag">{b.c}</span>
-            {b.o && <span className={`org ${b.lc ? 'local' : ''}`}>{b.lc ? '📍 ' : ''}{orgShort(b.o)}</span>}
-            {profile.set && <span className={`mt ${sec.badge[0]}`}>{sec.badge[1]}</span>}
+            {b.o && <span className={`org ${b.lc ? 'local' : ''}`}>{orgShort(b.o)}</span>}
           </span>
-          <span className={`due ${d.hot ? 'hot' : ''}`}>{d.text}</span>
+          <span className={`due ${d.hot ? 'hot' : ''} ${d.ended ? 'end' : ''}`}>{d.text}</span>
         </div>
         <strong>{b.n}</strong>
         {b.s && <span className="sum">{b.s}</span>}
-        {why && <span className={t === 'no' ? 'why' : 'fitwhy'}>{t === 'fit' ? `✓ ${why}` : why}</span>}
-        <div className="row" style={{ justifyContent: 'flex-end' }}><span className={`lk ${on ? 'on' : ''}`}><IcHeartFill />{likesOf(b).toLocaleString()}</span></div>
+        {chips.length > 0 && <span className="cchips">{chips.map((c, i) => <span key={i} className={c.k}>{c.k === 'ok' ? '✓ ' : c.k === 'q' ? '? ' : c.k === 'x' ? '✕ ' : ''}{c.t}</span>)}</span>}
+        {(n > 0 || on) && <div className="row" style={{ justifyContent: 'flex-end' }}><span className={`lk ${on ? 'on' : ''}`}><IcHeartFill />{n.toLocaleString()}</span></div>}
       </button>
     );
   };
@@ -199,7 +235,8 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
                 right={<label className="sortsel"><span className="sr">정렬</span><select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select></label>}
                 label="혜택 분야" items={counts} current={cat} onPick={(k) => { setCat(k); setLimit(PAGE); track('pick_category', { cat: k }); }}
               />
-              <div className="thead"><strong>{sec.title} {sorted.length.toLocaleString()}개</strong>{cat !== '전체' && <span className="cap">{cat}</span>}</div>
+              <div className="opentog"><span>지금 신청할 수 있는 것만<small>신청 기간이 끝난 혜택은 숨겨요</small></span><button role="switch" aria-checked={openOnly} aria-label="지금 신청할 수 있는 것만 보기" className={`swt ${openOnly ? 'on' : ''}`} onClick={toggleOpen} /></div>
+              <div className="thead"><strong>{sec.name} · {cat === '전체' ? '전체' : cat} {sorted.length.toLocaleString()}개</strong></div>
             </>
           ) : (
             <>
