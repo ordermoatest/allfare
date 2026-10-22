@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { IcHeart, IcOut, IcShare } from './icons';
 import { Profile, deviceId } from '@/lib/profile';
 import { conditionSummary, evaluate, explain, Match } from '@/lib/match';
+import { govText } from '@/lib/text';
 import type { Hint } from '@/lib/hints';
 import { deadlineLabel } from '@/lib/deadline';
 import { shareLink, track } from '@/lib/client';
@@ -92,7 +93,7 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
             <span className="cap">{[d.org, d.dept].filter(Boolean).join(' · ')}</span>
             {profile.set && <div className="row" style={{ justifyContent: 'flex-start', gap: 8 }}><span className={`mt ${m}`}>{MT[m][0]}</span><span className="cap">{MT[m][1]}</span></div>}
             {(d.content || d.supportType) && (
-              <div className="amount"><span className="cap" style={{ color: 'inherit' }}>지원 내용{d.supportType ? ` · ${d.supportType}` : ''}</span><b>{d.content || d.summary}</b></div>
+              <div className="amount"><span className="cap" style={{ color: 'inherit' }}>지원 내용{d.supportType ? ` · ${d.supportType}` : ''}</span><b>{govText(d.content || d.summary)}</b></div>
             )}
             {checks.length > 0 && (
               <section className="panel" aria-label="내 조건과 비교" style={{ gap: 12 }}>
@@ -107,10 +108,10 @@ export default function BenefitSheet({ id, profile, liked, onLiked, onClose, toa
               </section>
             )}
             <section className="panel">
-              {d.target && <div className="kv"><em>누가 받을 수 있나요</em><p>{d.target}</p></div>}
+              {d.target && <div className="kv"><em>누가 받을 수 있나요</em><p>{govText(d.target)}</p></div>}
               {!profile.set && conds.length > 0 && <><hr /><div className="kv"><em>지원 조건 요약</em><p>{conds.join('\n')}</p></div></>}
-              {d.criteria && <><hr /><div className="kv"><em>선정 기준</em><p>{d.criteria}</p></div></>}
-              {d.how && <><hr /><div className="kv"><em>어떻게 신청하나요</em><p>{d.how}</p></div></>}
+              {d.criteria && <><hr /><div className="kv"><em>선정 기준</em><p>{govText(d.criteria)}</p></div></>}
+              {d.how && <><hr /><div className="kv"><em>어떻게 신청하나요</em><p>{govText(d.how)}</p></div></>}
               <hr />
               <div className="row"><span className="cap">신청 기한</span><b style={{ textAlign: 'right', color: dl?.hot ? 'var(--warn)' : undefined }}>{d.deadlineText || dl?.text}</b></div>
               {d.receiver && <div className="row"><span className="cap">접수 기관</span><span style={{ textAlign: 'right' }}>{d.receiver}</span></div>}

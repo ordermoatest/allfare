@@ -1,4 +1,4 @@
-export const metadata = { title: '이용약관 - 올페어' };
+export const metadata = { title: '이용약관 - 올페어', alternates: { canonical: '/terms' } };
 
 export default function Terms() {
   return (

@@ -886,3 +886,34 @@ nav.tabs .ic { width: 54px; }
 .swt.on { background: var(--mint); }
 .swt.on::after { left: 21px; }
 .item.ended { opacity: .6; }
+
+/* v17: 혜택 상세 · 시도 페이지 */
+.bcrumb { font-size: 12px; color: var(--mute); padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bcrumb a { color: var(--mute); text-decoration: none; }
+.bh2 { font-size: 16px; margin: 0; letter-spacing: -.3px; }
+.bchk { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.bchk li { display: flex; gap: 8px; font-size: 14.5px; line-height: 1.5; }
+.bchk li::before { content: '✓'; flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--soft); color: var(--mint); font-weight: 800; font-size: 12px; display: grid; place-items: center; margin-top: 1px; }
+.bmy { display: block; text-align: center; background: var(--soft); color: var(--mint-ink); border-radius: 14px; padding: 12px; font-weight: 700; font-size: 14px; text-decoration: none; }
+.bfaq details { border-top: 1px solid var(--line); padding: 10px 0 2px; }
+.bfaq details:first-of-type { border-top: 0; padding-top: 0; }
+.bfaq summary { font-size: 14.5px; font-weight: 700; cursor: pointer; line-height: 1.5; }
+.bfaq details p { margin: 6px 0 4px; font-size: 14px; color: var(--sub); line-height: 1.65; }
+.blist a { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.blist h2 + a { border-top: 0; }
+.blist b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.4; }
+.blist small { display: block; font-size: 12px; color: var(--mute); margin-top: 2px; }
+.blist em { font-style: normal; color: var(--mute); }
+.sstat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.sstat div { background: var(--soft); border-radius: 14px; padding: 12px 14px; }
+.sstat small { display: block; font-size: 12px; color: var(--mint-ink); font-weight: 700; }
+.sstat b { font-size: 22px; color: var(--mint-ink); }
+.sdbars { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.sdbar { display: grid; grid-template-columns: 76px 1fr 52px; align-items: center; gap: 8px; font-size: 13.5px; }
+.sdbar i { display: block; height: 10px; border-radius: 5px; background: var(--mint); min-width: 4px; }
+.sdbar span:last-child { text-align: right; color: var(--sub); font-weight: 700; font-variant-numeric: tabular-nums; }
+.ssgg a { display: flex; justify-content: space-between; padding: 10px 2px; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); font-weight: 600; }
+.ssgg a:first-child { border-top: 0; }
+.ssgg a span { color: var(--sub); font-variant-numeric: tabular-nums; }
+.gbanner.bguide > span:first-child { font-size: inherit; flex: 1; min-width: 0; }
+.gbanner.bguide > span:nth-child(2) { flex: none; }

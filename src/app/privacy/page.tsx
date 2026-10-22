@@ -1,4 +1,4 @@
-export const metadata = { title: '개인정보처리방침 - 올페어' };
+export const metadata = { title: '개인정보처리방침 - 올페어', alternates: { canonical: '/privacy' } };
 
 export default function Privacy() {
   const mail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;

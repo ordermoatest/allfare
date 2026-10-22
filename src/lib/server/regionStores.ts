@@ -56,3 +56,28 @@ export async function storesOf(sido: string, sgg?: string): Promise<RegionStore[
   const key = (n: string) => n.replace(/\(.*?\)|㈜|주식회사|재단법인|사단법인|\s/g, '');
   return out.sort((a, b) => (b.reviews || 0) - (a.reviews || 0) || Number(!!b.phone) - Number(!!a.phone) || key(a.name).localeCompare(key(b.name), 'ko'));
 }
+
+/** 시·도 페이지용 숫자: 전체·분야별·시군구별 가맹점 수 */
+export async function sidoStats(sido: string): Promise<{ total: number; cats: { name: string; n: number }[]; sggs: { name: string; n: number }[] }> {
+  const prefixes = ADDR_SIDO[sido] || [];
+  const rows: { address: string | null; category: string | null }[] = [];
+  for (let from = 0; from < 20000; from += 1000) {
+    const { data, error } = await db().from('culture_stores').select('address,category')
+      .eq('active', true).or(prefixes.map((p) => `address.ilike."${p}%"`).join(',')).order('id').range(from, from + 999);
+    if (error) throw new Error(error.message);
+    if (!data?.length) break;
+    rows.push(...data);
+    if (data.length < 1000) break;
+  }
+  const cm = new Map<string, number>();
+  rows.forEach((r) => { const c = (r.category || '기타').trim(); cm.set(c, (cm.get(c) || 0) + 1); });
+  const cats = Array.from(cm.entries()).map(([name, n]) => ({ name, n })).sort((a, b) => b.n - a.n);
+  const sggs = (SGG[sido] || []).map((g) => {
+    let pre = prefixes;
+    if (sido === '전남광주통합특별시') pre = GWANGJU_GU.includes(g) ? ['광주'] : ['전라남도', '전남'];
+    const names = OLD_SGG[sido]?.[g] || [g];
+    const n = rows.filter((r) => { const a = r.address || ''; return pre.some((p) => a.startsWith(p)) && names.some((x) => a.includes(` ${x} `)); }).length;
+    return { name: g, n };
+  }).sort((a, b) => b.n - a.n);
+  return { total: rows.length, cats, sggs };
+}

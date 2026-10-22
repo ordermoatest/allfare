@@ -186,7 +186,14 @@ export function conditionSummary(b: Cond): string[] {
   const g = GENDER.filter((c) => on.has(c));
   if (g.length === 1) out.push(CODE_LABEL[g[0]] + '만');
   const inc = INCOME.filter((c) => on.has(c));
-  if (inc.length > 0 && inc.length < INCOME.length) out.push(inc.map((c) => CODE_LABEL[c]).join(', '));
+  if (inc.length > 0 && inc.length < INCOME.length) {
+    // 연속된 구간(50% 이하~200% 이하)은 "중위소득 200% 이하"처럼 한 번에
+    const idx = INCOME.map((c, i) => (on.has(c) ? i : -1)).filter((i) => i >= 0);
+    const contiguous = idx[idx.length - 1] - idx[0] === idx.length - 1;
+    if (contiguous && idx[0] === 0) out.push(`중위소득 ${INC_LIMIT[idx[idx.length - 1]]}% 이하`);
+    else if (contiguous && idx[idx.length - 1] === INCOME.length - 1) out.push(`중위소득 ${INC_LIMIT[idx[0] - 1]}% 초과`);
+    else out.push(inc.map((c) => CODE_LABEL[c]).join(', '));
+  }
   for (const [group, none] of [[LIFE, LIFE_NONE], [HOUSE, HOUSE_NONE]] as [string[], string][]) {
     const need = group.filter((c) => on.has(c));
     if (need.length && !on.has(none)) out.push(need.map((c) => CODE_LABEL[c]).join(' 또는 '));
