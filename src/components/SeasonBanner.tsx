@@ -11,7 +11,7 @@ function pick(): B | null {
   const y = n.getUTCFullYear(), m = n.getUTCMonth() + 1;
   if (m === 10 || m === 11) return { id: `nuri-apply-${y}`, tag: '11/30 마감', text: '문화누리카드 신청하셨나요?', href: '/guide/culture-nuri-card' };
   if (m === 12) return { id: `nuri-end-${y}`, tag: '12/31 소멸', text: '문화누리카드 남은 잔액 쓰는 곳', href: '/guide/culture-nuri-year-end' };
-  if (m === 1 || m === 2) return { id: `new-year-${y}`, tag: `${y} 새 혜택`, text: '올해 바뀐 정부 지원금 한눈에', href: '/news' };
+  if (m === 1 || m === 2) return { id: `new-year-${y}`, tag: `${y} 새 혜택`, text: '올해 바뀐 정부 지원금 한눈에', href: y === 2027 ? '/guide/2027-welfare-changes' : '/news' };
   return null;
 }
 
