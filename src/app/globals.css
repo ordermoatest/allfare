@@ -1026,3 +1026,21 @@ nav.tabs .ic { width: 54px; }
 .erg b { flex: 1; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .elist .erg a { flex: none; border-top: 0; gap: 0; height: 32px; padding: 0 11px; border-radius: 999px; background: var(--chip); color: var(--ink); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; text-decoration: none; }
 .elist .erg a:first-of-type { background: var(--mint); color: var(--on-mint); }
+
+/* v21 계산기 */
+.gcalc-row.col { flex-direction: column; align-items: stretch; gap: 6px; }
+.cseg { display: flex; flex-wrap: wrap; gap: 6px; }
+.cseg button { flex: 1 1 auto; min-height: 38px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--chip); color: var(--sub); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.cseg button.on { background: var(--mint); border-color: var(--mint); color: var(--on-mint); }
+.cmonth { height: 44px; border: 0; border-radius: 12px; background: var(--chip); color: var(--ink); padding: 0 12px; font: inherit; font-size: 15px; font-weight: 700; color-scheme: light dark; }
+.gcalc .cres { list-style: none; margin: 8px 0 0; padding: 0 !important; display: flex; flex-direction: column; gap: 6px; }
+.cres li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; font-size: 14px; color: var(--ink); background: var(--card); border-radius: 10px; padding: 8px 10px; }
+.cres li b { color: var(--ink) !important; }
+.cres li small { flex-basis: 100%; font-size: 12px; color: var(--sub); }
+.cnext { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--sub); line-height: 1.6; }
+.cwarn { display: block; margin-top: 6px; font-size: 12.5px; color: var(--warn); }
+.chelp { margin: -6px 0 0 !important; }
+.ecalcs { display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.ecalcs::-webkit-scrollbar { display: none; }
+.ecalcs span { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--mint); padding-right: 2px; }
+.ecalcs a { flex: none; height: 34px; padding: 0 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; text-decoration: none; }

@@ -24,6 +24,7 @@ const ALL: { sido: string; sgg: string; label: string; key: string }[] = Object.
 
 type Pane = 'guide' | 'news' | 'region';
 const PANES: { k: Pane; label: string }[] = [{ k: 'guide', label: '복지 가이드' }, { k: 'news', label: '복지 소식' }, { k: 'region', label: '우리 동네' }];
+const CALCS: [string, string][] = [['median-income', '기준중위소득'], ['child-money-calc', '부모급여·아동수당'], ['basic-pension-calc', '기초연금'], ['work-incentive-calc', '근로장려금']];
 const GORDER: GuideGroup[] = ['youth', 'family', 'living', 'senior', 'basics'];
 
 /** 알아보기: 복지 가이드 / 복지 소식 / 우리 동네(복지 혜택·문화누리 사용처) — 한 번에 하나만 */
@@ -61,7 +62,10 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
               <button className={grp === 'all' ? 'on' : ''} onClick={() => setGrp('all')}>전체</button>
               {GORDER.map((k) => <button key={k} className={grp === k ? 'on' : ''} onClick={() => setGrp(k)}>{glabel(k)}</button>)}
             </div>
-            <a className="ecalc" href="/guide/median-income" onClick={() => track('explore_calc')}><IcCalc size={18} />기준중위소득 계산기<em aria-hidden>›</em></a>
+            <div className="ecalcs" role="group" aria-label="계산기">
+              <span><IcCalc size={16} />계산기</span>
+              {CALCS.map(([slug, label]) => <a key={slug} href={`/guide/${slug}`} onClick={() => track('explore_calc', { slug })}>{label}</a>)}
+            </div>
           </>
         )}
         {pane === 'region' && (
