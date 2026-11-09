@@ -78,6 +78,7 @@ export default function RegionStores({ sidoShort, sidoFull, sgg, stores, sibling
           <div className="rchips">{siblings.map((x) => <a key={x.href} href={x.href} className="rchip">{x.label}</a>)}</div>
         </section>
       )}
+      <a className="gbanner bguide" href={sgg ? `/local/${encodeURIComponent(sidoShort)}/${encodeURIComponent(sgg)}` : `/local/${encodeURIComponent(sidoShort)}`}><span><b>{place} 복지 혜택·지원금</b><small>우리 동네에서 받을 수 있는 혜택 모음</small></span><span aria-hidden>›</span></a>
       <MoreBenefits from="region" />
       <Footer notes={[`가맹점 목록은 한국문화예술위원회 공개 자료${fmtAsOf(asOf) ? ` ${fmtAsOf(asOf)}` : ''} 기준이에요.`, '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
     </main>

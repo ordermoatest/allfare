@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getBenefit, similarBenefits } from '@/lib/server/benefit';
+import { SGG, SIDO_SHORT } from '@/lib/regions';
 import { govText } from '@/lib/text';
 import { SITE } from '@/lib/site';
 import { deadlineLabel } from '@/lib/deadline';
@@ -60,6 +61,10 @@ export default async function BenefitPage({ params }: { params: { id: string } }
   const conds = conditionSummary({ lo: b.lo, hi: b.hi, codes: b.codes, hint: b.hint as Cond['hint'] });
   const similar = await similarBenefits(b).catch(() => []);
   const guide = guideFor(b.name, b.codes);
+  const sh = b.sido ? SIDO_SHORT[b.sido] : null;
+  const localLink = b.scope === 'local' && sh ? (b.sgg && SGG[b.sido!]?.includes(b.sgg)
+    ? { label: `${sh} ${b.sgg}`, href: `/local/${encodeURIComponent(sh)}/${encodeURIComponent(b.sgg)}` }
+    : { label: sh, href: `/local/${encodeURIComponent(sh)}` }) : null;
   const content = govText(b.content || b.summary);
   const target = govText(b.target);
   const how = govText(b.how);
@@ -126,6 +131,7 @@ export default async function BenefitPage({ params }: { params: { id: string } }
             {similar.map((x) => <a key={x.id} href={`/benefit/${encodeURIComponent(x.id)}`}><span><b>{x.name}</b><small>{[x.org, x.category].filter(Boolean).join(' · ')}</small></span><em aria-hidden>›</em></a>)}
           </section>
         )}
+        {localLink && <a className="gbanner bguide" href={localLink.href}><span><b>{localLink.label} 복지 혜택 모두 보기</b><small>우리 동네 지원금 모음</small></span><span aria-hidden>›</span></a>}
         {guide && <a className="gbanner bguide" href={`/guide/${guide.slug}`}><span><b>{guide.title}</b><small>올페어 복지 가이드</small></span><span aria-hidden>›</span></a>}
         <a className="cta" href={`/?b=${encodeURIComponent(b.id)}`} style={{ display: 'grid', placeItems: 'center', textDecoration: 'none', background: 'var(--card)', color: 'var(--mint)' }}>내가 받을 수 있는 혜택 더 찾기</a>
         <Footer notes={['정확한 지원 조건과 선정 여부는 신청처에서 꼭 확인하세요.']} />

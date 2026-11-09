@@ -996,3 +996,33 @@ nav.tabs .ic { width: 54px; }
   .hsum { background: var(--card); }
 }
 .cfull.hi .cmap .maprad1 { opacity: 0; pointer-events: none; }
+
+/* v20 동네 복지 */
+.lnum { font-style: normal; color: var(--mint); white-space: nowrap; }
+.sstat.s3 { grid-template-columns: repeat(3, 1fr); }
+.sstat b.sm { font-size: 16px; display: block; margin-top: 4px; }
+.lchips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 16px -2px 4px; padding: 0 2px; }
+.lchips::-webkit-scrollbar { display: none; }
+.lchips button { flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--sub); font: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.lchips button em { font-style: normal; font-size: 11.5px; color: var(--mute); margin-left: 4px; font-weight: 600; }
+.lchips button.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.lchips button.on em { color: var(--bg); opacity: .7; }
+.lsec h2 small { font-size: 12.5px; color: var(--mute); font-weight: 600; margin-left: 6px; }
+.llist { background: var(--card); border-radius: 18px; padding: 2px 14px; }
+.llist a { display: flex; flex-direction: column; gap: 3px; padding: 12px 0; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.llist a:first-child { border-top: 0; }
+.llist a.lhide { display: none; }
+.llist .ltop { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--sub); }
+.llist .ltop span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.llist .ltop span:last-child { flex: none; }
+.llist .ltop .hot { color: var(--warn); font-weight: 800; }
+.llist b { font-size: 15px; line-height: 1.4; font-weight: 700; }
+.llist small { font-size: 13px; color: var(--sub); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lmore { display: block; width: 100%; padding: 12px 0 14px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--mint); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.lsido { text-decoration: none; color: var(--ink); }
+.lsido small { font-size: 12.5px; color: var(--mint); font-weight: 600; margin-left: 4px; }
+.erg { display: flex; align-items: center; gap: 6px; padding: 10px 14px 10px 16px; border-top: 1px solid var(--line); }
+.erg:first-child { border-top: 0; }
+.erg b { flex: 1; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.elist .erg a { flex: none; border-top: 0; gap: 0; height: 32px; padding: 0 11px; border-radius: 999px; background: var(--chip); color: var(--ink); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; text-decoration: none; }
+.elist .erg a:first-of-type { background: var(--mint); color: var(--on-mint); }

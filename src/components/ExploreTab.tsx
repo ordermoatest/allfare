@@ -12,6 +12,7 @@ const href = (sido: string, sgg?: string) => {
   const sh = encodeURIComponent(SIDO_SHORT[sido]);
   return sgg ? `/culture/${sh}/${encodeURIComponent(sgg)}` : `/culture/${sh}`;
 };
+const lhref = (sido: string, sgg?: string) => href(sido, sgg).replace(/^\/culture/, '/local');
 
 // 전체 시·군·구 (세종처럼 시·군·구가 없으면 시·도 자체)
 const ALL: { sido: string; sgg: string; label: string; key: string }[] = Object.entries(SGG).flatMap(([sido, list]) => {
@@ -22,10 +23,10 @@ const ALL: { sido: string; sgg: string; label: string; key: string }[] = Object.
 });
 
 type Pane = 'guide' | 'news' | 'region';
-const PANES: { k: Pane; label: string }[] = [{ k: 'guide', label: '복지 가이드' }, { k: 'news', label: '복지 소식' }, { k: 'region', label: '동네 사용처' }];
+const PANES: { k: Pane; label: string }[] = [{ k: 'guide', label: '복지 가이드' }, { k: 'news', label: '복지 소식' }, { k: 'region', label: '우리 동네' }];
 const GORDER: GuideGroup[] = ['youth', 'family', 'living', 'senior', 'basics'];
 
-/** 알아보기: 복지 가이드 / 복지 소식 / 동네 사용처 — 한 번에 하나만 */
+/** 알아보기: 복지 가이드 / 복지 소식 / 우리 동네(복지 혜택·문화누리 사용처) — 한 번에 하나만 */
 export default function ExploreTab({ profile }: { profile: Profile }) {
   const [pane, setPane] = useState<Pane>('guide');
   const [grp, setGrp] = useState<GuideGroup | 'all'>('all');
@@ -35,7 +36,7 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
     if (!v) return [];
     return ALL.filter((r) => r.key.includes(v) || r.sgg.replace(/[시군구]$/, '').startsWith(v)).slice(0, 6);
   }, [v]);
-  const mine = profile.sido && SGG[profile.sido] ? { label: `${SIDO_SHORT[profile.sido]} ${profile.sgg || '전체'}`, href: href(profile.sido, profile.sgg || undefined) } : null;
+  const mine = profile.sido && SGG[profile.sido] ? { label: `${SIDO_SHORT[profile.sido]} ${profile.sgg || '전체'}`, href: href(profile.sido, profile.sgg || undefined), lhref: lhref(profile.sido, profile.sgg || undefined) } : null;
   const guides = grp === 'all' ? GORDER.flatMap((k) => guidesIn(k)) : guidesIn(grp);
   const glabel = (k: GuideGroup) => (GROUPS.find((x) => x.key === k)?.label || '').replace(/^\S+\s/, '');
 
@@ -101,19 +102,25 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
           {v && (
             <div className="elist">
               {hits.length ? hits.map((r) => (
-                <a key={r.label} href={href(r.sido, r.sgg || undefined)} onClick={() => track('explore_region', { from: 'search', q: v })}>
-                  <span><b>{r.label} 문화누리카드 사용처</b></span><em aria-hidden>›</em>
-                </a>
+                <div key={r.label} className="erg">
+                  <b>{r.label}</b>
+                  <a href={lhref(r.sido, r.sgg || undefined)} onClick={() => track('explore_region', { from: 'search', to: 'local', q: v })}>복지 혜택</a>
+                  <a href={href(r.sido, r.sgg || undefined)} onClick={() => track('explore_region', { from: 'search', q: v })}>문화누리 사용처</a>
+                </div>
               )) : <span className="eempty">찾는 지역이 없어요. 시·군·구 이름으로 검색해 보세요</span>}
             </div>
           )}
           {mine && (
-            <a className="ecalc" href={mine.href} onClick={() => track('explore_region', { from: 'mine' })}><IcPin size={18} />내 지역: {mine.label} 사용처<em aria-hidden>›</em></a>
+            <>
+              <a className="ecalc" href={mine.lhref} onClick={() => track('explore_region', { from: 'mine', to: 'local' })}><IcPin size={18} />{mine.label} 복지 혜택<em aria-hidden>›</em></a>
+              <a className="ecalc" href={mine.href} onClick={() => track('explore_region', { from: 'mine' })}><IcPin size={18} />{mine.label} 문화누리카드 사용처<em aria-hidden>›</em></a>
+            </>
           )}
           <p className="elbl">시·도에서 고르기</p>
           <div className="esido">
-            {Object.keys(SGG).map((s) => <a key={s} href={href(s)}>{SIDO_SHORT[s]}</a>)}
+            {Object.keys(SGG).map((s) => <a key={s} href={lhref(s)}>{SIDO_SHORT[s]}</a>)}
           </div>
+          <a className="ecalc" href="/culture" onClick={() => track('explore_region', { from: 'culture_all' })}><IcPin size={18} />지역별 문화누리카드 사용처<em aria-hidden>›</em></a>
         </>
       )}
       <Footer />

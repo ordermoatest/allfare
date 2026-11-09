@@ -27,6 +27,8 @@ export function coreUrls(): U[] {
     ...NEWS.map((n) => ({ loc: `${SITE}/news/${n.slug}`, lastmod: day(n.date), changefreq: 'monthly', priority: 0.8 })),
     { loc: `${SITE}/culture`, changefreq: 'weekly', priority: 0.8 },
     ...Object.keys(SGG).map((full) => ({ loc: `${SITE}/culture/${encodeURIComponent(SIDO_SHORT[full])}`, changefreq: 'weekly', priority: 0.7 })),
+    { loc: `${SITE}/local`, changefreq: 'weekly', priority: 0.8 },
+    ...Object.keys(SGG).map((full) => ({ loc: `${SITE}/local/${encodeURIComponent(SIDO_SHORT[full])}`, changefreq: 'weekly', priority: 0.7 })),
     { loc: `${SITE}/about`, changefreq: 'monthly', priority: 0.4 },
     { loc: `${SITE}/privacy`, changefreq: 'yearly', priority: 0.2 },
     { loc: `${SITE}/terms`, changefreq: 'yearly', priority: 0.2 },
@@ -37,6 +39,14 @@ export function cultureUrls(): U[] {
   return Object.entries(SGG).flatMap(([full, list]) => {
     const sh = encodeURIComponent(SIDO_SHORT[full]);
     return list.map((g) => ({ loc: `${SITE}/culture/${sh}/${encodeURIComponent(g)}`, changefreq: 'weekly', priority: 0.6 }));
+  });
+}
+
+/** 동네 복지: 시·군·구별 혜택 페이지 */
+export function localUrls(): U[] {
+  return Object.entries(SGG).flatMap(([full, list]) => {
+    const sh = encodeURIComponent(SIDO_SHORT[full]);
+    return list.map((g) => ({ loc: `${SITE}/local/${sh}/${encodeURIComponent(g)}`, changefreq: 'weekly', priority: 0.7 }));
   });
 }
 
