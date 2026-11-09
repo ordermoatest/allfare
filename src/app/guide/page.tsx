@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
-import { GROUPS, guidesIn } from '@/lib/guides';
+import { GROUPS, guideBySlug, guidesIn, PINNED } from '@/lib/guides';
 
 export const metadata: Metadata = {
   title: '복지 가이드 - 청년월세·부모급여·아동수당·기초연금·근로장려금 2026 | 올페어',
@@ -15,6 +15,19 @@ export default function GuideList() {
       <Brand href="/" />
       <h1 style={{ marginTop: 20 }}>📘 복지 가이드</h1>
       <p>혜택을 찾기 전에 알아두면 좋은 내용을 쉽게 정리했어요.</p>
+      {PINNED.length > 0 && (
+        <section className="ggroup">
+          <h2>지금 많이 찾는 글</h2>
+          <div className="glist">
+            {PINNED.map((slug) => guideBySlug(slug)).filter((g) => !!g).map((g) => (
+              <a key={g!.slug} className="gitem" href={`/guide/${g!.slug}`}>
+                <span className="gemoji" aria-hidden>{g!.emoji}</span>
+                <span><b>{g!.title}</b>{g!.sub && <small>{g!.sub}</small>}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
       {GROUPS.map((gr) => (
         <section key={gr.key} className="ggroup">
           <h2>{gr.label}</h2>

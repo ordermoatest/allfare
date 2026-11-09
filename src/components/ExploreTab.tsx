@@ -4,7 +4,7 @@ import Footer from './Footer';
 import { IcCalc, IcPin, IcSearch } from './icons';
 import { Profile } from '@/lib/profile';
 import { SGG, SIDO_SHORT } from '@/lib/regions';
-import { GROUPS, GuideGroup, guidesIn } from '@/lib/guides';
+import { GROUPS, GuideGroup, guidesIn, PINNED } from '@/lib/guides';
 import { NEWS, fmtNewsDate } from '@/lib/news';
 import { track } from '@/lib/client';
 
@@ -37,7 +37,8 @@ export default function ExploreTab({ profile }: { profile: Profile }) {
     return ALL.filter((r) => r.key.includes(v) || r.sgg.replace(/[시군구]$/, '').startsWith(v)).slice(0, 6);
   }, [v]);
   const mine = profile.sido && SGG[profile.sido] ? { label: `${SIDO_SHORT[profile.sido]} ${profile.sgg || '전체'}`, href: href(profile.sido, profile.sgg || undefined), lhref: lhref(profile.sido, profile.sgg || undefined) } : null;
-  const guides = grp === 'all' ? GORDER.flatMap((k) => guidesIn(k)) : guidesIn(grp);
+  const all = GORDER.flatMap((k) => guidesIn(k));
+  const guides = grp === 'all' ? [...all.filter((g) => PINNED.includes(g.slug)), ...all.filter((g) => !PINNED.includes(g.slug))] : guidesIn(grp);
   const glabel = (k: GuideGroup) => (GROUPS.find((x) => x.key === k)?.label || '').replace(/^\S+\s/, '');
 
   return (

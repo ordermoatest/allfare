@@ -265,4 +265,6 @@ const BASE: Guide[] = [
 export const GUIDES: Guide[] = [...BASE, ...GUIDES2];
 export const guidesIn = (g: GuideGroup) => GUIDES.filter((x) => x.group === g);
 
+/** 목록 맨 위에 올릴 글 (시즌에 맞춰 바꾸면 됨) */
+export const PINNED = ['2027-welfare-changes'];
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);
