@@ -184,6 +184,7 @@ const BASE: Guide[] = [
         <h2>어디서 쓸 수 있나요?</h2>
         <p>전국 문화누리카드 가맹점(서점, 영화관, 공연장, 체육시설, 여행사 등)에서 쓸 수 있어요. 올페어 <b>문화누리</b> 탭에서 내 주변 사용처를 지도로 찾고, 다른 이용자가 남긴 &lsquo;결제 됐어요&rsquo; 후기도 확인할 수 있어요.</p>
         <Tip>가맹점 목록은 실제와 다를 수 있어요. 방문 전에 가게에 결제 가능 여부를 한 번 확인해 보세요.</Tip>
+        <p>내년 금액이 궁금하다면 <a href="/guide/culture-nuri-2027">2027 문화누리카드, 얼마로 오를까요?</a>를 보세요.</p>
         <p className="gsmall">문화체육관광부·한국문화예술위원회 2026년 안내 기준이에요. 세부 일정은 문화누리카드 누리집에서 확인하세요.</p>
       </>
     ),
@@ -266,5 +267,5 @@ export const GUIDES: Guide[] = [...BASE, ...GUIDES2];
 export const guidesIn = (g: GuideGroup) => GUIDES.filter((x) => x.group === g);
 
 /** 목록 맨 위에 올릴 글 (시즌에 맞춰 바꾸면 됨) */
-export const PINNED = ['2027-welfare-changes'];
+export const PINNED = ['2027-welfare-changes', 'culture-nuri-2027'];
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);
