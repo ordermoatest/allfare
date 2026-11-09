@@ -88,6 +88,9 @@ export default function PcSide({ onShare, onMy }: { onShare: () => void; onMy: (
         <section>
           <p className="pclbl">바로가기</p>
           <div className="pclinks">
+            <a href="/guide/child-money-calc" onClick={() => track('pc_side', { to: 'calc_child' })}><IcCalc />부모급여·아동수당 계산기<IcChevron size={15} /></a>
+            <a href="/guide/basic-pension-calc" onClick={() => track('pc_side', { to: 'calc_pension' })}><IcCalc />기초연금 모의계산<IcChevron size={15} /></a>
+            <a href="/guide/work-incentive-calc" onClick={() => track('pc_side', { to: 'calc_eitc' })}><IcCalc />근로장려금 계산기<IcChevron size={15} /></a>
             <a href="/guide/median-income" onClick={() => track('pc_side', { to: 'calc' })}><IcCalc />기준중위소득 계산기<IcChevron size={15} /></a>
             <a href="/guide/culture-nuri-card" onClick={() => track('pc_side', { to: 'culture-guide' })}><IcTicket />문화누리카드 안내<IcChevron size={15} /></a>
           </div>

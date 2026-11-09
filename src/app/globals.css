@@ -1044,3 +1044,13 @@ nav.tabs .ic { width: 54px; }
 .ecalcs::-webkit-scrollbar { display: none; }
 .ecalcs span { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--mint); padding-right: 2px; }
 .ecalcs a { flex: none; height: 34px; padding: 0 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; text-decoration: none; }
+/* v21.1 계산기 카드 줄 (알아보기 전체) */
+.ecalc2 { margin: 2px 0 12px; }
+.ect { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 8px; font-size: 15px; font-weight: 800; color: var(--ink); }
+.ect small { font-size: 12px; color: var(--mute); font-weight: 600; }
+.ecrow { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+.ecrow::-webkit-scrollbar { display: none; }
+.ecrow a { flex: none; width: 152px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: var(--ink); }
+.ecrow i { width: 30px; height: 30px; border-radius: 9px; background: var(--soft); color: var(--mint); display: grid; place-items: center; }
+.ecrow b { font-size: 14px; line-height: 1.3; }
+.ecrow small { font-size: 12px; color: var(--sub); }
