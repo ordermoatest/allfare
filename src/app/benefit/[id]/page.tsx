@@ -9,6 +9,7 @@ import { Cond, conditionSummary } from '@/lib/match';
 import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
 import { ogImage } from '@/lib/og';
+import { indexedBenefitIds } from '@/lib/server/sitemaps';
 
 export const revalidate = 3600;
 
@@ -18,11 +19,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!b) return { title: '올페어', robots: { index: false } };
   const clip = (t: string | null, n: number) => (t || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const title = `${b.name} - 대상·지원 내용·신청 방법 | 올페어`;
+  // 인기 상위만 검색에 노출, 나머지는 noindex (링크는 따라가게 follow)
+  const top = await indexedBenefitIds().catch(() => null);
+  const indexable = b.active && (!top || top.includes(b.id));
   const desc = [b.org, clip(b.summary || b.content, 70), b.target ? `대상: ${clip(b.target, 50)}` : ''].filter(Boolean).join(' · ');
   return {
     title, description: desc,
     alternates: { canonical: `/benefit/${encodeURIComponent(b.id)}` },
-    robots: b.active ? undefined : { index: false },
+    robots: indexable ? undefined : { index: false, follow: true },
     openGraph: { title: b.name, description: desc, type: 'article', locale: 'ko_KR', siteName: '올페어',
       images: [ogImage({ t: b.name, s: deadlineLabel(b.deadlineKind, b.deadlineEnd).text, k: b.category || '복지 혜택', e: '🎁' })] },
     twitter: { card: 'summary_large_image', title: b.name, description: desc },
