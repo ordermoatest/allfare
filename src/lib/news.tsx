@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 export type News = {
   slug: string; kind: 'weekly' | 'theme'; date: string; emoji: string;
   title: string; seoTitle: string; sub?: string; desc: string; kw?: string[];
+  /** 썸네일에 크게 쓸 글자 (없으면 제목·부제 첫 마디) */
+  thumb?: { t: string; s?: string };
   body: ReactNode;
 };
 
@@ -635,6 +637,7 @@ export const NEWS: News[] = [
     emoji: '📰',
     title: '10월 셋째 주 복지 소식',
     sub: '문화누리카드 마감 D-45 · 내년 생계급여 인상 · 신청 없이 받는 아동수당',
+    thumb: { t: '2027 문화누리카드 얼마나 오를까?', s: '인구감소지역 +5만원' },
     seoTitle: '2027 문화누리카드 인상은? 인구감소지역 5만원 추가·대상 286만명, 올해 11월 30일 마감 | 10월 셋째 주 복지 소식',
     desc: '2027년 문화누리카드는 정부 예산안 기준으로 대상이 286만 명으로 늘고 인구감소지역 주민은 5만원을 더 받아요(1인 기본 금액은 1월 말 발표). 올해 신청 마감(11월 30일), 2027 기준중위소득 6.7% 인상, 아동수당 자동지급 소식도 정리했어요.',
     kw: ['2027 문화누리카드 인상', '2027년 문화누리카드 금액', '복지 소식', '문화누리카드 마감', '2027 기준중위소득', '2027 생계급여', '아동수당 자동지급', '신청주의 개선'],

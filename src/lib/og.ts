@@ -5,5 +5,6 @@ export function ogImage(o: { t: string; s?: string; k?: string; e?: string }) {
   if (o.s) q.set('s', o.s.slice(0, 50));
   if (o.k) q.set('k', o.k.slice(0, 20));
   if (o.e) q.set('e', o.e.slice(0, 4));
+  q.set('v', '2'); // 디자인 바꿀 때 올리면 네이버·카카오가 새 그림을 가져가요
   return { url: `/og?${q.toString()}`, width: 1200, height: 630, alt: o.t };
 }

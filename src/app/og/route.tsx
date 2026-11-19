@@ -16,39 +16,32 @@ export async function GET(req: NextRequest) {
   const t = (p.get('t') || '내가 받을 수 있는 복지 혜택 찾기').slice(0, 60);
   const s = (p.get('s') || '').slice(0, 50);
   const k = (p.get('k') || '').slice(0, 20);
-  const e = (p.get('e') || '').slice(0, 4);
-  const brand = '올페어 All welFare';
-  const foot = 'allfare.kr · 내 혜택, 내 주변 사용처 한 번에';
-  const size = t.length > 30 ? 60 : t.length > 18 ? 70 : 80;
+  const brand = '올페어';
+  const foot = 'allfare.kr';
+  // 네이버는 1200×630 그림의 가운데 정사각형만 잘라 썸네일로 써요 → 글자를 가운데 620px 안에 크게
+  const n = t.replace(/\s/g, '').length;
+  const size = n <= 10 ? 104 : n <= 16 ? 92 : n <= 24 ? 76 : n <= 34 ? 66 : 56;
+  // 노란 띠는 짧을 때만 (길면 정사각형에서 넘쳐요)
+  const pill = s && s.replace(/\s/g, '').length <= 16 ? s : '';
   try {
     const all = `${t}${s}${k}${brand}${foot}AF`;
-    const [b, r, logo] = await Promise.all([
-      font(all, 700), font(all, 500),
-      fetch(new URL('/icon-192.png', req.url)).then((x) => (x.ok ? x.arrayBuffer() : null)).catch(() => null),
-    ]);
+    const [b, r] = await Promise.all([font(all, 700), font(all, 500)]);
     return new ImageResponse(
       (
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#F2F7F4', padding: '64px 72px', fontFamily: 'Plex' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            {logo
-              ? /* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text, @typescript-eslint/no-explicit-any */
-                <img src={logo as any} width={64} height={64} style={{ borderRadius: 18 }} />
-              : <div style={{ width: 64, height: 64, borderRadius: 18, background: '#0F8A68', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700 }}>AF</div>}
-            <div style={{ display: 'flex', fontSize: 30, fontWeight: 700, color: '#16201C' }}>올페어<span style={{ marginLeft: 12, color: '#55635D', fontWeight: 500 }}>All welFare</span></div>
-            {k && <div style={{ display: 'flex', marginLeft: 'auto', background: '#E2F3EC', color: '#0B5A44', fontSize: 26, fontWeight: 700, padding: '10px 22px', borderRadius: 999 }}>{k}</div>}
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', background: '#0B6B51', padding: '44px 0', fontFamily: 'Plex' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'rgba(255,255,255,.88)', fontSize: 30, fontWeight: 700 }}>
+            <div style={{ display: 'flex', width: 44, height: 44, borderRadius: 12, background: '#fff', color: '#0B6B51', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700 }}>AF</div>
+            {brand}{k && <span style={{ marginLeft: 10, fontWeight: 500, color: 'rgba(255,255,255,.7)' }}>· {k}</span>}
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 40 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 26 }}>
-              <div style={{ display: 'flex', fontSize: size, fontWeight: 700, color: '#16201C', lineHeight: 1.25, letterSpacing: -1, wordBreak: 'keep-all' }}>{t}</div>
-              {s && <div style={{ display: 'flex', alignSelf: 'flex-start', background: '#0F8A68', color: '#fff', fontSize: 34, fontWeight: 700, padding: '12px 26px', borderRadius: 18 }}>{s}</div>}
-            </div>
-            {e && <div style={{ display: 'flex', width: 220, height: 220, borderRadius: 56, background: '#fff', alignItems: 'center', justifyContent: 'center', fontSize: 130 }}>{e}</div>}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, width: 580 }}>
+            <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center', fontSize: size, fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: -2, wordBreak: 'keep-all' }}>{t}</div>
+            {pill && <div style={{ display: 'flex', background: '#FFE14D', color: '#1E2A10', fontSize: size >= 80 ? 40 : 36, fontWeight: 700, padding: '12px 28px', borderRadius: 16, textAlign: 'center' }}>{pill}</div>}
           </div>
-          <div style={{ display: 'flex', fontSize: 26, color: '#55635D', fontWeight: 500 }}>{foot}</div>
+          <div style={{ display: 'flex', fontSize: 26, color: 'rgba(255,255,255,.7)', fontWeight: 500 }}>{foot}</div>
         </div>
       ),
       {
-        width: 1200, height: 630, emoji: 'twemoji',
+        width: 1200, height: 630,
         fonts: [{ name: 'Plex', data: b, weight: 700, style: 'normal' }, { name: 'Plex', data: r, weight: 500, style: 'normal' }],
         headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800' },
       },

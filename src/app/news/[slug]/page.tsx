@@ -13,7 +13,7 @@ export function generateStaticParams() {
   return NEWS.map((n) => ({ slug: n.slug }));
 }
 
-const card = (n: NonNullable<ReturnType<typeof newsBySlug>>) => ogImage({ t: n.title, s: (n.sub || '').split(' · ')[0], k: '복지 소식', e: n.emoji });
+const card = (n: NonNullable<ReturnType<typeof newsBySlug>>) => ogImage({ t: n.thumb?.t || n.title, s: n.thumb ? n.thumb.s : (n.sub || '').split(' · ')[0], k: '복지 소식' });
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
   const n = newsBySlug(params.slug);

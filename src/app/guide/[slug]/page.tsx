@@ -21,7 +21,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     keywords: g.kw,
     alternates: { canonical: `/guide/${g.slug}` },
     openGraph: { title: g.title, description: g.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', modifiedTime: g.updated,
-      images: [ogImage({ t: g.title, s: g.sub, k: '복지 가이드', e: g.emoji })] },
+      images: [ogImage({ t: g.title, s: (g.sub || '').split(' · ')[0], k: '복지 가이드' })] },
     twitter: { card: 'summary_large_image', title: g.title, description: g.desc },
   };
 }
@@ -36,7 +36,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
   const url = `${SITE}/guide/${g.slug}`;
   const ld = [
     { '@context': 'https://schema.org', '@type': 'Article', headline: g.seoTitle, description: g.desc, datePublished: g.updated, dateModified: g.updated,
-      mainEntityOfPage: url, inLanguage: 'ko-KR', image: `${SITE}${ogImage({ t: g.title, s: g.sub, k: '복지 가이드', e: g.emoji }).url}`, keywords: g.kw?.join(', '),
+      mainEntityOfPage: url, inLanguage: 'ko-KR', image: `${SITE}${ogImage({ t: g.title, s: (g.sub || '').split(' · ')[0], k: '복지 가이드' }).url}`, keywords: g.kw?.join(', '),
       author: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', url: `${SITE}/` }, publisher: { '@type': 'Organization', '@id': `${SITE}/#org`, name: '올페어', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } } },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: '올페어', item: `${SITE}/` },
