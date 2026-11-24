@@ -74,7 +74,7 @@ export default function NewsPage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
-      <AdSlot where="news_end" />
+      <AdSlot where="news_end" size="mid" />
       <MoreBenefits from="news" />
       <Footer notes={['소식 내용은 발행일 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>

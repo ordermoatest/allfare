@@ -1056,6 +1056,7 @@ nav.tabs .ic { width: 54px; }
 .ecrow small { font-size: 12px; color: var(--sub); }
 
 /* v22 광고 자리 (슬롯 없으면 렌더 안 됨) */
-.adwrap { margin: 14px 0; padding: 8px 0 4px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 100px; }
+.adwrap { margin: 14px 0; padding: 8px 0 4px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.adwrap.banner, .adwrap.mid { overflow: hidden; }
 .adlabel { display: block; font-size: 11px; color: var(--mute); margin-bottom: 4px; }
 .list .adwrap { margin: 4px 0; border: 0; background: var(--card); border-radius: 18px; padding: 10px 12px; }

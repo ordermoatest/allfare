@@ -7,7 +7,10 @@ export const AD_SLOT = '9364066617'; // 애드센스 → 광고 → 광고 단�
 
 declare global { interface Window { adsbygoogle?: unknown[] } }
 
-export default function AdSlot({ where }: { where: string }) {
+// size: banner = 가로 띠(높이 100px), mid = 중간(높이 250px), auto = 애드센스 자동
+const SIZES = { banner: 100, mid: 250 } as const;
+
+export default function AdSlot({ where, size = 'auto' }: { where: string; size?: 'banner' | 'mid' | 'auto' }) {
   const done = useRef(false);
   useEffect(() => {
     if (!AD_SLOT || done.current) return;
@@ -16,9 +19,12 @@ export default function AdSlot({ where }: { where: string }) {
   }, []);
   if (!AD_SLOT) return null;
   return (
-    <div className="adwrap" data-where={where}>
+    <div className={`adwrap ${size}`} data-where={where}>
       <span className="adlabel">광고</span>
-      <ins className="adsbygoogle" style={{ display: 'block' }} data-ad-client={AD_CLIENT} data-ad-slot={AD_SLOT} data-ad-format="auto" data-full-width-responsive="true" />
+      {size === 'auto'
+        ? <ins className="adsbygoogle" style={{ display: 'block' }} data-ad-client={AD_CLIENT} data-ad-slot={AD_SLOT} data-ad-format="auto" data-full-width-responsive="true" />
+        // 크기를 CSS로 고정하면 애드센스가 그 안에 맞는 광고만 보여줘요 (format 속성은 빼야 함)
+        : <ins className="adsbygoogle" style={{ display: 'inline-block', width: '100%', height: SIZES[size] }} data-ad-client={AD_CLIENT} data-ad-slot={AD_SLOT} />}
     </div>
   );
 }

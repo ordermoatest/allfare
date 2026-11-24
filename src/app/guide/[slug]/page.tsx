@@ -78,7 +78,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
-      <AdSlot where="guide_end" />
+      <AdSlot where="guide_end" size="mid" />
       <MoreBenefits from="guide" />
       <Footer notes={['가이드 내용은 작성 시점 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>

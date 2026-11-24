@@ -159,7 +159,7 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
     <div className="list">
       {sorted.length === 0 && <div className="empty" style={{ padding: '14px 8px' }}>{query || cat !== '전체' ? '이 조건으로 찾은 혜택이 없어요' : '해당하는 혜택이 없어요'}</div>}
       {sorted.slice(0, limit).map(({ b }, i) => (i === 4 || (i > 4 && (i - 4) % 15 === 0))
-        ? [card(b, pick), <AdSlot key={`ad${i}`} where="benefits" />]
+        ? [card(b, pick), <AdSlot key={`ad${i}`} where="benefits" size="banner" />]
         : card(b, pick))}
       {sorted.length > limit && <button className="morebtn" onClick={() => setLimit((l) => l + PAGE)}>더 보기 ({(sorted.length - limit).toLocaleString()}개 남음)</button>}
     </div>
