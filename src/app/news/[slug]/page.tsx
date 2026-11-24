@@ -4,6 +4,7 @@ import Brand from '@/components/Brand';
 import MoreBenefits from '@/components/MoreBenefits';
 import AdSlot from '@/components/AdSlot';
 import { withMidAd } from '@/lib/midAd';
+import { fitDesc } from '@/lib/text';
 import Footer from '@/components/Footer';
 import NewsStats from '@/components/NewsStats';
 import { NEWS, fmtNewsDate, newsBySlug } from '@/lib/news';
@@ -22,7 +23,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   if (!n) return { title: '올페어' };
   return {
     title: `${n.seoTitle} | 올페어`,
-    description: n.desc,
+    description: fitDesc(n.desc, '마감이 다가오는 혜택과 새로 시작된 지원금, 달라지는 제도를 올페어 복지 소식에서 한 번에 확인하세요.'),
     keywords: n.kw,
     alternates: { canonical: `/news/${n.slug}` },
     openGraph: { title: n.title, description: n.desc, type: 'article', locale: 'ko_KR', siteName: '올페어', publishedTime: n.date, images: [card(n)] },

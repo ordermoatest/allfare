@@ -10,6 +10,7 @@ import Brand from '@/components/Brand';
 import Footer from '@/components/Footer';
 import { ogImage } from '@/lib/og';
 import { leanRobots } from '@/lib/seoMode';
+import { fitDesc } from '@/lib/text';
 import { indexedBenefitIds } from '@/lib/server/sitemaps';
 
 export const revalidate = 3600;
@@ -23,7 +24,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   // 인기 상위만 검색에 노출, 나머지는 noindex (링크는 따라가게 follow)
   const top = await indexedBenefitIds().catch(() => null);
   const indexable = b.active && (!top || top.includes(b.id));
-  const desc = [b.org, clip(b.summary || b.content, 70), b.target ? `대상: ${clip(b.target, 50)}` : ''].filter(Boolean).join(' · ');
+  const desc = fitDesc([b.org, clip(b.summary || b.content, 70), b.target ? `대상: ${clip(b.target, 50)}` : ''].filter(Boolean).join(' · '),
+    `${b.name}의 지원 대상, 지원 내용, 신청 방법과 기한을 정리했어요. 내 조건으로 받을 수 있는지 올페어에서 확인해 보세요.`);
   return {
     title, description: desc,
     alternates: { canonical: `/benefit/${encodeURIComponent(b.id)}` },

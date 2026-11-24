@@ -13,3 +13,10 @@ export function govText(t?: string | null): string {
     return bulleted > 1 ? `• ${body}` : body;
   }).join('\n');
 }
+
+/** 검색 설명 문구 길이 맞추기: 짧으면 뒷문장을 붙이고, 길면 155자에서 자름 */
+export function fitDesc(base: string, tail: string, min = 110, max = 155): string {
+  let d = base.replace(/\s+/g, ' ').trim();
+  if (d.length < min) d = d ? `${d.replace(/[.\s]+$/, '')}. ${tail}` : tail;
+  return d.length > max ? `${d.slice(0, max - 1).trim()}…` : d;
+}
