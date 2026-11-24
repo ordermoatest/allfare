@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Brand from '@/components/Brand';
 import MoreBenefits from '@/components/MoreBenefits';
+import AdSlot from '@/components/AdSlot';
+import { withMidAd } from '@/lib/midAd';
 import Footer from '@/components/Footer';
 import { GROUPS, GUIDES, guideBySlug } from '@/lib/guides';
 import { ogImage } from '@/lib/og';
@@ -54,7 +56,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
         <h1><span aria-hidden>{g.emoji} </span>{g.title}</h1>
         {g.sub && <p className="gsubt">{g.sub}</p>}
         <div className="gmeta"><p className="gsmall">{y}년 {m}월 {d}일 기준 · 올페어</p><ShareButton title={g.title} text={g.sub || g.desc} from="guide_top" /></div>
-        {g.body}
+        {withMidAd(g.body, 'guide')}
         {g.faq && g.faq.length > 0 && (
           <section className="gfaq">
             <h2>자주 묻는 질문</h2>
@@ -76,6 +78,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
+      <AdSlot where="guide_end" />
       <MoreBenefits from="guide" />
       <Footer notes={['가이드 내용은 작성 시점 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>

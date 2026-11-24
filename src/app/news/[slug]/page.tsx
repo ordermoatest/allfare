@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Brand from '@/components/Brand';
 import MoreBenefits from '@/components/MoreBenefits';
+import AdSlot from '@/components/AdSlot';
+import { withMidAd } from '@/lib/midAd';
 import Footer from '@/components/Footer';
 import NewsStats from '@/components/NewsStats';
 import { NEWS, fmtNewsDate, newsBySlug } from '@/lib/news';
@@ -54,7 +56,7 @@ export default function NewsPage({ params }: { params: { slug: string } }) {
         <h1>{n.title}</h1>
         {n.sub && <p className="gsubt">{n.sub}</p>}
         <div className="gmeta"><p className="gsmall">{fmtNewsDate(n.date)} · 올페어</p><NewsStats slug={n.slug} title={n.title} text={n.sub || n.desc} variant="top" /></div>
-        {n.body}
+        {withMidAd(n.body, 'news')}
       </article>
       <NewsStats slug={n.slug} title={n.title} text={n.sub || n.desc} variant="bottom" />
       <a className="gcta" href="/?tab=my">내 조건으로 받을 수 있는 혜택 찾기 →</a>
@@ -72,6 +74,7 @@ export default function NewsPage({ params }: { params: { slug: string } }) {
           ))}
         </div>
       </section>
+      <AdSlot where="news_end" />
       <MoreBenefits from="news" />
       <Footer notes={['소식 내용은 발행일 기준이에요. 신청 전 공식 안내를 꼭 확인하세요.']} />
     </main>
