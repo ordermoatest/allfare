@@ -23,7 +23,7 @@ export async function localRows(sido: string): Promise<LocalItem[]> {
     if (data.length < 1000) break;
   }
   rows.sort((a, b) => (b.like_count || 0) - (a.like_count || 0) || (b.views || 0) - (a.views || 0));
-  return rows.map((r) => ({ id: r.id, name: r.name, summary: r.summary, cat: shortCategory(r.category), org: r.org, dk: r.deadline_kind, de: r.deadline_end, sgg: r.sgg }));
+  return rows.map((r) => ({ id: r.id, name: r.name, summary: r.summary, cat: shortCategory(r.category, r.name, r.summary), org: r.org, dk: r.deadline_kind, de: r.deadline_end, sgg: r.sgg }));
 }
 
 /** 분야별 개수 (많은 순) */

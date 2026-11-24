@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/server/supabase';
 import { SGG } from '@/lib/regions';
-import { shortCategory } from '@/lib/categories';
+import { looksRegional, shortCategory } from '@/lib/categories';
 import { todayKST } from '@/lib/deadline';
 import { lastSync } from '@/lib/server/asof';
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       id: r.id,
       n: r.name,
       s: typeof r.summary === 'string' ? r.summary.slice(0, 90) : '',
-      c: shortCategory(r.category as string),
+      c: shortCategory(r.category as string, r.name as string, r.summary as string),
       o: r.org,
       dk: r.deadline_kind,
       de: r.deadline_end,
@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
       k: r.cond_codes,
       h: r.hint || undefined,
       lc: r.scope === 'local' ? 1 : undefined,
+      rg: r.scope !== 'local' && looksRegional(r.name as string, r.summary as string) ? 1 : undefined,
     }));
     return NextResponse.json({ items, asOf: await lastSync('benefits'), region: validSgg ? `${sido} ${sgg}` : validSido ? sido : '전국' }, {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400' },

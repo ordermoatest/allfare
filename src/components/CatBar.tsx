@@ -11,6 +11,16 @@ export default function CatBar({ title, right, items, current, onPick, label }: 
   const [end, setEnd] = useState(false);
   const update = () => { const el = ref.current; if (el) setEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4); };
   useEffect(() => { update(); }, [items.length]);
+  // 고른 분야가 화면 밖(오른쪽 › 버튼 뒤)에 가려지지 않게 보이는 곳으로 스크롤
+  useEffect(() => {
+    const el = ref.current;
+    const on = el?.querySelector<HTMLElement>('.chip.on');
+    if (!el || !on) return;
+    const pad = 56; // › 버튼 + 그라데이션 폭
+    const l = on.offsetLeft - el.offsetLeft, r = l + on.offsetWidth;
+    if (r > el.scrollLeft + el.clientWidth - pad) el.scrollTo({ left: r - el.clientWidth + pad, behavior: 'smooth' });
+    else if (l < el.scrollLeft) el.scrollTo({ left: Math.max(0, l - 8), behavior: 'smooth' });
+  }, [current]);
   return (
     <div className="catbar">
       {(title || right) && (

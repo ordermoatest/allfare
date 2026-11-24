@@ -17,7 +17,7 @@ export async function getBenefit(id: string): Promise<BenefitDetail | null> {
   const { data: r } = await db().from('benefits').select('*').eq('id', id).maybeSingle();
   if (!r) return null;
   return {
-    id: r.id, name: r.name, summary: r.summary, category: shortCategory(r.category), supportType: r.support_type,
+    id: r.id, name: r.name, summary: r.summary, category: shortCategory(r.category, r.name, r.summary), supportType: r.support_type,
     target: r.target, criteria: r.criteria, content: r.content, how: r.how,
     deadlineText: r.deadline_text, deadlineKind: r.deadline_kind, deadlineEnd: r.deadline_end,
     url: r.url, org: r.org, dept: r.dept, receiver: r.receiver, phone: r.phone,
@@ -33,5 +33,5 @@ export async function similarBenefits(b: BenefitDetail, n = 4): Promise<SimilarB
     .eq('category', b.rawCategory).neq('id', b.id);
   q = b.sido ? q.or(`sido.is.null,sido.eq."${b.sido}"`) : q.is('sido', null);
   const { data } = await q.order('like_count', { ascending: false }).order('views', { ascending: false }).limit(n);
-  return (data || []).map((r) => ({ id: r.id, name: r.name, org: r.org, category: shortCategory(r.category) }));
+  return (data || []).map((r) => ({ id: r.id, name: r.name, org: r.org, category: shortCategory(r.category, r.name) }));
 }

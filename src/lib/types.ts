@@ -4,6 +4,8 @@ export type BItem = {
   id: string; n: string; s: string; c: string; o: string | null;
   dk: string | null; de: string | null; v: number; l: number; r: string | null;
   lo: number; hi: number; k: string[]; h?: Hint; lc?: 1;
+  /** 전국 기관 혜택이지만 특정 지역 주민 대상으로 보이는 혜택 */
+  rg?: 1;
 };
 
 export type Store = {

@@ -61,6 +61,7 @@ function chipsOf(b: BItem, t: Tier, p: Profile): Chip[] {
   const ok: Chip[] = cs.filter((c) => c.status === 'ok').sort((a, z) => Number(!!z.specific) - Number(!!a.specific)).map((c) => ({ k: 'ok', t: chipText(c) }));
   if (b.lc && (t === 'fit' || t === 'maybe')) ok.unshift({ k: 'ok', t: p.sgg || regionLabel(p) });
   const q: Chip[] = cs.filter((c) => c.status === 'unknown').map((c) => ({ k: 'q', t: chipText(c) }));
+  if (b.rg) q.unshift({ k: 'q', t: '해당 지역 주민' });
   const x: Chip[] = cs.filter((c) => c.status === 'no').map((c) => ({ k: 'x', t: chipText(c) + (/(만|이상|이하|이내)$/.test(chipText(c)) ? '' : '만') }));
   const out = t === 'fit' ? ok : t === 'maybe' ? [...ok, ...q] : t === 'no' ? [...x, ...ok] : ok.length ? ok : [{ k: 'any' as const, t: '조건 없이 신청' }];
   return out.slice(0, 4);
@@ -82,7 +83,14 @@ export default function BenefitsTab({ profile, items, error, region, asOf, liked
   const likesOf = (b: BItem) => likeCounts[b.id] ?? b.l;
 
   // 판정은 목록·내 조건이 바뀔 때만
-  const judged = useMemo(() => (items || []).map((b) => ({ b, t: tierOf(condOf(b), profile) })), [items, profile]);
+  // 조건 입력 전엔 '전국 공통'만 보여주므로 특정 지역 주민 대상으로 보이는 혜택은 빼고,
+  // 입력 후엔 지역을 확인할 수 없으니 '꼭 맞음·누구나' 대신 '확인 필요'로 둠
+  const judged = useMemo(() => (items || [])
+    .filter((b) => profile.set || !b.rg)
+    .map((b) => {
+      const t = tierOf(condOf(b), profile);
+      return { b, t: b.rg && (t === 'fit' || t === 'all') ? ('maybe' as Tier) : t };
+    }), [items, profile]);
 
   const query = q.trim().replace(/\s+/g, '');
   const visible = useMemo(() => {

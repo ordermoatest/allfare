@@ -13,10 +13,22 @@ export const CATEGORY_LABELS: [string, string][] = [
 ];
 const MAP = new Map(CATEGORY_LABELS);
 
-export function shortCategory(raw?: string | null): string {
+export function shortCategory(raw?: string | null, name?: string | null, summary?: string | null): string {
   if (!raw) return '기타';
   const key = raw.replace(/\s/g, '');
-  return MAP.get(key) || MAP.get(raw) || raw;
+  const c = MAP.get(key) || MAP.get(raw) || raw;
+  // 정부24 분야가 잘못 붙은 경우 보정: 노후·노인 대상인데 '보육·교육'으로 온 혜택은 '생활'로
+  if (c === '육아·교육' && name) {
+    const txt = `${name} ${summary || ''}`;
+    if (/노후|노인|어르신|은퇴|중장년|고령/.test(name) && !/아동|청소년|학생|자녀|보육|유아|영아|어린이|학교/.test(txt)) return '생활';
+  }
+  return c;
+}
+
+/** 전국(중앙기관) 혜택이지만 실제로는 특정 지역 주민만 받는 혜택인지 (예: 발전소 주변지역 장학금) */
+export function looksRegional(name?: string | null, summary?: string | null): boolean {
+  const txt = `${name || ''} ${summary || ''}`.replace(/\s+/g, '');
+  return /주변지역|인근지역|인접지역|관내(거주|주민|학생)|지역주민|발전소주변|댐주변|공항주변|원전주변/.test(txt);
 }
 
 export const CATEGORY_ORDER = ['전체', ...CATEGORY_LABELS.map(([, s]) => s), '기타'];
