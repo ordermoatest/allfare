@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 // 애드센스 광고 자리. AD_SLOT이 비어 있으면 아무것도 안 그려요 (자리만 잡아둔 상태).
 export const AD_CLIENT = 'ca-pub-5364478364167025';
-export const AD_SLOT = ''; // 애드센스 → 광고 → 광고 단위 기준 → '올페어 본문'의 data-ad-slot 숫자
+export const AD_SLOT = '9364066617'; // 애드센스 → 광고 → 광고 단위 기준 → '올페어 본문'의 data-ad-slot 숫자
 
 declare global { interface Window { adsbygoogle?: unknown[] } }
 
