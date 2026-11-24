@@ -1060,3 +1060,18 @@ nav.tabs .ic { width: 54px; }
 .adwrap.banner, .adwrap.mid { overflow: hidden; }
 .adlabel { display: block; font-size: 11px; color: var(--mute); margin-bottom: 4px; }
 .list .adwrap { margin: 4px 0; border: 0; background: var(--card); border-radius: 18px; padding: 10px 12px; }
+
+/* 품목 판정 목록 */
+.iv { background: var(--card); border-radius: 18px; padding: 2px 14px; margin: 10px 0 6px; }
+.ivr { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+.ivr:first-child { border-top: 0; }
+.ivr b { display: block; font-size: 15px; }
+.ivr small { display: block; font-size: 13px; color: var(--sub); line-height: 1.55; margin-top: 2px; }
+.ivr a { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: 700; color: var(--mint); text-decoration: none; }
+.ivm { flex: none; width: 22px; height: 22px; border-radius: 7px; display: inline-grid; place-items: center; font-style: normal; font-size: 12px; font-weight: 800; }
+.ivm.ok { background: var(--soft); color: var(--mint); }
+.ivm.mid { background: rgba(242, 193, 78, .18); color: #C9971C; }
+.ivm.no { background: rgba(255, 112, 98, .16); color: var(--warn); }
+.ivleg { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; color: var(--sub); }
+.ivleg .ivm { margin-left: 6px; }
+.ivleg .ivm:first-child { margin-left: 0; }

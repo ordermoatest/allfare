@@ -277,6 +277,7 @@ export default function CultureTab({ visible, onPick, toast, onHome, onMore }: {
       )}
       <MoreBenefits from="culture_tab" onGo={onMore} />
       <a className="gbanner" href="/guide/culture-nuri-year-end"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드 남은 잔액, 어디에 쓸까요?</b><small>연말 사용처 · 잔액 조회 · 온라인 가맹점 모음</small></span><span aria-hidden>›</span></a>
+      <a className="gbanner" href="/guide/culture-nuri-items"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드로 뭘 살 수 있을까요?</b><small>품목별로 되는 것·안 되는 것 · 운동화·다이소·이불</small></span><span aria-hidden>›</span></a>
       <a className="gbanner" href="/guide/culture-nuri-card"><span aria-hidden className="gbic"><IcTicket size={22} /></span><span><b>문화누리카드, 누가 얼마나 받을까요?</b><small>2026년 지원 금액 · 신청 기간 · 자동 재충전</small></span><span aria-hidden>›</span></a>
       <Footer notes={['가맹점 목록은 한국문화예술위원회 공개 자료 기준이에요.', '방문 전 문화누리카드 결제 가능 여부를 가게에 확인하세요.']} />
 
