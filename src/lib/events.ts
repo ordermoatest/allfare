@@ -11,6 +11,7 @@ export const EVENTS: Ev[] = [
   { date: '2026-12-09', title: '등유·LPG 가구 난방비 추가 지급', sub: '14만 7천원 · 국민행복카드로', slug: 'energy-voucher' },
   { date: '2026-12-31', title: '에너지바우처 신청 마감', sub: '복지로·주민센터', slug: 'energy-voucher' },
   { date: '2026-12-31', title: '문화누리카드 잔액 소멸', sub: '남은 금액은 다음 해로 안 넘어가요', slug: 'culture-nuri-year-end' },
+  { month: '2026-12', title: 'K-패스 시차시간 추가 환급 종료', sub: '출퇴근 피해 타면 30%p 더 · 12월까지', slug: 'k-pass' },
 ];
 
 const kstToday = () => { const n = new Date(Date.now() + 9 * 3600000); return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()); };
