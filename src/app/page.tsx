@@ -22,6 +22,7 @@ export default function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <h1 className="srh">올페어(Allfare) - 나에게 맞는 복지 혜택 찾기, 내 주변 문화누리카드 사용처 찾기</h1>
       <App />
     </>
   );
